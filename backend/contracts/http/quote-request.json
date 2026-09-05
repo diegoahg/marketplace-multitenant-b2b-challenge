@@ -1,0 +1,12 @@
+{
+  "tenantId": "tenant-demo",
+  "country": "PE",
+  "customerId": "CUSTOMER-001",
+  "paymentMethod": "CREDIT",
+  "items": [
+    {
+      "sku": "SKU-001",
+      "quantity": 12
+    }
+  ]
+}

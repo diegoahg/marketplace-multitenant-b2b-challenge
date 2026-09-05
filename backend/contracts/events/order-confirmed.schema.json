@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/contracts/v1/order-confirmed.schema.json",
+  "title": "OrderConfirmed v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "eventId",
+    "eventType",
+    "eventVersion",
+    "occurredAt",
+    "tenantId",
+    "country",
+    "order"
+  ],
+  "properties": {
+    "eventId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "eventType": {
+      "const": "OrderConfirmed"
+    },
+    "eventVersion": {
+      "const": 1
+    },
+    "occurredAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "tenantId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "country": {
+      "type": "string",
+      "minLength": 1
+    },
+    "order": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tenantId",
+        "country",
+        "customerId",
+        "orderId",
+        "orderNumber",
+        "quoteId",
+        "currency",
+        "total",
+        "status",
+        "createdAt"
+      ],
+      "properties": {
+        "tenantId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "country": {
+          "type": "string",
+          "minLength": 1
+        },
+        "customerId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "orderId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "orderNumber": {
+          "type": "string",
+          "minLength": 1
+        },
+        "quoteId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "currency": {
+          "type": "string",
+          "minLength": 1
+        },
+        "total": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "amount",
+            "currency",
+            "scale"
+          ],
+          "properties": {
+            "amount": {
+              "type": "string",
+              "pattern": "^[0-9]+$"
+            },
+            "currency": {
+              "type": "string",
+              "pattern": "^[A-Z]{3}$"
+            },
+            "scale": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 6
+            }
+          }
+        },
+        "status": {
+          "const": "CONFIRMED"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    }
+  }
+}

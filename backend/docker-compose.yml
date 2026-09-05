@@ -1,0 +1,69 @@
+services:
+  mongo:
+    image: mongo:8.0
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
+    ports: ["127.0.0.1:27017:27017"]
+    volumes: ["mongo-data:/data/db"]
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "try { if (!rs.status().ok) quit(1); } catch (e) { rs.initiate({_id:'rs0',members:[{_id:0,host:'mongo:27017'}]}); quit(1); } if (!db.hello().isWritablePrimary) quit(1);"]
+      interval: 3s
+      timeout: 5s
+      retries: 40
+    networks: [backend]
+
+  pubsub-emulator:
+    image: gcr.io/google.com/cloudsdktool/google-cloud-cli:emulators
+    command: ["gcloud", "beta", "emulators", "pubsub", "start", "--project=local-marketplace", "--host-port=0.0.0.0:8085"]
+    ports: ["127.0.0.1:8085:8085"]
+    networks: [backend]
+
+  seed:
+    build: .
+    command: ["/app/seed"]
+    environment:
+      MONGO_URI: mongodb://mongo:27017/?replicaSet=rs0
+      MONGO_DATABASE: marketplace
+    depends_on:
+      mongo: {condition: service_healthy}
+    networks: [backend]
+
+  api:
+    build: .
+    ports: ["127.0.0.1:8080:8080"]
+    environment:
+      HTTP_PORT: "8080"
+      MONGO_URI: mongodb://mongo:27017/?replicaSet=rs0
+      MONGO_DATABASE: marketplace
+      PUBSUB_EMULATOR_HOST: pubsub-emulator:8085
+      PUBSUB_PROJECT_ID: local-marketplace
+      PUBSUB_TOPIC: orders-confirmed
+      PUBSUB_SUBSCRIPTION: orders-confirmed-worker
+      QUOTE_TTL: ${QUOTE_TTL:-15m}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      ERP_BASE_URL: ${ERP_BASE_URL:-}
+      PUSH_BASE_URL: ${PUSH_BASE_URL:-}
+    depends_on:
+      seed: {condition: service_completed_successfully}
+      pubsub-emulator: {condition: service_started}
+    stop_grace_period: 50s
+    networks: [backend]
+
+  tests:
+    profiles: [test]
+    build:
+      context: .
+      target: test
+    environment:
+      MONGO_TEST_URI: mongodb://mongo:27017/?replicaSet=rs0
+      PUBSUB_EMULATOR_HOST: pubsub-emulator:8085
+    command: ["go", "test", "-race", "-tags=integration", "-count=1", "./..."]
+    depends_on:
+      mongo: {condition: service_healthy}
+      pubsub-emulator: {condition: service_started}
+    networks: [backend]
+
+volumes:
+  mongo-data:
+networks:
+  backend:
+    driver: bridge

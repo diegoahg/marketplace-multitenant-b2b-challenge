@@ -1,0 +1,1157 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Marketplace B2B Multi-tenant — Documentación</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; color: #1f2328; background: #fff; font: 16px/1.65 system-ui, sans-serif; }
+    main { max-width: 1100px; margin: auto; padding: 40px 28px 80px; overflow-wrap: anywhere; }
+    h1, h2, h3, h4 { line-height: 1.3; margin-top: 1.7em; }
+    h1 { font-size: 2em; }
+    h1, h2 { padding-bottom: .3em; border-bottom: 1px solid #d1d9e0; }
+    a { color: #0969da; }
+    pre { padding: 16px; background: #f6f8fa; border-radius: 6px; overflow: auto; overflow-wrap: normal; }
+    code { font: .875em/1.5 ui-monospace, Consolas, monospace; background: #eff1f3; padding: .15em .35em; border-radius: 4px; }
+    pre code { background: none; padding: 0; }
+    blockquote { margin-left: 0; padding: 0 1em; color: #59636e; border-left: 4px solid #d1d9e0; }
+    table { display: block; max-width: 100%; overflow-x: auto; border-collapse: collapse; margin: 1.5em 0; }
+    th, td { border: 1px solid #d1d9e0; padding: 8px 13px; text-align: left; }
+    th, tr:nth-child(even) { background: #f6f8fa; }
+    hr { border: 0; border-top: 1px solid #d1d9e0; margin: 2em 0; }
+    img, svg { max-width: 100%; }
+    .mermaid { text-align: center; background: #fff; border: 1px solid #d1d9e0; }
+    @media (max-width: 600px) { main { padding: 20px 16px 48px; } h1 { font-size: 1.6em; } }
+    @media print { main { max-width: none; padding: 0; } pre { white-space: pre-wrap; } }
+  </style>
+</head>
+<body>
+<main>
+<h1>Prueba Técnica Tech Lead — Discovery y Diseño de Solución</h1>
+<h2>Marketplace B2B Multi-tenant — Motor de Precios y Confirmación de Pedidos</h2>
+<blockquote>
+<p><strong>Objetivo del documento</strong><br>Consolidar el Discovery funcional y técnico de la solución propuesta para la prueba técnica: problema, flujo funcional, journey del cliente, dominio y reglas de negocio, casos de uso, estrategia de pruebas, casos golden, orden de aplicación de palancas comerciales y stack tecnológico.</p>
+</blockquote>
+<hr>
+<h1>1. Descripción del problema</h1>
+<p>La plataforma corresponde a un <strong>marketplace B2B multi-tenant y multi-país</strong> donde tenderos compran productos a distribuidores de bebidas.</p>
+<p>El journey principal de compra es:</p>
+<pre><code class="language-text">Catálogo → Carrito → Checkout / Cotización → Confirmación → Historial
+</code></pre>
+<p>Sobre un mismo pedido pueden coexistir distintas <strong>palancas comerciales</strong>:</p>
+<ul>
+<li>Descuento por escala.</li>
+<li>Combo.</li>
+<li>Obsequio.</li>
+<li>Impuestos.</li>
+<li>Cupo de crédito.</li>
+</ul>
+<p>La solución debe resolver dos problemas principales:</p>
+<h2>1.1. Motor de cálculo del pedido</h2>
+<p>Dado un carrito y un conjunto de reglas comerciales vigentes, el sistema debe calcular:</p>
+<ul>
+<li>Subtotal bruto.</li>
+<li>Descuentos aplicados.</li>
+<li>Origen de cada descuento.</li>
+<li>Combos.</li>
+<li>Obsequios y sus cantidades.</li>
+<li>Base gravable.</li>
+<li>Impuestos.</li>
+<li>Total a pagar.</li>
+<li>Evaluación del cupo de crédito.</li>
+</ul>
+<p>El resultado debe ser <strong>explicable</strong>, es decir, no basta con entregar un total: el cliente debe poder entender cómo se obtuvo.</p>
+<h2>1.2. Confirmación confiable del pedido</h2>
+<p>La confirmación debe garantizar que:</p>
+<ol>
+<li>El total confirmado sea exactamente el mismo que el total cotizado.</li>
+<li>Los reintentos no creen pedidos duplicados.</li>
+<li>El cupo de crédito no se consuma dos veces.</li>
+<li>Si se responde <code>201 Created</code>, la orden ya exista y pueda consultarse.</li>
+<li>Luego de confirmar el pedido, se publique un evento para integraciones externas.</li>
+<li>ERP y Notificaciones Push se procesen de forma desacoplada respecto de la confirmación del pedido.</li>
+</ol>
+<h2>1.3. Invariantes principales</h2>
+<pre><code class="language-text">I1. Quote.total == Order.total
+
+I2. HTTP 201 =&gt; Order existe y es consultable
+
+I3. Misma Idempotency-Key + mismo request =&gt; misma Order
+
+I4. Una intención lógica de compra =&gt; un único consumo de crédito
+
+I5. El dinero nunca usa aritmética floating point
+
+I6. Cada descuento o beneficio debe ser trazable a su regla de origen
+
+I7. País, moneda, escala decimal e impuestos no deben estar hardcodeados
+
+I8. Pedido confirmado =&gt; evento de pedido confirmado publicable hacia Pub/Sub
+</code></pre>
+<hr>
+<h1>2. Diagrama funcional</h1>
+<pre class="mermaid">flowchart LR
+    A[Cliente explora catálogo] --&gt; B[Agrega productos al carrito]
+    B --&gt; C[Solicita cotización]
+
+    C --&gt; D[Calcular precios]
+    D --&gt; E[Aplicar promociones]
+    E --&gt; F[Determinar obsequios]
+    F --&gt; G[Calcular impuestos]
+    G --&gt; H[Evaluar crédito]
+    H --&gt; I[Generar resumen de cotización]
+
+    I --&gt; J{Cliente confirma?}
+
+    J -- No --&gt; B
+    J -- Sí --&gt; K[Validar solicitud e idempotencia]
+
+    K --&gt; L{Crédito válido?}
+    L -- No --&gt; M[Informar rechazo]
+    L -- Sí --&gt; N[Crear pedido]
+
+    N --&gt; O[Consumir crédito]
+    O --&gt; P[Guardar pedido confirmado]
+    P --&gt; Q[Publicar evento OrderConfirmed en Pub/Sub]
+    Q --&gt; R[Worker Go consume evento]
+
+    R --&gt; S[Enviar pedido al ERP]
+    R --&gt; T[Enviar notificación Push]
+
+    P --&gt; U[Pedido disponible en historial]
+</pre>
+<h2>2.1. Lectura funcional del flujo</h2>
+<ol>
+<li>El cliente construye su carrito.</li>
+<li>Solicita una cotización.</li>
+<li>El sistema calcula beneficios, impuestos y crédito.</li>
+<li>El cliente revisa el resumen antes de comprar.</li>
+<li>Al confirmar, el sistema valida idempotencia y crédito.</li>
+<li>La orden se persiste antes de entregar una respuesta exitosa.</li>
+<li>Una vez confirmada, la API publica un evento.</li>
+<li>Un worker en Go consume el evento desde Pub/Sub.</li>
+<li>El worker integra con ERP y Notificaciones Push.</li>
+<li>La orden confirmada queda disponible en historial.</li>
+</ol>
+<hr>
+<h1>3. Journey del cliente</h1>
+<pre class="mermaid">journey
+    title Journey de compra — Marketplace B2B
+    section Descubrimiento
+      Explora catálogo: 5: Cliente
+      Compara productos y precios: 4: Cliente
+    section Preparación
+      Agrega productos al carrito: 5: Cliente
+      Ajusta cantidades: 4: Cliente
+    section Cotización
+      Solicita cotización: 5: Cliente
+      Visualiza promociones: 5: Cliente
+      Revisa obsequios: 5: Cliente
+      Revisa impuestos y total: 5: Cliente
+      Conoce evaluación de crédito: 4: Cliente
+    section Confirmación
+      Confirma pedido: 5: Cliente
+      Recibe número de orden: 5: Cliente
+    section Postventa
+      Recibe notificación: 4: Cliente
+      Consulta pedido en historial: 5: Cliente
+</pre>
+<h2>3.1. Momentos clave del Journey</h2>
+<table>
+<thead>
+<tr>
+<th>Momento</th>
+<th>Expectativa del cliente</th>
+<th>Riesgo</th>
+<th>Respuesta de diseño</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Cotización</td>
+<td>Entender cuánto pagará</td>
+<td>Total opaco</td>
+<td>Breakdown completo</td>
+</tr>
+<tr>
+<td>Promociones</td>
+<td>Entender el beneficio recibido</td>
+<td>Descuento inexplicable</td>
+<td>Origen de cada ajuste</td>
+</tr>
+<tr>
+<td>Confirmación</td>
+<td>Pagar exactamente lo cotizado</td>
+<td>Precio diferente al confirmar</td>
+<td>Quote Snapshot</td>
+</tr>
+<tr>
+<td>Reintento</td>
+<td>No duplicar la compra</td>
+<td>Doble tap / mala red</td>
+<td>Idempotency-Key</td>
+</tr>
+<tr>
+<td>Crédito</td>
+<td>Saber si puede comprar</td>
+<td>Sobreconsumo concurrente</td>
+<td>Validación y consumo atómico</td>
+</tr>
+<tr>
+<td>Confirmación</td>
+<td>Tener certeza de compra</td>
+<td><code>201</code> sin orden persistida</td>
+<td>Responder después de persistir</td>
+</tr>
+<tr>
+<td>Historial</td>
+<td>Encontrar su pedido</td>
+<td>Pedido “desaparece”</td>
+<td>Orden consultable inmediatamente</td>
+</tr>
+</tbody></table>
+<hr>
+<h1>4. Dominio de negocio</h1>
+<h2>4.1. Agregados y entidades principales</h2>
+<h3>Customer</h3>
+<p>Representa al comprador B2B.</p>
+<pre><code class="language-text">Customer
+- id
+- tenantId
+- country
+- creditAccount
+</code></pre>
+<h3>Product</h3>
+<pre><code class="language-text">Product
+- sku
+- description
+- family
+- unitPrice
+- taxCategory
+</code></pre>
+<h3>Cart</h3>
+<pre><code class="language-text">Cart
+- customerId
+- tenantId
+- country
+- items[]
+</code></pre>
+<h3>CartItem</h3>
+<pre><code class="language-text">CartItem
+- sku
+- quantity
+</code></pre>
+<h3>Promotion</h3>
+<p>Representa una palanca comercial.</p>
+<pre><code class="language-text">Promotion
+- id
+- type
+- priority
+- eligibility
+- compatibility
+- validFrom
+- validTo
+</code></pre>
+<p>Tipos iniciales:</p>
+<pre><code class="language-text">SCALE
+COMBO
+GIFT
+</code></pre>
+<h3>Quote</h3>
+<p>Representa la cotización calculada y aceptable por el cliente.</p>
+<pre><code class="language-text">Quote
+- quoteId
+- tenantId
+- country
+- customerId
+- currency
+- lines[]
+- adjustments[]
+- gifts[]
+- grossSubtotal
+- taxableBase
+- taxTotal
+- total
+- creditEvaluation
+- createdAt
+</code></pre>
+<h3>Order</h3>
+<pre><code class="language-text">Order
+- orderId
+- orderNumber
+- quoteId
+- customerId
+- tenantId
+- status
+- total
+- createdAt
+</code></pre>
+<h3>CreditAccount</h3>
+<pre><code class="language-text">CreditAccount
+- customerId
+- availableAmount
+- currency
+</code></pre>
+<h3>OrderConfirmedEvent</h3>
+<pre><code class="language-text">OrderConfirmedEvent
+- eventId
+- orderId
+- orderNumber
+- customerId
+- tenantId
+- total
+- currency
+- occurredAt
+</code></pre>
+<hr>
+<h1>5. Reglas de negocio</h1>
+<h2>RN01 — Dinero exacto</h2>
+<p>No se debe utilizar <code>float32</code> ni <code>float64</code> para representar dinero.</p>
+<p>El tipo monetario debe encapsular:</p>
+<pre><code class="language-text">Money
+- amount
+- currency
+- scale
+</code></pre>
+<p>La política de redondeo debe ser explícita y configurable por país/moneda.</p>
+<hr>
+<h2>RN02 — Configuración multi-país</h2>
+<p>Los siguientes valores no deben quedar hardcodeados en el motor:</p>
+<ul>
+<li>Moneda.</li>
+<li>Escala decimal.</li>
+<li>Regla de redondeo.</li>
+<li>Tasas tributarias.</li>
+<li>Configuración comercial específica del país.</li>
+</ul>
+<hr>
+<h2>RN03 — Cotización determinística</h2>
+<p>Para el mismo:</p>
+<pre><code class="language-text">Carrito + Configuración + Reglas + Precios
+</code></pre>
+<p>el resultado debe ser el mismo.</p>
+<hr>
+<h2>RN04 — Quote Snapshot</h2>
+<p>Una vez generada la cotización, el resultado económico utilizado para confirmar el pedido debe mantenerse inmutable.</p>
+<pre><code class="language-text">Quote.total == Order.total
+</code></pre>
+<p>La confirmación no debe recalcular el pedido usando nuevos precios o promociones.</p>
+<hr>
+<h2>RN05 — Descuento por escala</h2>
+<p>Las escalas son acumulativas por tramos.</p>
+<p>Ejemplo:</p>
+<pre><code class="language-text">1 - 5 unidades    : 0%
+6 - 10 unidades   : 5%
+11+ unidades      : 10%
+</code></pre>
+<p>Para 12 unidades:</p>
+<pre><code class="language-text">1 - 5   =&gt; 0%
+6 - 10  =&gt; 5%
+11 - 12 =&gt; 10%
+</code></pre>
+<hr>
+<h2>RN06 — Combo</h2>
+<p>Los productos y cantidades usados para activar un combo deben quedar asociados al combo.</p>
+<p>Por defecto, esas mismas unidades no deben recibir adicionalmente un descuento suelto por escala.</p>
+<hr>
+<h2>RN07 — Obsequio</h2>
+<p>Cuando se cumpla la condición comercial:</p>
+<ul>
+<li>El SKU regalado debe aparecer explícitamente.</li>
+<li>Debe indicarse la cantidad.</li>
+<li>El valor comercial puede ser cero para el cliente.</li>
+<li>Su tratamiento tributario debe depender de la configuración del país/regla.</li>
+</ul>
+<hr>
+<h2>RN08 — Impuestos</h2>
+<p>Los impuestos se calculan sobre la base gravable resultante <strong>después de descuentos comerciales</strong>.</p>
+<pre><code class="language-text">Subtotal bruto
+- descuentos comerciales
+= base gravable
+</code></pre>
+<p>Luego:</p>
+<pre><code class="language-text">base gravable × tasa = impuesto
+</code></pre>
+<hr>
+<h2>RN09 — Crédito</h2>
+<p>Si el medio de pago es crédito:</p>
+<pre><code class="language-text">Order.total &lt;= Credit.available
+</code></pre>
+<p>La validación y consumo deben evitar sobreconsumo ante solicitudes concurrentes.</p>
+<hr>
+<h2>RN10 — Idempotencia</h2>
+<p><code>POST /orders</code> debe recibir una <code>Idempotency-Key</code>.</p>
+<pre><code class="language-text">Misma key + mismo request
+=&gt; misma orden
+</code></pre>
+<pre><code class="language-text">Misma key + request diferente
+=&gt; conflicto
+</code></pre>
+<hr>
+<h2>RN11 — Confirmación</h2>
+<p>La API solo debe devolver <code>201 Created</code> cuando la orden haya sido persistida correctamente.</p>
+<hr>
+<h2>RN12 — Evento de pedido confirmado</h2>
+<p>Solo se publica <code>OrderConfirmed</code> cuando la orden alcanzó estado <code>CONFIRMED</code>.</p>
+<p>El evento no debe representar un intento de confirmación sino un hecho ya ocurrido.</p>
+<hr>
+<h1>6. Casos de uso</h1>
+<h2>UC01 — Solicitar cotización</h2>
+<p><strong>Actor:</strong> Cliente.</p>
+<h3>Entrada</h3>
+<ul>
+<li>Tenant.</li>
+<li>País.</li>
+<li>Cliente.</li>
+<li>Carrito.</li>
+<li>Medio de pago.</li>
+</ul>
+<h3>Flujo principal</h3>
+<ol>
+<li>Validar solicitud.</li>
+<li>Obtener contexto de país y tenant.</li>
+<li>Obtener precios.</li>
+<li>Obtener promociones vigentes.</li>
+<li>Ejecutar el motor de precios.</li>
+<li>Determinar obsequios.</li>
+<li>Calcular base gravable.</li>
+<li>Calcular impuestos.</li>
+<li>Evaluar crédito.</li>
+<li>Generar Quote Snapshot.</li>
+<li>Retornar breakdown.</li>
+</ol>
+<h3>Resultado</h3>
+<ul>
+<li><code>quoteId</code>.</li>
+<li>Líneas.</li>
+<li>Promociones.</li>
+<li>Obsequios.</li>
+<li>Impuestos.</li>
+<li>Total.</li>
+<li>Estado del crédito.</li>
+</ul>
+<hr>
+<h2>UC02 — Confirmar pedido</h2>
+<p><strong>Actor:</strong> Cliente.</p>
+<h3>Precondiciones</h3>
+<ul>
+<li>Existe una cotización.</li>
+<li>Existe <code>Idempotency-Key</code>.</li>
+</ul>
+<h3>Flujo principal</h3>
+<ol>
+<li>Validar idempotencia.</li>
+<li>Recuperar Quote Snapshot.</li>
+<li>Validar disponibilidad de crédito.</li>
+<li>Crear orden usando el snapshot.</li>
+<li>Consumir crédito.</li>
+<li>Persistir la orden.</li>
+<li>Marcarla <code>CONFIRMED</code>.</li>
+<li>Publicar <code>OrderConfirmed</code>.</li>
+<li>Responder <code>201 Created</code>.</li>
+</ol>
+<h3>Postcondición</h3>
+<pre><code class="language-text">201 =&gt; Order persistida y consultable
+</code></pre>
+<hr>
+<h2>UC03 — Consultar pedido</h2>
+<p><strong>Actor:</strong> Cliente.</p>
+<h3>Entrada</h3>
+<p><code>orderId</code></p>
+<h3>Resultado</h3>
+<p>Información de la orden confirmada.</p>
+<hr>
+<h2>UC04 — Procesar pedido confirmado</h2>
+<p><strong>Actor:</strong> Worker en Go.</p>
+<h3>Trigger</h3>
+<p>Evento <code>OrderConfirmed</code> disponible en Pub/Sub.</p>
+<h3>Flujo</h3>
+<ol>
+<li>Consumir evento.</li>
+<li>Validar estructura.</li>
+<li>Procesar de manera idempotente.</li>
+<li>Enviar pedido hacia ERP.</li>
+<li>Enviar Notificación Push.</li>
+<li>Confirmar procesamiento del mensaje.</li>
+</ol>
+<hr>
+<h1>7. Casos de prueba</h1>
+<h2>7.1. Casos funcionales</h2>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Caso</th>
+<th>Resultado esperado</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>CF01</td>
+<td>Carrito sin promociones</td>
+<td>Total = subtotal + impuestos</td>
+</tr>
+<tr>
+<td>CF02</td>
+<td>Descuento por escala</td>
+<td>Aplicar descuentos por tramo</td>
+</tr>
+<tr>
+<td>CF03</td>
+<td>Combo válido</td>
+<td>Aplicar precio/beneficio combo</td>
+</tr>
+<tr>
+<td>CF04</td>
+<td>Obsequio válido</td>
+<td>Mostrar SKU y cantidad gratis</td>
+</tr>
+<tr>
+<td>CF05</td>
+<td>Pedido con impuestos</td>
+<td>Impuesto calculado sobre base gravable</td>
+</tr>
+<tr>
+<td>CF06</td>
+<td>Crédito suficiente</td>
+<td>Pedido elegible</td>
+</tr>
+<tr>
+<td>CF07</td>
+<td>Crédito insuficiente</td>
+<td>Pedido no elegible</td>
+</tr>
+<tr>
+<td>CF08</td>
+<td>Confirmar quote</td>
+<td>Order.total = Quote.total</td>
+</tr>
+<tr>
+<td>CF09</td>
+<td>Retry misma idempotency key</td>
+<td>Misma orden</td>
+</tr>
+<tr>
+<td>CF10</td>
+<td>Consultar orden confirmada</td>
+<td><code>200</code> y orden encontrada</td>
+</tr>
+</tbody></table>
+<hr>
+<h1>8. Casos de borde</h1>
+<h2>CB01 — Carrito vacío</h2>
+<p><strong>Entrada:</strong> <code>items=[]</code></p>
+<p><strong>Esperado:</strong> rechazo de validación.</p>
+<hr>
+<h2>CB02 — Cantidad cero</h2>
+<pre><code class="language-text">quantity = 0
+</code></pre>
+<p><strong>Esperado:</strong> rechazo.</p>
+<hr>
+<h2>CB03 — Cantidad negativa</h2>
+<p><strong>Esperado:</strong> rechazo.</p>
+<hr>
+<h2>CB04 — SKU inexistente</h2>
+<p><strong>Esperado:</strong> error de dominio / producto no encontrado.</p>
+<hr>
+<h2>CB05 — Promoción expirada</h2>
+<p><strong>Esperado:</strong> no debe aplicarse.</p>
+<hr>
+<h2>CB06 — Combo incompleto</h2>
+<p>Si falta cualquier cantidad mínima necesaria:</p>
+<p><strong>Esperado:</strong> combo no aplicado.</p>
+<hr>
+<h2>CB07 — Exactamente en el límite de un tramo</h2>
+<p>Ejemplo:</p>
+<pre><code class="language-text">quantity = 10
+</code></pre>
+<p>Validar que la distribución entre tramos sea exacta.</p>
+<hr>
+<h2>CB08 — Unidades excedentes al combo</h2>
+<p>Ejemplo:</p>
+<pre><code class="language-text">Combo requiere 2A + 1B
+
+Carrito:
+5A + 2B
+</code></pre>
+<p>Validar cuántos combos se aplican y qué unidades quedan disponibles para otras reglas.</p>
+<hr>
+<h2>CB09 — Múltiples promociones candidatas</h2>
+<p>Validar:</p>
+<ul>
+<li>prioridad;</li>
+<li>compatibilidad;</li>
+<li>unidades consumidas;</li>
+<li>no doble descuento.</li>
+</ul>
+<hr>
+<h2>CB10 — Impuesto con resultado decimal límite</h2>
+<p>Ejemplos:</p>
+<pre><code class="language-text">0.005
+1.005
+10.015
+</code></pre>
+<p>Validar política de rounding.</p>
+<hr>
+<h2>CB11 — Crédito exactamente igual al total</h2>
+<pre><code class="language-text">credit.available == order.total
+</code></pre>
+<p><strong>Esperado:</strong> permitido.</p>
+<hr>
+<h2>CB12 — Crédito menor por una unidad mínima</h2>
+<p>Ejemplo:</p>
+<pre><code class="language-text">total = 100.01
+credit = 100.00
+</code></pre>
+<p><strong>Esperado:</strong> rechazo.</p>
+<hr>
+<h2>CB13 — Quote cambiado después de cotizar</h2>
+<p>Cambiar:</p>
+<ul>
+<li>precio;</li>
+<li>promoción;</li>
+<li>impuesto configurado;</li>
+</ul>
+<p>antes de confirmar.</p>
+<p><strong>Esperado:</strong> se conserva el valor del snapshot.</p>
+<hr>
+<h2>CB14 — Misma idempotency key con payload diferente</h2>
+<p><strong>Esperado:</strong> <code>409 Conflict</code>.</p>
+<hr>
+<h2>CB15 — Evento duplicado en Pub/Sub</h2>
+<p><strong>Esperado:</strong> worker no debe producir efectos de negocio duplicados.</p>
+<hr>
+<h1>9. Casos límite</h1>
+<h2>CL01 — Cantidad máxima aceptada por línea</h2>
+<p>Definir un límite técnico configurable.</p>
+<p>El motor debe:</p>
+<ul>
+<li>validar antes de procesar;</li>
+<li>evitar overflow;</li>
+<li>mantener tiempo de cálculo controlado.</li>
+</ul>
+<hr>
+<h2>CL02 — Máximo de líneas por carrito</h2>
+<p>Ejemplo propuesto para la prueba:</p>
+<pre><code class="language-text">100 líneas
+</code></pre>
+<blockquote>
+<p>Este valor es una <strong>meta propuesta para el take-home</strong>, no un requisito explícito del enunciado.</p>
+</blockquote>
+<hr>
+<h2>CL03 — Máximo número de promociones aplicables</h2>
+<p>El motor debe poder procesar múltiples reglas sin generar doble aplicación sobre las mismas unidades.</p>
+<hr>
+<h2>CL04 — Montos monetarios grandes</h2>
+<p>Probar cercanía al máximo soportado por el tipo decimal elegido.</p>
+<hr>
+<h2>CL05 — Gran cantidad de reintentos</h2>
+<pre><code class="language-text">N retries con misma Idempotency-Key
+=&gt; una sola orden
+</code></pre>
+<hr>
+<h1>10. Casos de rendimiento</h1>
+<blockquote>
+<p>El enunciado no entrega un SLA o throughput explícito. Los siguientes objetivos son <strong>metas propuestas para la prueba</strong>, enfocadas en detectar regresiones evidentes y demostrar criterio de ingeniería.</p>
+</blockquote>
+<h2>CR01 — Pricing de carrito representativo</h2>
+<p><strong>Entrada propuesta:</strong></p>
+<ul>
+<li>100 líneas.</li>
+<li>20 promociones.</li>
+<li>Mezcla de combo, escala y obsequios.</li>
+</ul>
+<p><strong>Objetivo:</strong></p>
+<p>El cálculo debe ser determinístico y completar sin degradación significativa en ambiente local.</p>
+<hr>
+<h2>CR02 — Cotizaciones concurrentes</h2>
+<p>Ejecutar múltiples solicitudes simultáneas de <code>POST /quotes</code>.</p>
+<p>Validar:</p>
+<ul>
+<li>cero corrupción de datos;</li>
+<li>cero resultados no determinísticos;</li>
+<li>ausencia de race conditions.</li>
+</ul>
+<hr>
+<h2>CR03 — Confirmaciones concurrentes sobre mismo crédito</h2>
+<p>Dos pedidos simultáneos compiten por un cupo que permite solo uno.</p>
+<p><strong>Esperado:</strong></p>
+<pre><code class="language-text">1 confirmada
+1 rechazada
+</code></pre>
+<p>Nunca ambas.</p>
+<hr>
+<h2>CR04 — Reintentos concurrentes de la misma orden</h2>
+<p>Varias solicitudes con la misma <code>Idempotency-Key</code>.</p>
+<p><strong>Esperado:</strong></p>
+<pre><code class="language-text">1 Order
+1 consumo de crédito
+</code></pre>
+<hr>
+<h2>CR05 — Consumo sostenido de Pub/Sub</h2>
+<p>Publicar múltiples <code>OrderConfirmed</code>.</p>
+<p>Validar:</p>
+<ul>
+<li>el worker continúa consumiendo;</li>
+<li>no bloquea la API;</li>
+<li>eventos fallidos pueden reintentarse;</li>
+<li>no existen efectos duplicados ante redelivery.</li>
+</ul>
+<hr>
+<h1>11. Casos Golden obligatorios</h1>
+<p>Los Golden Tests representan escenarios de negocio cuyo resultado debe permanecer estable ante refactors.</p>
+<h2>GT01 — Descuento por escala en dos tramos</h2>
+<h3>Escenario</h3>
+<p>Un SKU alcanza dos tramos con descuento.</p>
+<h3>Validar</h3>
+<ul>
+<li>unidades asignadas correctamente;</li>
+<li>descuento de cada tramo;</li>
+<li>descuento total;</li>
+<li>total final.</li>
+</ul>
+<hr>
+<h2>GT02 — Combo sin descuento suelto duplicado</h2>
+<h3>Escenario</h3>
+<p>Los productos activan un combo.</p>
+<h3>Validar</h3>
+<ul>
+<li>combo aplicado;</li>
+<li>origen visible;</li>
+<li>unidades consumidas por el combo;</li>
+<li>mismas unidades no aparecen también como descuento individual.</li>
+</ul>
+<hr>
+<h2>GT03 — Obsequio</h2>
+<h3>Escenario</h3>
+<p>La compra cumple una condición que genera producto gratis.</p>
+<h3>Validar</h3>
+<pre><code class="language-text">gift.sku
+gift.quantity
+</code></pre>
+<p>y presencia en el breakdown.</p>
+<hr>
+<h2>GT04 — Combo con impuestos</h2>
+<h3>Validar</h3>
+<pre><code class="language-text">combo
+→ base gravable
+→ impuesto
+→ total
+</code></pre>
+<p>El impuesto debe formar parte del total.</p>
+<hr>
+<h2>GT05 — Crédito excedido</h2>
+<h3>Escenario</h3>
+<pre><code class="language-text">order.total &gt; availableCredit
+</code></pre>
+<h3>Esperado</h3>
+<p>Pedido no elegible para crédito.</p>
+<hr>
+<h2>GT06 — Regresión Quote / Order</h2>
+<h3>Escenario</h3>
+<ol>
+<li>Cotizar carrito.</li>
+<li>Guardar quote.</li>
+<li>Modificar precios/promociones vigentes.</li>
+<li>Confirmar utilizando <code>quoteId</code>.</li>
+</ol>
+<h3>Assert principal</h3>
+<pre><code class="language-text">Quote.total == Order.total
+</code></pre>
+<hr>
+<h1>12. Casos Golden adicionales recomendados</h1>
+<h2>GT07 — Idempotencia</h2>
+<pre><code class="language-text">100 retries
+=&gt; 1 order
+</code></pre>
+<hr>
+<h2>GT08 — Crédito concurrente</h2>
+<p>Dos confirmaciones compiten por el mismo saldo.</p>
+<pre><code class="language-text">Solo una debe confirmar.
+</code></pre>
+<hr>
+<h2>GT09 — Rounding</h2>
+<p>Validar valores límite de decimal y tasas.</p>
+<hr>
+<h2>GT10 — Multi-país</h2>
+<p>Mismo carrito con dos configuraciones de país.</p>
+<p>Validar:</p>
+<ul>
+<li>moneda;</li>
+<li>escala;</li>
+<li>impuestos;</li>
+<li>rounding.</li>
+</ul>
+<hr>
+<h2>GT11 — Evento OrderConfirmed</h2>
+<p>Confirmar pedido.</p>
+<p>Validar que solo después del estado <code>CONFIRMED</code> exista publicación hacia Pub/Sub.</p>
+<hr>
+<h1>13. Orden de aplicación de palancas</h1>
+<h2>13.1. Decisión</h2>
+<p>El orden propuesto es:</p>
+<pre><code class="language-text">1. Resolver contexto Tenant / País
+          ↓
+2. Resolver precios base
+          ↓
+3. Detectar y asignar Combos
+          ↓
+4. Aplicar descuentos por Escala
+   sobre unidades elegibles restantes
+          ↓
+5. Determinar Obsequios
+          ↓
+6. Calcular Base Gravable
+          ↓
+7. Calcular Impuestos
+          ↓
+8. Calcular Totales
+          ↓
+9. Evaluar Cupo de Crédito
+          ↓
+10. Generar Quote Snapshot
+</code></pre>
+<hr>
+<h1>14. Justificación del orden de palancas</h1>
+<p>La decisión se basa en las perspectivas levantadas durante el Discovery con dos perfiles de negocio.</p>
+<h2>14.1. Perspectiva de Gerencia de Marketing Digital</h2>
+<p>La mirada de Marketing prioriza:</p>
+<ul>
+<li>que el beneficio sea visible;</li>
+<li>que las promociones sean explicables;</li>
+<li>que el cliente confíe en el precio;</li>
+<li>que las campañas puedan coexistir bajo reglas claras;</li>
+<li>que se conozca qué promociones son acumulables y cuáles excluyentes.</li>
+</ul>
+<p>Esto implica que el motor debe mantener trazabilidad de:</p>
+<pre><code class="language-text">Qué regla se aplicó
+Sobre qué unidades
+Qué beneficio produjo
+Qué reglas quedaron excluidas
+</code></pre>
+<h3>Efecto en el orden</h3>
+<p><strong>Combo antes que descuento por escala</strong>.</p>
+<p>Un combo consume un conjunto concreto de productos y cantidades. Si primero se aplica un descuento individual y luego se arma un combo con las mismas unidades, el cliente podría recibir un beneficio duplicado no intencional y el breakdown sería difícil de explicar.</p>
+<p>Por eso:</p>
+<pre><code class="language-text">Combo
+→ reserva/asigna unidades
+→ Scale Discount solo sobre unidades restantes elegibles
+</code></pre>
+<hr>
+<h2>14.2. Perspectiva del Product Owner B2B</h2>
+<p>La mirada de Producto prioriza:</p>
+<ol>
+<li>Un motor mínimo pero confiable.</li>
+<li>Journey completo antes que sofisticación innecesaria.</li>
+<li>Que el precio mostrado se respete al confirmar.</li>
+<li>Que el crédito represente correctamente la capacidad real de compra.</li>
+</ol>
+<h3>Efecto en el orden</h3>
+<p><strong>Impuestos después de descuentos</strong> porque la base gravable debe reflejar el precio comercial resultante.</p>
+<p><strong>Crédito después del total</strong> porque solo puede evaluarse cuando ya se conoce el valor definitivo del pedido.</p>
+<p><strong>Quote Snapshot al final</strong> porque debe persistir exactamente el resultado completo que el cliente visualizó.</p>
+<hr>
+<h1>15. ¿Por qué este orden es correcto?</h1>
+<h2>15.1. Evita double dipping</h2>
+<pre><code class="language-text">Unidades usadas por combo
+≠
+unidades disponibles automáticamente para otro beneficio
+</code></pre>
+<hr>
+<h2>15.2. Mantiene trazabilidad comercial</h2>
+<p>Cada ajuste conoce:</p>
+<ul>
+<li>promoción;</li>
+<li>tipo;</li>
+<li>unidades;</li>
+<li>monto;</li>
+<li>origen.</li>
+</ul>
+<hr>
+<h2>15.3. Permite explicar el precio</h2>
+<p>El cliente puede recorrer:</p>
+<pre><code class="language-text">Precio base
+→ beneficio comercial
+→ obsequios
+→ impuestos
+→ total
+</code></pre>
+<hr>
+<h2>15.4. Calcula correctamente impuestos</h2>
+<p>La base gravable se determina después de los descuentos comerciales.</p>
+<hr>
+<h2>15.5. Evalúa crédito sobre el valor correcto</h2>
+<p>No se consulta crédito contra subtotal bruto, sino contra el valor final que efectivamente se intentará confirmar.</p>
+<hr>
+<h2>15.6. Protege Quote = Order</h2>
+<p>El snapshot se crea únicamente una vez que el cálculo terminó.</p>
+<pre><code class="language-text">Pricing completo
+→ Quote Snapshot
+→ Confirm Order sin recalcular
+</code></pre>
+<hr>
+<h1>16. Stack tecnológico</h1>
+<h2>16.1. Backend</h2>
+<h3>Go</h3>
+<p>Uso propuesto:</p>
+<pre><code class="language-text">Go
+└── API REST monolítica modular
+</code></pre>
+<p>Motivos:</p>
+<ul>
+<li>tipado estático;</li>
+<li>simplicidad;</li>
+<li>buen soporte para concurrencia;</li>
+<li>bajo overhead;</li>
+<li>facilidad para mantener un core de dominio independiente del framework.</li>
+</ul>
+<hr>
+<h2>16.2. Arquitectura</h2>
+<pre><code class="language-text">Modular Monolith
++
+Clean Architecture / Ports &amp; Adapters
+</code></pre>
+<p>Módulos principales:</p>
+<pre><code class="language-text">HTTP Handlers
+Application / Use Cases
+Domain
+Repositories
+Messaging
+Integrations
+</code></pre>
+<p>Se evita separar prematuramente en microservicios.</p>
+<hr>
+<h2>16.3. Base de datos</h2>
+<h3>MongoDB</h3>
+<p>Uso:</p>
+<ul>
+<li>productos;</li>
+<li>clientes;</li>
+<li>promociones;</li>
+<li>quotes;</li>
+<li>orders;</li>
+<li>idempotency records.</li>
+</ul>
+<p>Motivos para la prueba:</p>
+<ul>
+<li>modelo documental alineado con snapshots;</li>
+<li>rápida ambientación;</li>
+<li>baja fricción de desarrollo;</li>
+<li>integración directa con Docker Compose.</li>
+</ul>
+<h3>Consideración importante</h3>
+<p>Las operaciones críticas de confirmación deben diseñarse cuidando atomicidad y concurrencia.</p>
+<p>Cuando una operación requiera consistencia entre múltiples documentos/colecciones, se evaluará el uso de:</p>
+<ul>
+<li>transacciones MongoDB;</li>
+<li>actualización condicional atómica;</li>
+<li>restricciones/índices únicos.</li>
+</ul>
+<hr>
+<h2>16.4. Mensajería</h2>
+<h3>Pub/Sub</h3>
+<p>Topic principal:</p>
+<pre><code class="language-text">orders-confirmed
+</code></pre>
+<p>Flujo:</p>
+<pre><code class="language-text">API confirma Order
+      ↓
+Publica OrderConfirmed
+      ↓
+Pub/Sub
+      ↓
+Worker Go
+      ↓
+ERP
++
+Push
+</code></pre>
+<p>Para desarrollo local se puede utilizar:</p>
+<pre><code class="language-text">Pub/Sub Emulator
+</code></pre>
+<hr>
+<h2>16.5. Worker</h2>
+<p>El consumidor se implementará en Go como <strong>goroutine</strong> administrada por la aplicación.</p>
+<p>Responsabilidades:</p>
+<ul>
+<li>suscribirse al topic;</li>
+<li>consumir eventos;</li>
+<li>validar payload;</li>
+<li>procesar redelivery de manera idempotente;</li>
+<li>enviar a ERP;</li>
+<li>enviar Push;</li>
+<li>ack/nack según resultado.</li>
+</ul>
+<p>La goroutine debe respetar:</p>
+<pre><code class="language-text">context.Context
+graceful shutdown
+retry controlado
+logging
+</code></pre>
+<hr>
+<h2>16.6. Contenedores</h2>
+<h3>Docker Compose</h3>
+<p>Servicios propuestos:</p>
+<pre><code class="language-text">api
+mongo
+pubsub-emulator
+mongo-express (opcional)
+</code></pre>
+<p>Todos conectados mediante una red Docker interna.</p>
+<hr>
+<h2>16.7. Front</h2>
+<p>Opcional:</p>
+<ul>
+<li>Angular.</li>
+</ul>
+<p>Solo se desarrollará después de:</p>
+<pre><code class="language-text">Pricing correcto
+Golden Tests
+Quote = Order
+Idempotencia
+Crédito consistente
+</code></pre>
+<hr>
+<h2>16.8. Testing</h2>
+<h3>Go estándar</h3>
+<pre><code class="language-text">testing
+</code></pre>
+<p>Opcional:</p>
+<pre><code class="language-text">testify
+</code></pre>
+<p>Tipos:</p>
+<ul>
+<li>unitarios;</li>
+<li>golden tests;</li>
+<li>integración;</li>
+<li>concurrencia;</li>
+<li>regresión;</li>
+<li>performance básico.</li>
+</ul>
+<hr>
+<h1>17. Estructura de proyecto sugerida</h1>
+<pre><code class="language-text">/cmd
+  /api
+    main.go
+
+/internal
+  /domain
+    money.go
+    product.go
+    promotion.go
+    quote.go
+    order.go
+    credit.go
+
+  /application
+    /quote
+      calculate_quote.go
+    /order
+      confirm_order.go
+      get_order.go
+
+  /pricing
+    engine.go
+    combo.go
+    scale_discount.go
+    gift.go
+    tax.go
+
+  /repository
+    mongo_product.go
+    mongo_quote.go
+    mongo_order.go
+    mongo_credit.go
+    mongo_idempotency.go
+
+  /messaging
+    publisher.go
+    subscriber.go
+    order_confirmed_worker.go
+
+  /integration
+    erp.go
+    push.go
+
+  /http
+    quote_handler.go
+    order_handler.go
+
+/config
+/docker-compose.yml
+/README.md
+/ADR.md
+/Makefile
+</code></pre>
+<hr>
+<h1>18. Flujo técnico resumido</h1>
+<pre class="mermaid">flowchart LR
+    C[Cliente] --&gt;|HTTP / JSON| API[API Monolítica Go]
+
+    API --&gt; PRICE[Pricing Engine]
+    PRICE --&gt; DB[(MongoDB)]
+
+    API --&gt;|Confirmar pedido| DB
+    API --&gt;|OrderConfirmed| PS[Pub/Sub]
+
+    PS --&gt; W[Worker Go / Goroutine]
+
+    W --&gt; ERP[ERP]
+    W --&gt; PUSH[Notificaciones Push]
+</pre>
+<hr>
+<h1>19. Criterios de éxito</h1>
+<p>La solución se considera satisfactoria si demuestra:</p>
+<pre><code class="language-text">✓ Pricing correcto y explicable
+✓ Golden Tests ejecutables
+✓ Quote.total == Order.total
+✓ Idempotencia
+✓ Crédito consistente
+✓ Sin floating point para Money
+✓ Multi-país configurable
+✓ 201 solo después de persistir
+✓ OrderConfirmed publicado solo luego de confirmar
+✓ Worker desacoplado para ERP y Push
+✓ Código ejecutable con un comando simple
+✓ README y ADR claros
+</code></pre>
+<hr>
+<h1>20. Decisiones conscientemente simplificadas para el take-home</h1>
+<p>Para mantener foco en el problema de negocio:</p>
+<ul>
+<li>No se desplegará Kubernetes.</li>
+<li>No se implementará Kafka.</li>
+<li>No se diseñará infraestructura cloud productiva.</li>
+<li>No se implementará un motor genérico de promociones ilimitado.</li>
+<li>No se intentará <code>exactly-once</code> distribuido.</li>
+<li>No se implementará un ERP real.</li>
+<li>No se implementará un proveedor Push real.</li>
+</ul>
+<p>El objetivo es demostrar:</p>
+<pre><code class="language-text">Correctitud
+→ Consistencia
+→ Testabilidad
+→ Simplicidad
+→ Extensibilidad
+</code></pre>
+<p>antes que complejidad de infraestructura.</p>
+
+</main>
+<script type="module">
+  try {
+    const { default: mermaid } = await import('https://cdn.jsdelivr.net/npm/mermaid@11.17.2/dist/mermaid.esm.min.mjs');
+    mermaid.initialize({ startOnLoad: false, securityLevel: 'strict', theme: 'default' });
+    for (const node of document.querySelectorAll('.mermaid')) {
+      const source = node.textContent;
+      try {
+        await mermaid.run({ nodes: [node] });
+      } catch (error) {
+        node.textContent = source;
+        console.error('No se pudo dibujar el diagrama.', error);
+      }
+    }
+  } catch (error) {
+    console.error('No se pudo cargar Mermaid; se conserva el texto de los diagramas.', error);
+  }
+</script>
+</body>
+</html>

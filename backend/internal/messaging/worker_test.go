@@ -137,8 +137,14 @@ func TestSustainedMessages(t *testing.T) {
 		e := template
 		e.EventID = application.NewID()
 		e.Order.OrderID = application.NewID()
-		if err := w.Handle(context.Background(), e); err != nil { t.Fatal(err) }
-		if err := w.Handle(context.Background(), e); err != nil { t.Fatal(err) }
+		if err := w.Handle(context.Background(), e); err != nil {
+			t.Fatal(err)
+		}
+		if err := w.Handle(context.Background(), e); err != nil {
+			t.Fatal(err)
+		}
 	}
-	if erp.calls != 200 || push.calls != 200 { t.Fatal("lost or duplicated effects") }
+	if erp.calls != 200 || push.calls != 200 {
+		t.Fatal("lost or duplicated effects")
+	}
 }

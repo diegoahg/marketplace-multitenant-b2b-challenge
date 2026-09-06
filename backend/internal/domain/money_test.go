@@ -21,8 +21,12 @@ func TestGT09Rounding(t *testing.T) {
 	}
 }
 func TestMoneySafety(t *testing.T) {
-	if _, err := ParseMoney("1.00", "PEN", 2, "UNKNOWN"); err == nil { t.Fatal("invalid rounding accepted") }
-	if (Money{Amount: 1, Currency: "pen", Scale: 2}).Valid() { t.Fatal("invalid currency accepted") }
+	if _, err := ParseMoney("1.00", "PEN", 2, "UNKNOWN"); err == nil {
+		t.Fatal("invalid rounding accepted")
+	}
+	if (Money{Amount: 1, Currency: "pen", Scale: 2}).Valid() {
+		t.Fatal("invalid currency accepted")
+	}
 	m := Money{math.MaxInt64, "PEN", 2}
 	if _, e := m.Add(m); e == nil {
 		t.Fatal("overflow accepted")

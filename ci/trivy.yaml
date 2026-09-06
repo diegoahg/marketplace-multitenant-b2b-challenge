@@ -1,0 +1,17 @@
+scan:
+  scanners:
+    - vuln
+    - secret
+  skip-dirs:
+    - .git
+    - frontend/node_modules
+    - frontend/.dart_tool
+    - frontend/build
+    - frontend/test-results
+    - frontend/coverage
+    - reports
+severity:
+  - HIGH
+  - CRITICAL
+exit-code: 1
+format: table

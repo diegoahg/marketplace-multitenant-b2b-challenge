@@ -18,3 +18,5 @@ docker compose --profile test run --build --no-deps --rm tests
 ```
 
 Detalles de ejecución, arquitectura, pruebas y límites: [frontend](frontend/README.md), [backend](backend/README.md), [documentación del desafío](Documentation/README.md).
+
+Integración continua: [workflow de pruebas, sintaxis, complejidad y seguridad](.github/workflows/ci.yml). Consulta los controles, la validación local y los hallazgos que bloquean el CI en [ci/README.md](ci/README.md).

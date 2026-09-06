@@ -4,9 +4,9 @@ package integration_test
 
 import (
 	"context"
-	"errors"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"marketplace/internal/application"
@@ -28,18 +28,32 @@ func TestMongoConcurrentDifferentRequestsSameKey(t *testing.T) {
 	key := application.NewID()
 	results := make(chan error, 2)
 	for _, q := range quotes {
-		go func(q d.Quote) { _, err := s.Confirm(ctx, q.Scope, key, d.OrderRequest{QuoteID: q.QuoteID, CustomerID: q.CustomerID}); results <- err }(q)
+		go func(q d.Quote) {
+			_, err := s.Confirm(ctx, q.Scope, key, d.OrderRequest{QuoteID: q.QuoteID, CustomerID: q.CustomerID})
+			results <- err
+		}(q)
 	}
 	success, conflicts := 0, 0
 	for range quotes {
 		err := <-results
-		if err == nil { success++; continue }
+		if err == nil {
+			success++
+			continue
+		}
 		var business *d.Error
-		if errors.As(err, &business) && business.Code == "IDEMPOTENCY_CONFLICT" { conflicts++ } else { t.Fatal(err) }
+		if errors.As(err, &business) && business.Code == "IDEMPOTENCY_CONFLICT" {
+			conflicts++
+		} else {
+			t.Fatal(err)
+		}
 	}
-	if success != 1 || conflicts != 1 { t.Fatal(success, conflicts) }
+	if success != 1 || conflicts != 1 {
+		t.Fatal(success, conflicts)
+	}
 	n, err := store.DB.Collection("outbox_events").CountDocuments(ctx, bson.M{})
-	if err != nil || n != 1 { t.Fatal("duplicate event", n, err) }
+	if err != nil || n != 1 {
+		t.Fatal("duplicate event", n, err)
+	}
 }
 
 func setup(t *testing.T) (*mongo.Store, *application.Service, context.Context) {

@@ -1,6 +1,6 @@
 # Marketplace Order Engine
 
-Backend ejecutable de la prueba técnica: Go, API REST, MongoDB con transacciones, outbox y Google Pub/Sub Emulator. El punto de entrada es `cmd/api`; `cmd/seed` carga el escenario de demostración. No hay frontend.
+Backend ejecutable de la prueba técnica: Go, API REST, MongoDB con transacciones, outbox y Google Pub/Sub Emulator. El punto de entrada es `cmd/api`; `cmd/seed` carga el escenario de demostración. La interfaz Flutter Web está en [`../frontend`](../frontend/README.md); el Compose de la raíz levanta el conjunto en `http://localhost:3000`.
 
 ## Contexto, problema y objetivos
 
@@ -199,6 +199,9 @@ go vet ./...
 # Integración real + race en Linux, sin instalar Go localmente:
 docker compose --profile test run --build --rm tests
 
+# Si el entorno ya está levantado, conservar sus contenedores:
+docker compose --profile test run --build --no-deps --rm tests
+
 # O desde el host, con Mongo replica set y emulador activos:
 export MONGO_TEST_URI='mongodb://localhost:27017/?replicaSet=rs0&directConnection=true'
 export PUBSUB_EMULATOR_HOST=localhost:8085
@@ -224,6 +227,10 @@ En Windows el race detector requiere un compilador C compatible en PATH. El targ
 
 Casos adicionales: carrito vacío, cero/negativos, SKU inexistente/duplicado, campaña expirada, combo incompleto, límite/excedente de escala, campañas candidatas e incompatibles, impuestos de regalo, crédito exacto, quote antigua, cambio de request con misma key, aislamiento de scope, JSON inválido, recorrido HTTP y cotizaciones concurrentes. Las pruebas Mongo cubren índices y rollback real; la de Pub/Sub publica, consume, republica el mismo eventId y verifica dos recibos totales.
 
+Si Compose recrea el emulador al ejecutar tests, sus topics, subscriptions y mensajes se pierden porque viven en memoria. Ejecutar `docker compose restart api` para recrear los recursos del demo y comprobar `http://localhost:8080/ready`. Los eventos aún pendientes en Mongo se reintentan; los mensajes ya publicados que se pierdan con el emulador no se recuperan automáticamente. Usar `--no-deps` cuando Mongo y el emulador ya están disponibles evita que el comando de tests los recree.
+
+Si Windows bloquea el script de smoke por su política de ejecución, ejecutarlo en un proceso temporal: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/smoke.ps1`. Esto no modifica la política persistente del sistema.
+
 ## Performance tests y validación local
 
 `make benchmark` mide 100 líneas y 20 campañas, con allocs/op y bytes/op. No existe un SLA oficial. Los resultados ejecutados en el entorno de desarrollo se registran en `VALIDATION.md`; no son garantías productivas.
@@ -236,7 +243,7 @@ Casos adicionales: carrito vacío, cero/negativos, SKU inexistente/duplicado, ca
 - El motor cubre palancas descritas, no una DSL genérica de campañas. La política de acumulación sobre unidades de combo es deliberadamente excluyente.
 - Un consumidor secuencial y reintentos fijos son adecuados para el demo. Faltan DLQ y cuarentena de mensajes inválidos: actualmente se reintentan y se registran en logs.
 - No se implementan autenticación real, stock, pagos, devolución de crédito, administración de reglas, auditoría fiscal ni retención automática de outbox/idempotencia.
-- No se implementaron Kubernetes, Kafka, Redis, service mesh, microservicios, frontend, despliegue cloud productivo ni exactly-once distribuido.
+- No se implementaron Kubernetes, Kafka, Redis, service mesh, microservicios, despliegue cloud productivo ni exactly-once distribuido.
 
 ## Mejoras para producción
 

@@ -1,0 +1,93 @@
+{
+  "tenantId": "tenant-demo",
+  "country": "PE",
+  "customerId": "CUSTOMER-001",
+  "quoteId": "11111111-1111-4111-8111-000000000003",
+  "currency": "PEN",
+  "paymentMethod": "CREDIT",
+  "lines": [
+    {
+      "sku": "A",
+      "quantity": 6,
+      "comboQuantity": 0,
+      "unitPrice": {
+        "amount": "100",
+        "currency": "PEN",
+        "scale": 2
+      },
+      "gross": {
+        "amount": "600",
+        "currency": "PEN",
+        "scale": 2
+      },
+      "discount": {
+        "amount": "0",
+        "currency": "PEN",
+        "scale": 2
+      },
+      "taxableBase": {
+        "amount": "600",
+        "currency": "PEN",
+        "scale": 2
+      },
+      "tax": {
+        "amount": "108",
+        "currency": "PEN",
+        "scale": 2
+      }
+    }
+  ],
+  "adjustments": [],
+  "gifts": [
+    {
+      "sku": "C",
+      "quantity": 1,
+      "promotionId": "gift",
+      "referenceValue": {
+        "amount": "50",
+        "currency": "PEN",
+        "scale": 2
+      },
+      "tax": {
+        "amount": "0",
+        "currency": "PEN",
+        "scale": 2
+      }
+    }
+  ],
+  "grossSubtotal": {
+    "amount": "600",
+    "currency": "PEN",
+    "scale": 2
+  },
+  "discountTotal": {
+    "amount": "0",
+    "currency": "PEN",
+    "scale": 2
+  },
+  "taxableBase": {
+    "amount": "600",
+    "currency": "PEN",
+    "scale": 2
+  },
+  "taxTotal": {
+    "amount": "108",
+    "currency": "PEN",
+    "scale": 2
+  },
+  "total": {
+    "amount": "708",
+    "currency": "PEN",
+    "scale": 2
+  },
+  "creditEvaluation": {
+    "eligible": true,
+    "available": {
+      "amount": "100000",
+      "currency": "PEN",
+      "scale": 2
+    }
+  },
+  "createdAt": "2026-01-01T12:00:00Z",
+  "expiresAt": "2026-01-01T12:15:00Z"
+}

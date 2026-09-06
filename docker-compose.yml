@@ -1,0 +1,16 @@
+name: backend
+include:
+  - path: ./backend/docker-compose.yml
+services:
+  frontend:
+    build: ./frontend
+    ports: ["127.0.0.1:3000:80"]
+    depends_on:
+      api: {condition: service_started}
+    networks: [backend]
+  frontend-tests:
+    profiles: [frontend-test]
+    build:
+      context: ./frontend
+      target: test
+    networks: [backend]

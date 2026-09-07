@@ -61,7 +61,7 @@ box(355,211,550,88,'#f0faff','#54b8ee');logo('flutter',372,232);logo('nginx',425
 text(507,243,'Frontend · Flutter Web + nginx',23,true);text(507,276,'UI adaptable · proxy /api → api:8080',18);
 box(355,328,550,422,'url(#green)','#26ad5b');logo('go',374,341,45,42);text(435,370,'Aplicación API · Go',26,true);
 box(375,393,510,70,'url(#blue)','#5daff0');icon('net',395,406);text(465,423,'Transporte HTTP',22,true);text(465,451,'Router, contexto y validación del contrato',18);
-const modules=[['doc','Quote','Snapshot',375,476],['cart','Order','Confirmación',548,476],['tag','Pricing Engine','Promociones',721,476],['db','Credit','Cupo disponible',375,560],['shield','Idempotency','Clave + hash',548,560],['mail','Outbox','Registro atómico',721,560]];
+const modules=[['doc','Quote','Snapshot',375,476],['cart','Order','Confirmación',548,476],['tag','Pricing Engine','Promociones',721,476],['db','Credit','Cupo disponible',375,560],['shield','Idempotency','Clave + hash',548,560],['mail','Eventos','Por publicar',721,560]];
 for(const [i,title,sub,x,y] of modules){box(x,y,164,73,'#f8fcff','#8cb7d2');icon(i,x+12,y+18,'#087ee5',.75);text(x+53,y+28,title,title.length>12?15:16,true);text(x+53,y+53,sub,13);}
 box(375,647,510,42,'#eae2ff','#ae85fa');icon('cube',393,653,'#6c42c5',.65);text(442,674,'Dominio · entidades y reglas de negocio',19,true);
 box(375,701,510,36,'#edf0f3','#9dabb8');icon('db',393,704,'#466079',.6);text(442,725,'Puertos y repositorios · adaptador MongoDB',18,true);
@@ -85,16 +85,17 @@ box(975,613,277,88,'#f8fcff','#79bdf5');icon('net',990,635,'#0886f0',.7);text(10
 
 // Four concurrent loops in one independent worker application.
 box(1325,231,425,615,'url(#purple)','#ad7cff');logo('go',1344,250,44,39);text(1402,279,'Aplicación Worker · Go',25,true);
-box(1345,310,385,98,'#faf7ff','#b79bea');icon('mail',1361,334,'#7843c3',.8);text(1411,339,'Publisher / reconciliador',20,true);text(1411,368,'Publica el outbox y recupera pendientes',16);text(1411,392,'Mismo eventId · entrega al menos una vez',15);
+box(1345,310,385,98,'#faf7ff','#b79bea');icon('mail',1361,334,'#7843c3',.8);text(1411,339,'Publicador de confirmaciones',20,true);text(1411,368,'Publica en Pub/Sub y recupera pendientes',16);text(1411,392,'Mismo eventId · entrega al menos una vez',15);
 box(1345,442,385,102,'#f8faff','#a6b4e5');icon('doc',1361,466,'#42668e',.8);text(1411,471,'Consumidor ERP',21,true);text(1411,501,'Acción dummy → progreso → ACK ERP',16);text(1411,525,'Fallo: sin ACK y reintento programado',15);
 box(1345,565,385,102,'#f7fcfa','#9fcfb7');icon('bell',1361,589,'#27778b',.8);text(1411,594,'Consumidor PUSH',21,true);text(1411,624,'Acción dummy → progreso → ACK PUSH',16);text(1411,648,'Independiente del resultado de ERP',15);
 box(1345,691,385,131,'#fff8f0','#deae77');icon('mail',1361,716,'#ad7516',.8);text(1411,721,'DLQ y alertas',21,true);text(1411,752,'6.º fallo: persistir DLQ antes del ACK',16);text(1411,779,'Cola durable dead_letters en Mongo',16);text(1411,807,'Bucle SMTP · reintentar correo fallido',15);
 
 // Explicit routing: publisher into topic; subscriptions into consumers.
-line('M1345 357H1300V430H1260');text(1303,338,'Publica',13,false,'middle');
+box(957,211,313,64,'#e3f7f5','#00a6a6');text(1113,236,'Worker → Pub/Sub',21,true,'middle');text(1113,261,'Publica OrderConfirmed',19,true,'middle');
+svg+='<path d="M1345 357H1290V285H1113V305" fill="none" stroke="#00a6a6" stroke-width="4" marker-end="url(#arrow)"/>';
 line('M1252 536H1285V493H1335');
 line('M1252 657H1298V617H1335');
-line('M905 876H931V772H1311V354H1335',true);text(1083,760,'Lee outbox pendiente',16,false,'middle');
+line('M905 876H931V772H1311V385H1335',true);text(1083,760,'Lee eventos por publicar',16,false,'middle');
 line('M1345 793H1285V965H915',true);text(1092,949,'Progreso, retries y DLQ',17,false,'middle');
 
 box(1420,920,310,112,'#fff7e4','#e2af4a');icon('mail',1438,943,'#a77215',.85);text(1494,952,'Mailpit · SMTP local',21,true);text(1494,982,'Bandeja de prueba',18);text(1494,1010,'localhost:8025',17);

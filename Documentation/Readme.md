@@ -244,6 +244,15 @@ La mirada de Producto prioriza:
 
 # 15. ¿Por qué este orden es correcto?
 
+![Infografía: seis razones del orden de cálculo, desde evitar beneficios duplicados hasta confirmar el pedido sin recalcular.](images/orden_calculo.svg)
+
+[Abrir en tamaño completo](images/orden_calculo.svg) · [Descargar PNG](images/orden_calculo.png)
+
+Los montos y las unidades de la infografía son ilustrativos. Los impuestos usan la tasa configurada; el cupo se evalúa en compras a crédito.
+
+<details>
+<summary>Leer los seis conceptos en texto</summary>
+
 ## 15.1. Evita double dipping
 
 ```text
@@ -303,6 +312,8 @@ Pricing completo
 ```
 
 ---
+
+</details>
 
 # 16. Stack tecnológico
 

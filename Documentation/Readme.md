@@ -80,37 +80,7 @@ I8. Pedido confirmado => evento de pedido confirmado publicable hacia Pub/Sub
 
 # 2. Diagrama funcional
 
-```mermaid
-flowchart LR
-    A[Cliente explora catálogo] --> B[Agrega productos al carrito]
-    B --> C[Solicita cotización]
-
-    C --> D[Calcular precios]
-    D --> E[Aplicar promociones]
-    E --> F[Determinar obsequios]
-    F --> G[Calcular impuestos]
-    G --> H[Evaluar crédito]
-    H --> I[Generar resumen de cotización]
-
-    I --> J{Cliente confirma?}
-
-    J -- No --> B
-    J -- Sí --> K[Validar solicitud e idempotencia]
-
-    K --> L{Crédito válido?}
-    L -- No --> M[Informar rechazo]
-    L -- Sí --> N[Crear pedido]
-
-    N --> O[Consumir crédito]
-    O --> P[Guardar pedido confirmado]
-    P --> Q[Publicar evento OrderConfirmed en Pub/Sub]
-    Q --> R[Worker Go consume evento]
-
-    R --> S[Enviar pedido al ERP]
-    R --> T[Enviar notificación Push]
-
-    P --> U[Pedido disponible en historial]
-```
+[![Diagrama funcional del marketplace B2B](images/diagrama_funcional.png)](images/diagrama_funcional.png)
 
 ## 2.1. Lectura funcional del flujo
 

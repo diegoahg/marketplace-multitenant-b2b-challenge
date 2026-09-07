@@ -31,7 +31,6 @@
     h1,h2,h3 { color:var(--ink); }
     a { color:#123B5D; text-underline-offset:3px; }
     a:focus-visible, summary:focus-visible { outline:3px solid #00A6A6; outline-offset:4px; }
-    .page-nav { display:flex; flex-wrap:wrap; gap:12px 24px; padding:16px 0; border-bottom:1px solid #dde5eb; }
     .toc { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; margin:24px 0; padding:0; list-style:none; }
     .toc a,.doc-link { display:block; padding:20px; border:1px solid #b9d6e7; border-radius:16px; background:#f3f8fc; text-decoration:none; }
     .toc a:hover,.doc-link:hover { background:#e7f4f4; }
@@ -50,10 +49,12 @@
     .diagram-scroll img { min-width:1100px; }
     @media print { .diagram-scroll img { min-width:0; } .case,.tech { break-inside:avoid; } body { background:white; } }
 </style>
+  <link rel="stylesheet" href="navigation.css">
 </head>
 <body>
+<nav class="page-nav" aria-label="Documentación"><a href="index.html" aria-current="page">Resumen</a><a href="dominio.html">Dominio y reglas</a><a href="casos.html">Casos y pruebas</a><a href="adr.html">ADR</a></nav>
 <main>
-<nav class="page-nav" aria-label="Documentación"><a href="revision-final.html">Revisión final</a><a href="index.html">Resumen</a><a href="dominio.html">Dominio y reglas</a><a href="casos.html">Casos y pruebas</a><a href="adr.html">ADR</a></nav>
+
 <h1>Prueba Técnica Tech Lead — Discovery y Diseño de Solución</h1>
 <h2>Marketplace B2B Multi-tenant — Motor de Precios y Confirmación de Pedidos</h2>
 <blockquote>
@@ -117,36 +118,7 @@ I8. Pedido confirmado =&gt; evento de pedido confirmado publicable hacia Pub/Sub
 </code></pre>
 <hr>
 <h1>2. Diagrama funcional</h1>
-<pre class="mermaid">flowchart LR
-    A[Cliente explora catálogo] --&gt; B[Agrega productos al carrito]
-    B --&gt; C[Solicita cotización]
-
-    C --&gt; D[Calcular precios]
-    D --&gt; E[Aplicar promociones]
-    E --&gt; F[Determinar obsequios]
-    F --&gt; G[Calcular impuestos]
-    G --&gt; H[Evaluar crédito]
-    H --&gt; I[Generar resumen de cotización]
-
-    I --&gt; J{Cliente confirma?}
-
-    J -- No --&gt; B
-    J -- Sí --&gt; K[Validar solicitud e idempotencia]
-
-    K --&gt; L{Crédito válido?}
-    L -- No --&gt; M[Informar rechazo]
-    L -- Sí --&gt; N[Crear pedido]
-
-    N --&gt; O[Consumir crédito]
-    O --&gt; P[Guardar pedido confirmado]
-    P --&gt; Q[Publicar evento OrderConfirmed en Pub/Sub]
-    Q --&gt; R[Worker Go consume evento]
-
-    R --&gt; S[Enviar pedido al ERP]
-    R --&gt; T[Enviar notificación Push]
-
-    P --&gt; U[Pedido disponible en historial]
-</pre>
+<figure><a href="images/diagrama_funcional.png"><img src="images/diagrama_funcional.png" alt="Diagrama funcional del marketplace B2B"></a><figcaption><a href="images/diagrama_funcional.png">Abrir diagrama funcional en tamaño completo</a>.</figcaption></figure>
 <h2>2.1. Lectura funcional del flujo</h2>
 <ol>
 <li>El cliente construye su carrito.</li>

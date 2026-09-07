@@ -1,0 +1,18 @@
+.page-nav {
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 24px;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px 28px;
+  border-bottom: 1px solid #dde5eb;
+  background: #fff;
+  font: 16px/1.65 system-ui, sans-serif;
+}
+.page-nav a { color: #123B5D; text-underline-offset: 3px; }
+.page-nav a[aria-current="page"] { font-weight: 700; }
+.page-nav a:focus-visible { outline: 3px solid #00A6A6; outline-offset: 4px; }
+@media (max-width: 600px) { .page-nav { padding: 20px 16px; } }
+@media print { .page-nav { display: none; } }

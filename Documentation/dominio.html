@@ -31,7 +31,6 @@
     h1,h2,h3 { color:var(--ink); }
     a { color:#123B5D; text-underline-offset:3px; }
     a:focus-visible, summary:focus-visible { outline:3px solid #00A6A6; outline-offset:4px; }
-    .page-nav { display:flex; flex-wrap:wrap; gap:12px 24px; padding:16px 0; border-bottom:1px solid #dde5eb; }
     .toc { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; margin:24px 0; padding:0; list-style:none; }
     .toc a,.doc-link { display:block; padding:20px; border:1px solid #b9d6e7; border-radius:16px; background:#f3f8fc; text-decoration:none; }
     .toc a:hover,.doc-link:hover { background:#e7f4f4; }
@@ -50,10 +49,12 @@
     .diagram-scroll img { min-width:1100px; }
     @media print { .diagram-scroll img { min-width:0; } .case,.tech { break-inside:avoid; } body { background:white; } }
 </style>
+  <link rel="stylesheet" href="navigation.css">
 </head>
 <body>
+<nav class="page-nav" aria-label="Documentación"><a href="index.html">Resumen</a><a href="dominio.html" aria-current="page">Dominio y reglas</a><a href="casos.html">Casos y pruebas</a><a href="adr.html">ADR</a></nav>
 <main>
-<nav class="page-nav" aria-label="Documentación"><a href="index.html">Resumen</a><a href="dominio.html">Dominio y reglas</a><a href="casos.html">Casos y pruebas</a><a href="adr.html">ADR</a></nav><h1>Dominio y reglas de negocio</h1><p>Entidades, invariantes y reglas del motor. Conservamos los identificadores RN para facilitar la trazabilidad con los casos de prueba.</p><ul class="toc"><li><a href="#4-dominio-de-negocio">4. Dominio de negocio</a></li><li><a href="#5-reglas-de-negocio">5. Reglas de negocio</a></li></ul><h2 id="4-dominio-de-negocio">4. Dominio de negocio</h2>
+<h1>Dominio y reglas de negocio</h1><p>Entidades, invariantes y reglas del motor. Conservamos los identificadores RN para facilitar la trazabilidad con los casos de prueba.</p><ul class="toc"><li><a href="#4-dominio-de-negocio">4. Dominio de negocio</a></li><li><a href="#5-reglas-de-negocio">5. Reglas de negocio</a></li></ul><h2 id="4-dominio-de-negocio">4. Dominio de negocio</h2>
 <h2>4.1. Agregados y entidades principales</h2>
 <h3>Customer</h3>
 <p>Representa al comprador B2B.</p>

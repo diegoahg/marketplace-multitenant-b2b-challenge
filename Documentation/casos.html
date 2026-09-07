@@ -31,7 +31,6 @@
     h1,h2,h3 { color:var(--ink); }
     a { color:#123B5D; text-underline-offset:3px; }
     a:focus-visible, summary:focus-visible { outline:3px solid #00A6A6; outline-offset:4px; }
-    .page-nav { display:flex; flex-wrap:wrap; gap:12px 24px; padding:16px 0; border-bottom:1px solid #dde5eb; }
     .toc { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; margin:24px 0; padding:0; list-style:none; }
     .toc a,.doc-link { display:block; padding:20px; border:1px solid #b9d6e7; border-radius:16px; background:#f3f8fc; text-decoration:none; }
     .toc a:hover,.doc-link:hover { background:#e7f4f4; }
@@ -50,10 +49,12 @@
     .diagram-scroll img { min-width:1100px; }
     @media print { .diagram-scroll img { min-width:0; } .case,.tech { break-inside:avoid; } body { background:white; } }
 </style>
+  <link rel="stylesheet" href="navigation.css">
 </head>
 <body>
+<nav class="page-nav" aria-label="Documentación"><a href="index.html">Resumen</a><a href="dominio.html">Dominio y reglas</a><a href="casos.html" aria-current="page">Casos y pruebas</a><a href="adr.html">ADR</a></nav>
 <main>
-<nav class="page-nav" aria-label="Documentación"><a href="index.html">Resumen</a><a href="dominio.html">Dominio y reglas</a><a href="casos.html">Casos y pruebas</a><a href="adr.html">ADR</a></nav><h1>Casos de uso y estrategia de pruebas</h1><p>Elige una categoría y revisa cada escenario por separado. Esta página organiza el catálogo del discovery; los casos descritos no constituyen por sí solos evidencia de ejecución. Consulta los resultados en los informes de validación del repositorio.</p><p><a href="https://github.com/diegoahg/marketplace-multitenant-b2b-challenge/blob/main/backend/VALIDATION.md">Validación backend</a> · <a href="https://github.com/diegoahg/marketplace-multitenant-b2b-challenge/blob/main/frontend/VALIDATION.md">Validación frontend</a></p><ul class="toc"><li><a href="#mensajeria">Worker y DLQ: evidencia actual</a></li><li><a href="#6-casos-de-uso">6. Casos de uso</a></li><li><a href="#7-casos-de-prueba">7. Casos de prueba</a></li><li><a href="#8-casos-de-borde">8. Casos de borde</a></li><li><a href="#9-casos-limite">9. Casos límite</a></li><li><a href="#10-casos-de-rendimiento">10. Casos de rendimiento</a></li><li><a href="#11-casos-golden-obligatorios">11. Casos Golden obligatorios</a></li><li><a href="#12-casos-golden-adicionales-recomendados">12. Casos Golden adicionales recomendados</a></li></ul><h2 id="6-casos-de-uso">6. Casos de uso</h2>
+<h1>Casos de uso y estrategia de pruebas</h1><p>Elige una categoría y revisa cada escenario por separado. Esta página organiza el catálogo del discovery; los casos descritos no constituyen por sí solos evidencia de ejecución. Consulta los resultados en los informes de validación del repositorio.</p><p><a href="https://github.com/diegoahg/marketplace-multitenant-b2b-challenge/blob/main/backend/VALIDATION.md">Validación backend</a> · <a href="https://github.com/diegoahg/marketplace-multitenant-b2b-challenge/blob/main/frontend/VALIDATION.md">Validación frontend</a></p><ul class="toc"><li><a href="#mensajeria">Worker y DLQ: evidencia actual</a></li><li><a href="#6-casos-de-uso">6. Casos de uso</a></li><li><a href="#7-casos-de-prueba">7. Casos de prueba</a></li><li><a href="#8-casos-de-borde">8. Casos de borde</a></li><li><a href="#9-casos-limite">9. Casos límite</a></li><li><a href="#10-casos-de-rendimiento">10. Casos de rendimiento</a></li><li><a href="#11-casos-golden-obligatorios">11. Casos Golden obligatorios</a></li><li><a href="#12-casos-golden-adicionales-recomendados">12. Casos Golden adicionales recomendados</a></li></ul><h2 id="6-casos-de-uso">6. Casos de uso</h2>
 <article class="case" id="uc01-solicitar-cotizacion"><h2>UC01 — Solicitar cotización</h2>
 <p><strong>Actor:</strong> Cliente.</p>
 <h3>Entrada</h3>

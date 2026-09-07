@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#123B5D">
+  <meta name="description" content="ADR de MariposaMarket: decisiones de diseño, stack, precios, idempotencia, integraciones y despliegue.">
+  <title>MariposaMarket · ADR 001</title>
+  <style>
+    :root { color-scheme: light; --primary:#123B5D; --accent:#00A6A6; --action:#FFC629; --ink:#17212B; --bg:#F5F7F8; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.55 system-ui,sans-serif; }
+    .toolbar { max-width:1000px; margin:24px auto 16px; padding:0 28px; display:flex; flex-wrap:wrap; gap:16px; align-items:center; justify-content:space-between; }
+    a { color:var(--primary); text-underline-offset:3px; }
+    .download { background:var(--action); color:var(--ink); padding:10px 16px; border-radius:8px; font-weight:700; text-decoration:none; }
+    a:focus-visible { outline:3px solid var(--accent); outline-offset:4px; }
+    article { max-width:944px; margin:0 auto 36px; padding:38px 42px 26px; background:white; border:1px solid #dce3e8; border-radius:16px; }
+    header { border-bottom:3px solid var(--accent); padding-bottom:20px; margin-bottom:23px; }
+    .eyebrow { margin:0 0 8px; color:var(--primary); font-size:11px; font-weight:750; letter-spacing:1.5px; text-transform:uppercase; }
+    h1 { color:var(--primary); font-size:34px; line-height:1.12; letter-spacing:-1px; margin:0 0 10px; overflow-wrap:anywhere; }
+    .subtitle { margin:0; font-size:17px; }
+    .meta { margin:12px 0 0; font-size:11px; color:#596875; }
+    .grid { display:grid; grid-template-columns:1fr 1fr; gap:21px 30px; }
+    section { min-width:0; break-inside:avoid; }
+    h2 { font-size:15px; line-height:1.35; margin:0 0 8px; color:var(--primary); }
+    h2 span { display:inline-block; color:var(--accent); margin-right:7px; font-size:12px; }
+    p { margin:0; }
+    strong { font-weight:700; }
+    .flow { margin:9px 0; padding:8px 10px; background:#e5f6f6; border-left:3px solid var(--accent); font-size:12px; font-weight:700; color:var(--primary); }
+    footer { margin-top:22px; padding-top:12px; border-top:1px solid #dce3e8; font-size:11px; color:#596875; }
+    @media (max-width:650px) {
+      body { font-size:15px; }
+      article { margin:0 12px 20px; padding:26px 20px; }
+      .toolbar { padding:0 16px; }
+      .grid { grid-template-columns:1fr; gap:24px; }
+      h1 { font-size:30px; }
+    }
+    @page { size:A4; margin:12mm; }
+    @media print {
+      body { background:white; font-size:9.3pt; line-height:1.42; print-color-adjust:exact; -webkit-print-color-adjust:exact; }
+      .toolbar { display:none; }
+      article { max-width:none; margin:0; padding:0; border:0; border-radius:0; }
+      header { padding-bottom:12px; margin-bottom:16px; }
+      h1 { font-size:27pt; }
+      .subtitle { font-size:12pt; }
+      .grid { grid-template-columns:1fr 1fr; gap:16px 24px; }
+      h2 { font-size:11pt; }
+      .eyebrow,.meta,footer { font-size:8pt; }
+      .flow { font-size:9pt; }
+      footer { margin-top:16px; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="toolbar" aria-label="Documentación">
+    <a href="index.html">← Documentación del desafío</a>
+    <a class="download" href="ADR.pdf" download>Descargar ADR · PDF</a>
+  </nav>
+  <main>
+    <article aria-labelledby="title">
+      <header>
+        <p class="eyebrow">ADR 001 · Registro de decisiones de arquitectura</p>
+        <h1 id="title">MariposaMarket</h1>
+        <p class="subtitle">Una compra explicable, una confirmación confiable.</p>
+        <p class="meta">6 de septiembre de 2026 · Decisiones adoptadas para la prueba · Implementación con apoyo de IA</p>
+      </header>
+      <div class="grid">
+        <section>
+          <h2><span>01</span> Contexto y diseño</h2>
+          <p>Tomé <strong>Grupo Mariposa como referencia</strong> para MariposaMarket: compra B2B, paleta azul/turquesa y CTA amarillo. Prioricé un resumen con líneas, origen de descuentos, obsequios, impuestos y total. Descarté tarjetas de altura fija y texto truncado: los componentes adaptan el contenido, protegen controles del teclado y barras del sistema, y escalan las imágenes con el mismo criterio.</p>
+        </section>
+        <section>
+          <h2><span>02</span> Stack y uso de IA</h2>
+          <p>Elegí <strong>Go por mis años de experiencia</strong>, flexibilidad y curva de aprendizaje ya recorrida; aprender otro backend habría restado foco al dominio. Frente a Angular, elegí Flutter por el ecosistema Google y su alcance multidispositivo. Acepté aprenderlo, aunque no lo conocía. <strong>Desarrollé la solución con apoyo de IA</strong> y validé con pruebas; esa asistencia no sustituye mi responsabilidad de revisar el código.</p>
+        </section>
+        <section>
+          <h2><span>03</span> La prioridad difícil: precios</h2>
+          <p>Exploré las prioridades <strong>con IA, simulando las perspectivas de una encargada de Marketing y una Product Owner</strong>. Contrasté claridad de beneficios y consistencia de compra; esa exploración orientó mi decisión:</p>
+          <p class="flow">Combo → escala → obsequios → impuestos → total → crédito</p>
+          <p>El combo reserva unidades; la escala usa el saldo y acumula por familia, asignando tramos por SKU ascendente para independizar el resultado del orden del carrito. Respeto prioridades e incompatibilidades, con dinero entero y reglas por país. <strong>Confirmo el snapshot</strong>: descarté recalcular para conservar el precio aceptado.</p>
+        </section>
+        <section>
+          <h2><span>04</span> Una intención, un pedido</h2>
+          <p>Descarté confiar solo en deshabilitar el botón. El frontend persiste la clave antes de enviar y la reutiliza tras recargas. <strong>Tenant + clave + hash</strong> permiten replay o rechazo de contenido distinto. Una transacción Mongo guarda pedido, débito condicional, idempotencia y outbox, e impide confirmar dos veces la cotización. El 201 llega después del commit: pedido consultable y débito único.</p>
+        </section>
+        <section>
+          <h2><span>05</span> ERP y notificaciones PUSH</h2>
+          <p>Descarté llamadas síncronas al confirmar y publicar sin outbox: una caída podría bloquear la compra o perder el evento. La <strong>outbox transaccional</strong> publica en Pub/Sub al menos una vez. El worker usa leases, progreso por destino y reintentos; si ERP termina y PUSH falla, continúa con PUSH. Acepté consistencia eventual y más coordinación para recuperar fallos.</p>
+        </section>
+        <section>
+          <h2><span>06</span> Despliegue y alcance consciente</h2>
+          <p>Elegí <strong>Compose</strong> con Go, Mongo replica set, Pub/Sub emulado y Flutter Web/nginx; preparé documentación para Pages. Dejé fuera autenticación productiva, ERP/PUSH reales y builds nativos para concentrar la prueba en precios y consistencia, con adaptadores simulados durables. Postergué despliegue cloud y operación avanzada: requieren infraestructura y contratos reales. La entrega incluye CI de pruebas, sintaxis, complejidad y seguridad.</p>
+        </section>
+        <section>
+          <h2><span>07</span> Mi revisión de código</h2>
+          <p>Si lo hubiera escrito otra persona, revisaría aislamiento por tenant/país, overflow, redondeo, tramos por familia, atomicidad y carreras de idempotencia. Exigiría pruebas de respuesta perdida, reinicio del broker y fallo entre efecto externo y registro local. Revisaría accesibilidad y controles con teclado. <strong>La revisión llevó a dividir funciones complejas y actualizar dependencias</strong>; mantengo esos controles en CI para prevenir regresiones.</p>
+        </section>
+        <section>
+          <h2><span>08</span> Riesgo y mitigación</h2>
+          <p><strong>Riesgo:</strong> el receptor acepta el efecto y el worker cae antes de registrar éxito. Exijo deduplicar <strong>evento:destino</strong> atómicamente en el receptor. La reconciliación ya repone eventos publicados sin destinos completados después de un minuto, conservando su ID. Probé pérdida de mensajes y éxito parcial. Para producción quedan alertas y cola de fallos. No prometo exactly-once distribuido.</p>
+        </section>
+      </div>
+      <footer>Validación: golden de negocio y visuales, carreras, recuperación y compra en seis países. Decisión guía: proteger precio e intención de compra y recuperar sus efectos.</footer>
+    </article>
+  </main>
+</body>
+</html>

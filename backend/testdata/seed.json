@@ -21,6 +21,50 @@
         "standard": 1900
       },
       "taxGifts": false
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "CO",
+      "currency": "COP",
+      "scale": 2,
+      "rounding": "HALF_UP",
+      "taxBps": {
+        "standard": 0
+      },
+      "taxGifts": false
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "EC",
+      "currency": "USD",
+      "scale": 2,
+      "rounding": "HALF_UP",
+      "taxBps": {
+        "standard": 0
+      },
+      "taxGifts": false
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "GT",
+      "currency": "GTQ",
+      "scale": 2,
+      "rounding": "HALF_UP",
+      "taxBps": {
+        "standard": 0
+      },
+      "taxGifts": false
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "AR",
+      "currency": "ARS",
+      "scale": 2,
+      "rounding": "HALF_UP",
+      "taxBps": {
+        "standard": 0
+      },
+      "taxGifts": false
     }
   ],
   "products": [
@@ -101,6 +145,162 @@
         "scale": 0
       },
       "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "CO",
+      "sku": "SKU-001",
+      "description": "Producto demo SKU-001",
+      "family": "drinks",
+      "unitPrice": {
+        "amount": "100",
+        "currency": "COP",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "CO",
+      "sku": "SKU-002",
+      "description": "Producto demo SKU-002",
+      "family": "drinks",
+      "unitPrice": {
+        "amount": "200",
+        "currency": "COP",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "CO",
+      "sku": "GIFT-001",
+      "description": "Producto demo GIFT-001",
+      "family": "gifts",
+      "unitPrice": {
+        "amount": "50",
+        "currency": "COP",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "EC",
+      "sku": "SKU-001",
+      "description": "Producto demo SKU-001",
+      "family": "drinks",
+      "unitPrice": {
+        "amount": "100",
+        "currency": "USD",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "EC",
+      "sku": "SKU-002",
+      "description": "Producto demo SKU-002",
+      "family": "drinks",
+      "unitPrice": {
+        "amount": "200",
+        "currency": "USD",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "EC",
+      "sku": "GIFT-001",
+      "description": "Producto demo GIFT-001",
+      "family": "gifts",
+      "unitPrice": {
+        "amount": "50",
+        "currency": "USD",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "GT",
+      "sku": "SKU-001",
+      "description": "Producto demo SKU-001",
+      "family": "drinks",
+      "unitPrice": {
+        "amount": "100",
+        "currency": "GTQ",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "GT",
+      "sku": "SKU-002",
+      "description": "Producto demo SKU-002",
+      "family": "drinks",
+      "unitPrice": {
+        "amount": "200",
+        "currency": "GTQ",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "GT",
+      "sku": "GIFT-001",
+      "description": "Producto demo GIFT-001",
+      "family": "gifts",
+      "unitPrice": {
+        "amount": "50",
+        "currency": "GTQ",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "AR",
+      "sku": "SKU-001",
+      "description": "Producto demo SKU-001",
+      "family": "drinks",
+      "unitPrice": {
+        "amount": "100",
+        "currency": "ARS",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "AR",
+      "sku": "SKU-002",
+      "description": "Producto demo SKU-002",
+      "family": "drinks",
+      "unitPrice": {
+        "amount": "200",
+        "currency": "ARS",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "AR",
+      "sku": "GIFT-001",
+      "description": "Producto demo GIFT-001",
+      "family": "gifts",
+      "unitPrice": {
+        "amount": "50",
+        "currency": "ARS",
+        "scale": 2
+      },
+      "taxCategory": "standard"
     }
   ],
   "customers": [
@@ -112,6 +312,26 @@
     {
       "tenantId": "tenant-demo",
       "country": "CL",
+      "customerId": "CUSTOMER-001"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "CO",
+      "customerId": "CUSTOMER-001"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "EC",
+      "customerId": "CUSTOMER-001"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "GT",
+      "customerId": "CUSTOMER-001"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "AR",
       "customerId": "CUSTOMER-001"
     }
   ],
@@ -259,6 +479,294 @@
       },
       "giftSku": "GIFT-001",
       "giftQuantity": 1
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "CO",
+      "priority": 1,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "COMBO-001",
+      "type": "COMBO",
+      "eligibility": {},
+      "items": [
+        {
+          "sku": "SKU-001",
+          "quantity": 2
+        },
+        {
+          "sku": "SKU-002",
+          "quantity": 1
+        }
+      ],
+      "comboPrice": {
+        "amount": "300",
+        "currency": "COP",
+        "scale": 2
+      }
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "CO",
+      "priority": 1,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "SCALE-001",
+      "type": "SCALE",
+      "eligibility": {
+        "sku": "SKU-001"
+      },
+      "tiers": [
+        {
+          "from": 1,
+          "to": 5,
+          "bps": 0
+        },
+        {
+          "from": 6,
+          "to": 10,
+          "bps": 500
+        },
+        {
+          "from": 11,
+          "to": 0,
+          "bps": 1000
+        }
+      ]
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "CO",
+      "priority": 1,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "GIFT-001",
+      "type": "GIFT",
+      "eligibility": {
+        "sku": "SKU-001",
+        "minimum": 6
+      },
+      "giftSku": "GIFT-001",
+      "giftQuantity": 1
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "EC",
+      "priority": 1,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "COMBO-001",
+      "type": "COMBO",
+      "eligibility": {},
+      "items": [
+        {
+          "sku": "SKU-001",
+          "quantity": 2
+        },
+        {
+          "sku": "SKU-002",
+          "quantity": 1
+        }
+      ],
+      "comboPrice": {
+        "amount": "300",
+        "currency": "USD",
+        "scale": 2
+      }
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "EC",
+      "priority": 1,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "SCALE-001",
+      "type": "SCALE",
+      "eligibility": {
+        "sku": "SKU-001"
+      },
+      "tiers": [
+        {
+          "from": 1,
+          "to": 5,
+          "bps": 0
+        },
+        {
+          "from": 6,
+          "to": 10,
+          "bps": 500
+        },
+        {
+          "from": 11,
+          "to": 0,
+          "bps": 1000
+        }
+      ]
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "EC",
+      "priority": 1,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "GIFT-001",
+      "type": "GIFT",
+      "eligibility": {
+        "sku": "SKU-001",
+        "minimum": 6
+      },
+      "giftSku": "GIFT-001",
+      "giftQuantity": 1
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "GT",
+      "priority": 1,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "COMBO-001",
+      "type": "COMBO",
+      "eligibility": {},
+      "items": [
+        {
+          "sku": "SKU-001",
+          "quantity": 2
+        },
+        {
+          "sku": "SKU-002",
+          "quantity": 1
+        }
+      ],
+      "comboPrice": {
+        "amount": "300",
+        "currency": "GTQ",
+        "scale": 2
+      }
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "GT",
+      "priority": 1,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "SCALE-001",
+      "type": "SCALE",
+      "eligibility": {
+        "sku": "SKU-001"
+      },
+      "tiers": [
+        {
+          "from": 1,
+          "to": 5,
+          "bps": 0
+        },
+        {
+          "from": 6,
+          "to": 10,
+          "bps": 500
+        },
+        {
+          "from": 11,
+          "to": 0,
+          "bps": 1000
+        }
+      ]
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "GT",
+      "priority": 1,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "GIFT-001",
+      "type": "GIFT",
+      "eligibility": {
+        "sku": "SKU-001",
+        "minimum": 6
+      },
+      "giftSku": "GIFT-001",
+      "giftQuantity": 1
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "AR",
+      "priority": 1,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "COMBO-001",
+      "type": "COMBO",
+      "eligibility": {},
+      "items": [
+        {
+          "sku": "SKU-001",
+          "quantity": 2
+        },
+        {
+          "sku": "SKU-002",
+          "quantity": 1
+        }
+      ],
+      "comboPrice": {
+        "amount": "300",
+        "currency": "ARS",
+        "scale": 2
+      }
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "AR",
+      "priority": 1,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "SCALE-001",
+      "type": "SCALE",
+      "eligibility": {
+        "sku": "SKU-001"
+      },
+      "tiers": [
+        {
+          "from": 1,
+          "to": 5,
+          "bps": 0
+        },
+        {
+          "from": 6,
+          "to": 10,
+          "bps": 500
+        },
+        {
+          "from": 11,
+          "to": 0,
+          "bps": 1000
+        }
+      ]
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "AR",
+      "priority": 1,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "GIFT-001",
+      "type": "GIFT",
+      "eligibility": {
+        "sku": "SKU-001",
+        "minimum": 6
+      },
+      "giftSku": "GIFT-001",
+      "giftQuantity": 1
     }
   ],
   "credits": [
@@ -280,6 +788,46 @@
         "amount": "1000000",
         "currency": "CLP",
         "scale": 0
+      }
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "CO",
+      "customerId": "CUSTOMER-001",
+      "available": {
+        "amount": "100000",
+        "currency": "COP",
+        "scale": 2
+      }
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "EC",
+      "customerId": "CUSTOMER-001",
+      "available": {
+        "amount": "100000",
+        "currency": "USD",
+        "scale": 2
+      }
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "GT",
+      "customerId": "CUSTOMER-001",
+      "available": {
+        "amount": "100000",
+        "currency": "GTQ",
+        "scale": 2
+      }
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "AR",
+      "customerId": "CUSTOMER-001",
+      "available": {
+        "amount": "100000",
+        "currency": "ARS",
+        "scale": 2
       }
     }
   ]

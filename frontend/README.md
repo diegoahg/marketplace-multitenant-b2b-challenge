@@ -18,7 +18,7 @@ Si el backend ya está funcionando:
 docker compose up --build --no-deps -d frontend
 ```
 
-Si se recreó el emulador y `/api/ready` devuelve 503, ejecutar `docker compose restart api`. El emulador es volátil; consultar la limitación documentada en `backend/VALIDATION.md`.
+Si se recreó el emulador, el backend recupera sus recursos al recibir 404. La reconciliación repone eventos sin efectos completados después de un minuto; `/api/ready` refleja la recuperación. El emulador es volátil y Mongo conserva la outbox.
 
 ## Recorrido
 
@@ -30,6 +30,8 @@ Si se recreó el emulador y `/api/ready` devuelve 503, ejecutar `docker compose 
 6. Consultar el pedido confirmado en **Mis pedidos**, por ID o desde el historial de este navegador.
 
 En móvil, el icono de bolsa del encabezado lleva directamente al pedido. Las cantidades admiten 0–1.000.000; cero elimina la línea. Para probar crédito insuficiente, usar una cantidad alta, cotizar a crédito y comprobar el bloqueo de confirmación.
+
+Países disponibles: Perú (PEN), Chile (CLP), Colombia (COP), Ecuador (USD), Guatemala (GTQ) y Argentina (ARS). Los cuatro nuevos usan dos decimales y datos nominales de demo, sin conversión de divisas; su tasa de impuesto es 0 hasta configurar las reglas comerciales. COP, USD y ARS se muestran con código para distinguir monedas que comparten símbolo; GTQ usa Q. Las pruebas Chrome cotizan y confirman en cada país nuevo.
 
 ## Invariantes
 

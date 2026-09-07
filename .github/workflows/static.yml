@@ -38,7 +38,10 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Verify site entry point
-        run: gittest -s Documentation/index.html
+        run: |
+          test -s Documentation/index.html
+          test -s Documentation/adr.html
+          test -s Documentation/ADR.pdf
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

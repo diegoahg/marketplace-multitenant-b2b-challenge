@@ -10,7 +10,17 @@ import (
 )
 
 func (s *Store) Pending(ctx context.Context, limit int) ([]d.OrderConfirmedEvent, error) {
-	cur, e := s.DB.Collection("outbox_events").Find(ctx, bson.M{"publishedAt": bson.M{"$exists": false}}, options.Find().SetSort(bson.D{{Key: "occurredAt", Value: 1}}).SetLimit(int64(limit)))
+	// A broker acknowledgement is not proof that the destinations completed.
+	// Reconcile older publications after one minute, preserving the original eventId.
+	cutoff := time.Now().UTC().Add(-time.Minute)
+	cur, e := s.DB.Collection("outbox_events").Aggregate(ctx, driver.Pipeline{
+		{{Key: "$match", Value: bson.M{"$or": bson.A{bson.M{"publishedAt": bson.M{"$exists": false}}, bson.M{"publishedAt": bson.M{"$lte": cutoff}}}}}},
+		{{Key: "$sort", Value: bson.D{{Key: "publishedAt", Value: 1}, {Key: "occurredAt", Value: 1}}}},
+		{{Key: "$lookup", Value: bson.M{"from": "processed_events", "localField": "eventId", "foreignField": "eventId", "as": "progress"}}},
+		{{Key: "$match", Value: bson.M{"$or": bson.A{bson.M{"progress.effects.erp.done": bson.M{"$ne": true}}, bson.M{"progress.effects.push.done": bson.M{"$ne": true}}}}}},
+		{{Key: "$limit", Value: int64(limit)}},
+		{{Key: "$unset", Value: "progress"}},
+	})
 	if e != nil {
 		return nil, e
 	}

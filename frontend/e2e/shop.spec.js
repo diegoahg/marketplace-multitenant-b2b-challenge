@@ -1,5 +1,38 @@
 import { test, expect } from '@playwright/test';
 
+for (const [country, label, currency, total] of [
+  ['CO', 'Colombia · COP', 'COP', 'COP 11,55'],
+  ['EC', 'Ecuador · USD', 'USD', 'USD 11,55'],
+  ['GT', 'Guatemala · GTQ', 'GTQ', 'Q 11,55'],
+  ['AR', 'Argentina · ARS', 'ARS', 'ARS 11,55'],
+]) {
+  test(`quote and confirm in ${country}/${currency}`, async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await openShop(page);
+    await page.getByText('Perú · PEN', { exact: true }).click();
+    await page.getByRole('menuitem', { name: label, exact: true }).click();
+    await page.getByRole('button', { name: 'Por volumen · 12 uds.', exact: true }).click();
+    await page.getByRole('button', { name: /Ir a tu pedido/ }).click();
+    await page.getByText('Contado', { exact: true }).click();
+    const response = page.waitForResponse(r => r.url().endsWith('/api/quotes'));
+    await page.getByRole('button', { name: 'Cotizar pedido', exact: true }).click();
+    const q = await (await response).json();
+    expect(q.country).toBe(country);
+    expect(q.total).toEqual({ amount: '1155', currency, scale: 2 });
+    expect(q.gifts[0].quantity).toBe(2);
+    // Demo taxes are zero: taxable base and final total both show this amount.
+    const displayedAmounts = page.getByText(total, { exact: true });
+    await expect(displayedAmounts).toHaveCount(2);
+    await expect(displayedAmounts.nth(0)).toBeVisible();
+    await expect(displayedAmounts.nth(1)).toBeVisible();
+    const confirmed = page.waitForResponse(r => r.url().endsWith('/api/orders') && r.request().method() === 'POST');
+    await page.getByRole('button', { name: 'Confirmar pedido', exact: true }).click();
+    const result = await confirmed;
+    expect(result.status()).toBe(201);
+    expect((await result.json()).total).toEqual(q.total);
+  });
+}
+
 const browserErrors = new WeakMap();
 test.beforeEach(async ({ page }) => {
   const errors = [];

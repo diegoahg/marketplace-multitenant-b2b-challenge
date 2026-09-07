@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	d "marketplace/internal/domain"
@@ -18,6 +19,26 @@ import (
 type Emulator struct {
 	BaseURL, Topic, Subscription string
 	Client                       *http.Client
+}
+type responseError struct {
+	status  int
+	message string
+}
+
+func (e *responseError) Error() string { return e.message }
+
+// The emulator loses its topic/subscription on restart. Recreate them on 404;
+// outbox reconciliation supplies any previously acknowledged but lost messages.
+func (p *Emulator) recoverCall(ctx context.Context, path string, input, output any) error {
+	err := p.call(ctx, http.MethodPost, path, input, output, false)
+	var failure *responseError
+	if !errors.As(err, &failure) || failure.status != http.StatusNotFound {
+		return err
+	}
+	if err = p.Setup(ctx); err != nil {
+		return err
+	}
+	return p.call(ctx, http.MethodPost, path, input, output, false)
 }
 
 func NewEmulator(host, project, topic, subscription string) (*Emulator, error) {
@@ -51,7 +72,7 @@ func (p *Emulator) call(ctx context.Context, method, path string, input, output 
 	}
 	if res.StatusCode < 200 || res.StatusCode >= 300 {
 		body, _ := io.ReadAll(io.LimitReader(res.Body, 2048))
-		return fmt.Errorf("pubsub %s: HTTP %d: %s", path, res.StatusCode, body)
+		return &responseError{status: res.StatusCode, message: fmt.Sprintf("pubsub %s: HTTP %d: %s", path, res.StatusCode, body)}
 	}
 	if output != nil {
 		return json.NewDecoder(io.LimitReader(res.Body, 4<<20)).Decode(output)
@@ -76,7 +97,7 @@ func (p *Emulator) Publish(ctx context.Context, event d.OrderConfirmedEvent) err
 	if e != nil {
 		return e
 	}
-	return p.call(ctx, http.MethodPost, p.Topic+":publish", map[string]any{"messages": []any{map[string]any{"data": base64.StdEncoding.EncodeToString(b), "attributes": map[string]string{"eventId": event.EventID, "eventType": event.EventType}}}}, nil, false)
+	return p.recoverCall(ctx, p.Topic+":publish", map[string]any{"messages": []any{map[string]any{"data": base64.StdEncoding.EncodeToString(b), "attributes": map[string]string{"eventId": event.EventID, "eventType": event.EventType}}}}, nil)
 }
 
 type Delivery struct {
@@ -90,7 +111,7 @@ func (p *Emulator) Pull(ctx context.Context) ([]Delivery, error) {
 	var out struct {
 		Received []Delivery `json:"receivedMessages"`
 	}
-	e := p.call(ctx, http.MethodPost, p.Subscription+":pull", map[string]any{"maxMessages": 1, "returnImmediately": true}, &out, false)
+	e := p.recoverCall(ctx, p.Subscription+":pull", map[string]any{"maxMessages": 1, "returnImmediately": true}, &out)
 	return out.Received, e
 }
 func (p *Emulator) Ack(ctx context.Context, id string) error {

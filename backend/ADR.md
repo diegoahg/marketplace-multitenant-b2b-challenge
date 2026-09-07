@@ -2,6 +2,8 @@
 
 Estado: aceptado para la prueba técnica.
 
+Síntesis actualizada con contexto de negocio, uso de IA y revisión: [ADR de una página](../Documentation/adr.html).
+
 **Contexto.** Un pedido combina beneficios comerciales y consume crédito compartido. Los reintentos HTTP y las entregas duplicadas son normales. El precio visto por el cliente debe respetarse aunque las reglas cambien.
 
 **Decisiones.** Go y monolito modular con puertos/adaptadores mantienen reglas comprobables sin HTTP o infraestructura. MongoDB almacena snapshots y documentos de reglas, y usa un replica set para transacciones. Money emplea unidades menores int64, intermedios de precisión arbitraria, validación de moneda/escala y rounding configurable; JSON expresa el entero como string. Quote Snapshot persiste el breakdown completo y la confirmación nunca recalcula precios.
@@ -9,6 +11,8 @@ Estado: aceptado para la prueba técnica.
 Idempotencia durable con índice `(tenantId,key)` y hash del request devuelve la respuesta original o 409 si cambia. Una quote no puede confirmar dos pedidos, incluso con keys distintas. La misma transacción reserva quote, consume crédito con condición atómica `available >= total`, crea Order, idempotencia y outbox. Write concern majority y lectura snapshot evitan estados parciales.
 
 Pub/Sub local ofrece entrega at-least-once. El publisher reintenta outbox y solo marca publicado después de recibir confirmación. El worker asíncrono gestiona ack/nack y progreso por ERP/Push, con leases recuperables. Los mocks deduplican mediante recibos durables; los receptores HTTP deben implementar `Idempotency-Key` para cubrir la caída entre efecto remoto y progreso local.
+
+La reconciliación vuelve a publicar eventos de más de un minuto sin ambos destinos completados, usando el mismo ID. Topic y subscription se recuperan ante 404. Para escalas por familia se acumula el saldo post-combo y se asignan tramos por SKU ascendente, independiente del orden del carrito.
 
 **Alternativas descartadas.** Microservicios y Kafka agregan operación sin necesidad demostrada. Recalcular quote rompe la promesa de precio. Llamar ERP dentro del request acopla disponibilidad y latencia. `float64` pierde precisión monetaria. Publicar tras guardar Order sin outbox puede perder eventos.
 

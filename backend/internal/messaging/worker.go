@@ -19,12 +19,21 @@ type Worker struct {
 }
 
 func (w *Worker) Handle(ctx context.Context, event d.OrderConfirmedEvent) error {
+	if err := validateEvent(event); err != nil {
+		return err
+	}
+	return w.deliver(ctx, event)
+}
+func validateEvent(event d.OrderConfirmedEvent) error {
 	if !application.ValidUUID(event.EventID) || event.EventType != "OrderConfirmed" || event.EventVersion != 1 || event.Order.Status != "CONFIRMED" || event.TenantID != event.Order.TenantID || event.Country != event.Order.Country || !application.ValidUUID(event.Order.OrderID) {
 		return fmt.Errorf("invalid OrderConfirmed event")
 	}
 	if event.TenantID == "" || event.Country == "" || event.Order.CustomerID == "" || event.Order.QuoteID == "" || event.Order.OrderNumber == "" || event.OccurredAt.IsZero() || event.Order.CreatedAt.IsZero() || !event.Order.Total.Valid() || event.Order.Total.Amount < 0 || event.Order.Currency != event.Order.Total.Currency {
 		return fmt.Errorf("invalid OrderConfirmed event")
 	}
+	return nil
+}
+func (w *Worker) deliver(ctx context.Context, event d.OrderConfirmedEvent) error {
 	for _, effect := range []struct {
 		name string
 		send func(context.Context, d.OrderConfirmedEvent) error

@@ -6,12 +6,12 @@ Cierre: **6 de septiembre de 2026**. Flutter Web 3.44.0 compilado en Docker Linu
 |---|---|
 | Build release y nginx con proxy `/api` | PASS; frontend levantado en http://localhost:3000 |
 | `flutter analyze` | PASS, sin incidencias |
-| `flutter test` | **42 pruebas aprobadas**; se compararon los ocho PNG golden sin regenerarlos |
-| `npm run test:e2e` | **4 pruebas aprobadas** |
-| Consola del navegador | Sin errores de Flutter ni excepciones JS en los cuatro recorridos; solo se permite el error de red provocado deliberadamente en la prueba de respuesta perdida |
+| `flutter test` | **43 pruebas**; incluye las cuatro monedas nuevas y comparación de ocho PNG golden |
+| `npm run test:e2e` | **8 recorridos**, incluidos cotización y confirmación en Colombia, Ecuador, Guatemala y Argentina |
+| Consola del navegador | Se comprueban errores Flutter/JS en todos los recorridos; solo se permite el error de red provocado deliberadamente en la prueba de respuesta perdida |
 | `GET /api/ready` | `ready` |
 
-Las pruebas de Go con `-race -tags=integration -count=1` también pasaron durante la implementación previa al corte. No se modificó código de negocio del backend. La matriz GT01–GT12, sus límites y la distinción entre golden de negocio y golden visual están en [README.md](README.md#pruebas-y-golden-tests).
+Las pruebas de Go con `-race -tags=integration -count=1` pasaron después de corregir escala por familia y reconciliación de outbox. La matriz GT01–GT12, sus límites y la distinción entre golden de negocio y golden visual están en [README.md](README.md#pruebas-y-golden-tests).
 
 ## Recorridos reales verificados
 
@@ -19,6 +19,7 @@ Las pruebas de Go con `-race -tags=integration -count=1` también pasaron durant
 2. Combo + escala: total **10.56 PEN**, descuento 1.05 PEN, base 8.95 PEN e impuesto 1.61 PEN; escala únicamente sobre la unidad excedente elegible.
 3. Móvil de 390 × 844: cambio a Chile, cotización de 12 unidades por **13,745 CLP**, edición de cantidad a 1,000,000, crédito insuficiente y confirmación deshabilitada.
 4. Pantalla mediana: abrir el editor de cantidad a 768 × 1024 y reducir la altura a 460 px; el botón Aplicar permanece dentro del viewport y permite guardar 18 unidades.
+5. Cuatro países nuevos: 12 unidades con descuento y dos regalos, total nominal de demo 11,55 COP/USD/GTQ/ARS, impuestos configurados en 0 y confirmación al contado que conserva importe, moneda y escala. No se aplica conversión cambiaria.
 
 ## Criterios de la pantalla de resumen
 
@@ -53,4 +54,4 @@ docker compose --profile frontend-test run --build --no-deps --rm frontend-tests
 
 Desde `frontend`: `npm ci` y `npm run test:e2e`. Requiere backend disponible y Chrome instalado. Las capturas de navegador quedan en `test-results/`; las ocho referencias visuales de la entrega están en `test/goldens/`.
 
-Los cambios están guardados en el workspace y todavía no tienen commit. La entrega configura Flutter Web adaptable; no incluye builds nativos Android/iOS ni autenticación de producción.
+La entrega configura Flutter Web adaptable; no incluye builds nativos Android/iOS ni autenticación de producción.

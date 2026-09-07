@@ -1,5 +1,7 @@
 # Prueba Técnica Tech Lead — Discovery y Diseño de Solución
 
+[MariposaMarket · ADR de una página](adr.html) · [Descargar PDF](ADR.pdf)
+
 ## Marketplace B2B Multi-tenant — Motor de Precios y Confirmación de Pedidos
 
 > **Objetivo del documento**  

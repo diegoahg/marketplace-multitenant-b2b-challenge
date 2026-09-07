@@ -385,6 +385,10 @@ class _ShopPageState extends State<ShopPage> {
             items: const [
               DropdownMenuItem(value: 'PE', child: Text('Perú · PEN')),
               DropdownMenuItem(value: 'CL', child: Text('Chile · CLP')),
+              DropdownMenuItem(value: 'CO', child: Text('Colombia · COP')),
+              DropdownMenuItem(value: 'EC', child: Text('Ecuador · USD')),
+              DropdownMenuItem(value: 'GT', child: Text('Guatemala · GTQ')),
+              DropdownMenuItem(value: 'AR', child: Text('Argentina · ARS')),
             ],
             onChanged: shop.locked ? null : (v) => shop.setCountry(v!),
           ),

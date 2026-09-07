@@ -8,14 +8,14 @@ El workflow [ci.yml](../.github/workflows/ci.yml) corre en cada push, pull reque
 | Flutter syntax and golden tests | Formato Dart, `flutter analyze` y `flutter test` en Flutter 3.44.0/Linux. Compara los ocho golden; nunca los regenera. |
 | Go and Dart complexity | Gocyclo 0.6.0 y Dart Code Linter 4.3.0. Complejidad ciclomática máxima 20; Go excluye archivos de pruebas y Dart analiza `lib`. Cualquier exceso hace fallar el job. |
 | Security and workflow validation | Actionlint 1.7.7 para YAML y expresiones de Actions; Gosec 2.29.0 para código Go con severidad y confianza al menos medias; Trivy 0.74.0 para secretos y vulnerabilidades HIGH/CRITICAL en dependencias Go, Dart y npm, incluidas dependencias de desarrollo. |
-| Chrome end-to-end in Docker | Compila la aplicación, espera `/api/ready`, verifica sintaxis JS y ejecuta los cuatro recorridos Playwright con Chrome y API real. |
+| Chrome end-to-end in Docker | Compila la aplicación, espera `/api/ready`, verifica sintaxis JS y ejecuta ocho recorridos Playwright con Chrome y API real, incluidos CO/COP, EC/USD, GT/GTQ y AR/ARS. |
 | CI required | Falla si cualquier job anterior falla, se cancela o se omite. |
 
 El workflow usa `contents: read`, acciones fijadas por SHA, Trivy fijado por digest y no persiste credenciales del checkout. No necesita credenciales cloud, claves de scanners ni servicios de pago. Los jobs de integración y navegador tienen entornos independientes y eliminan sus contenedores y volúmenes al terminar. Los informes de complejidad/seguridad y las evidencias de pruebas fallidas se conservan como artefactos durante siete días. Bash utiliza `pipefail`, por lo que `tee` no oculta fallos de los scanners.
 
 Para impedir merges con controles fallidos, seleccionar **CI required** como comprobación obligatoria en las reglas de protección de la rama de GitHub. El archivo crea la comprobación; no modifica las reglas del repositorio. El workflow de Pages existente sigue separado.
 
-## Validación local del 6 de septiembre de 2026
+## Validación inicial del 6 de septiembre de 2026
 
 Los comandos se ejecutaron en Docker sobre el workspace; el workflow todavía no se ha ejecutado en GitHub Actions.
 
@@ -28,7 +28,7 @@ Los comandos se ejecutaron en Docker sobre el workspace; el workflow todavía no
 - Gocyclo: **FAIL esperado por deuda existente**, detallada abajo.
 - Trivy: **FAIL esperado por dependencias existentes**, detalladas abajo.
 
-### Hallazgos que bloquean CI
+### Hallazgos iniciales corregidos
 
 | Función Go | Complejidad | Límite |
 |---|---:|---:|
@@ -38,7 +38,9 @@ Los comandos se ejecutaron en Docker sobre el workspace; el workflow todavía no
 
 Trivy detectó 13 vulnerabilidades HIGH/CRITICAL en `backend/go.mod`: 12 altas y una crítica, asociadas a `golang.org/x/crypto v0.33.0` y `golang.org/x/text v0.22.0`. El informe señala versiones corregidas hasta `x/crypto v0.55.0` y `x/text v0.39.0`. Es un análisis de dependencias, no una prueba de que todas las rutas vulnerables sean alcanzables desde esta API. Los informes del job incluyen identificadores, versiones y referencias para la corrección.
 
-No se aumentaron umbrales ni se añadieron excepciones para ocultar estos hallazgos. Antes de obtener un CI verde hay que refactorizar las tres funciones y actualizar las dependencias afectadas, comprobando compatibilidad y repitiendo las pruebas.
+La revisión posterior dividió el motor en etapas y separó validación de eventos y parsing/redondeo de dinero. Gocyclo ya no encuentra funciones por encima de 20. Se actualizaron `x/crypto` a 0.55.0, `x/text` a 0.41.0 y `x/sync` a 0.22.0; Trivy volvió a escanear los tres lockfiles y no encontró vulnerabilidades HIGH/CRITICAL. No se aumentaron umbrales ni se añadieron excepciones. Los resultados originales anteriores se conservan como evidencia del problema corregido.
+
+Las pruebas Go con `-race -tags=integration` incluyen ahora escala por familia, orden del carrito, combo e incompatibilidades, además de pérdida de recursos del broker y reconciliación de destinos incompletos. Flutter tiene 43 pruebas y ocho golden; Chrome agrega cuatro compras en monedas nuevas. El ADR de una página se publica con la documentación.
 
 ## Reproducir los controles
 

@@ -15,6 +15,7 @@ import (
 	"marketplace/internal/messaging"
 	mongo "marketplace/internal/repository/mongo"
 	"marketplace/internal/testkit"
+	"net/http"
 	"os"
 	"strings"
 	"sync"
@@ -228,6 +229,31 @@ func TestMongoPubSubOutboxAndRedelivery(t *testing.T) {
 	if e != nil || len(pending) != 0 {
 		t.Fatal(pending, e)
 	}
+	// Simulate a broker restart by deleting only this test's topic/subscription.
+	// The already-published message is gone; no demo resources are touched.
+	for _, resource := range []string{p.Subscription, p.Topic} {
+		req, err := http.NewRequestWithContext(ctx, http.MethodDelete, p.BaseURL+"/v1/"+resource, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		res, err := p.Client.Do(req)
+		if err != nil {
+			t.Fatal(err)
+		}
+		res.Body.Close()
+		if res.StatusCode != http.StatusOK {
+			t.Fatal(res.Status)
+		}
+	}
+	if _, e = p.Pull(ctx); e != nil {
+		t.Fatal("subscription recovery", e)
+	}
+	if _, e = store.DB.Collection("outbox_events").UpdateMany(ctx, bson.M{}, bson.M{"$set": bson.M{"publishedAt": time.Now().Add(-2 * time.Minute)}}); e != nil {
+		t.Fatal(e)
+	}
+	if e = messaging.DispatchOnce(ctx, store, p); e != nil {
+		t.Fatal("lost publication recovery", e)
+	}
 	w := &messaging.Worker{Effects: store, ERP: integration.New("erp", "", store.DB), Push: integration.New("push", "", store.DB)}
 	var delivered d.OrderConfirmedEvent
 	pull := func() {
@@ -259,6 +285,12 @@ func TestMongoPubSubOutboxAndRedelivery(t *testing.T) {
 		t.Fatal("message not delivered")
 	}
 	pull()
+	if _, e = store.DB.Collection("outbox_events").UpdateMany(ctx, bson.M{}, bson.M{"$set": bson.M{"publishedAt": time.Now().Add(-2 * time.Minute)}}); e != nil {
+		t.Fatal(e)
+	}
+	if pending, e = store.Pending(ctx, 10); e != nil || len(pending) != 0 {
+		t.Fatal("completed event must not be reconciled", pending, e)
+	}
 	if e = p.Publish(ctx, delivered); e != nil {
 		t.Fatal(e)
 	}

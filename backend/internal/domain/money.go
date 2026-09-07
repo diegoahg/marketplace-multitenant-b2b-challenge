@@ -93,45 +93,50 @@ func ParseMoney(s, currency string, scale int, mode Rounding) (Money, error) {
 		s = strings.TrimPrefix(s, "-")
 	}
 	parts := strings.Split(s, ".")
+	n, decimals, err := decimalDigits(parts)
+	if err != nil {
+		return Money{}, err
+	}
+	if decimals <= scale {
+		n.Mul(n, new(big.Int).Exp(big.NewInt(10), big.NewInt(int64(scale-decimals)), nil))
+	} else {
+		n = roundDecimal(n, decimals-scale, mode)
+	}
+	if negative {
+		n.Neg(n)
+	}
+	return m.fromBig(n)
+}
+func decimalDigits(parts []string) (*big.Int, int, error) {
 	if len(parts) > 2 || parts[0] == "" {
-		return Money{}, ErrMoney
+		return nil, 0, ErrMoney
 	}
 	decimals := 0
 	if len(parts) == 2 {
 		decimals = len(parts[1])
 		if decimals == 0 {
-			return Money{}, ErrMoney
+			return nil, 0, ErrMoney
 		}
 	}
 	digits := strings.Join(parts, "")
 	for _, c := range digits {
 		if c < '0' || c > '9' {
-			return Money{}, ErrMoney
+			return nil, 0, ErrMoney
 		}
 	}
 	n, ok := new(big.Int).SetString(digits, 10)
 	if !ok {
-		return Money{}, ErrMoney
+		return nil, 0, ErrMoney
 	}
-	if decimals <= scale {
-		n.Mul(n, new(big.Int).Exp(big.NewInt(10), big.NewInt(int64(scale-decimals)), nil))
-		if negative {
-			n.Neg(n)
-		}
-		return m.fromBig(n)
-	}
-	d := new(big.Int).Exp(big.NewInt(10), big.NewInt(int64(decimals-scale)), nil)
-	if mode != HalfUp && mode != HalfEven {
-		return Money{}, ErrMoney
-	}
+	return n, decimals, nil
+}
+func roundDecimal(n *big.Int, places int, mode Rounding) *big.Int {
+	d := new(big.Int).Exp(big.NewInt(10), big.NewInt(int64(places)), nil)
 	q, r := new(big.Int), new(big.Int)
 	q.QuoRem(n, d, r)
 	cmp := new(big.Int).Lsh(r, 1).Cmp(d)
 	if cmp > 0 || (cmp == 0 && (mode == HalfUp || q.Bit(0) == 1)) {
 		q.Add(q, big.NewInt(1))
 	}
-	if negative {
-		q.Neg(q)
-	}
-	return m.fromBig(q)
+	return q
 }

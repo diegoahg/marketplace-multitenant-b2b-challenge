@@ -21,7 +21,13 @@ class Money {
       (_) => '.',
     );
     final decimal = scale == 0 ? '' : ',${raw.substring(raw.length - scale)}';
-    return '${amount.isNegative ? '−' : ''}${currency == 'PEN' ? 'S/ ' : '\$ '}$grouped$decimal';
+    final prefix = switch (currency) {
+      'PEN' => 'S/',
+      'CLP' => '\$',
+      'GTQ' => 'Q',
+      _ => currency,
+    };
+    return '${amount.isNegative ? '−' : ''}$prefix $grouped$decimal';
   }
 
   @override

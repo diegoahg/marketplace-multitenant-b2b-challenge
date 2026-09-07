@@ -130,6 +130,8 @@ Un combo reserva unidades y distribuye su descuento entre líneas proporcionalme
 
 Escala acumulativa: unidades 1–5 a 0%, 6–10 a 5%, 11+ a 10%. Para 12 unidades a 100 unidades menores: descuento = 5×100×5% + 2×100×10% = 45, no 120. Cada tramo genera un ajuste con `promotionId`, tipo, SKU y cantidad.
 
+Para una escala por **familia**, se suman las unidades elegibles que quedan después de los combos. Los tramos se asignan por SKU ascendente, independiente del orden del carrito; cada porción usa el precio del SKU y se redondea por tramo/SKU. Con A3+B3, el sexto lugar corresponde a B. No se busca maximizar el descuento mediante el orden de entrada. Si la escala beneficia al grupo, reserva también sus unidades del tramo de 0 %, evitando reutilizarlas en una segunda escala. Una regla por SKU mantiene sus tramos individuales.
+
 Dentro de cada tipo se ordena por `priority` ascendente y después `id`; la primera escala que otorga beneficio ocupa el SKU. `incompatibleWith` excluye campañas a nivel de carrito de forma simétrica al aplicar las reglas. El orden entre tipos siempre prevalece sobre la prioridad. Fechas válidas en intervalo `[validFrom, validTo)`.
 
 Los regalos se calculan sobre las unidades compradas elegibles, incluso si participaron en combo. Incluyen SKU, cantidad, campaña y valor de referencia. `taxGifts` configura si ese valor genera impuesto; no se cobra su precio comercial. La base gravable de líneas pagadas excluye regalos; el impuesto de regalos se detalla en `gifts[].tax` y se agrega a `taxTotal`.
@@ -146,7 +148,7 @@ Significa **13.63 PEN**. `amount` es una cadena con unidades menores en JSON y u
 
 `HALF_UP` redondea mitades alejándose de cero; `HALF_EVEN` al entero par. Se redondea cada tramo y cada impuesto por línea; los totales suman resultados ya redondeados. Las tasas se expresan en basis points: 1800 = 18%. Sumas/restas/comparaciones rechazan moneda o escala distinta. Se admiten escalas 0–6.
 
-`countries` configura moneda, escala, redondeo, impuestos por categoría y tratamiento de obsequios para cada tenant/país. El seed incluye PE/PEN/2 y CL/CLP/0 con datos tributarios **sintéticos de prueba**, no reglas legales completas. El motor no contiene condiciones por código de país.
+`countries` configura moneda, escala, redondeo, impuestos por categoría y tratamiento de obsequios para cada tenant/país. El seed incluye PE/PEN/2, CL/CLP/0, CO/COP/2, EC/USD/2, GT/GTQ/2 y AR/ARS/2. Los datos tributarios son **sintéticos de prueba**: los cuatro países nuevos tienen tasa 0 pendiente de configuración comercial. Sus importes nominales de demo no son una conversión cambiaria. Cada país dispone de productos, promociones, cliente y crédito. El seed usa inserción condicional, sin sobrescribir saldos ni pedidos existentes. El motor no contiene condiciones por código de país.
 
 ## Quote Snapshot
 
@@ -173,6 +175,8 @@ Se usan transacciones con snapshot y write concern majority. Los conflictos de e
 ## Transactional Outbox, Pub/Sub y Worker
 
 El publisher consulta hasta 50 eventos pendientes cada segundo. Publica y espera la respuesta de Pub/Sub antes de marcar `publishedAt`. Si se cae entre ambos pasos, vuelve a publicar; esto es **at-least-once**. Los eventos permanecen en Mongo durante una indisponibilidad del emulador.
+
+La consulta reconcilia también publicaciones de más de un minuto sin ambos destinos completados. Reenvía el mismo `eventId`; el progreso por destino y los receptores idempotentes evitan repetir efectos. Los eventos completados se filtran antes del límite del lote para que no bloqueen la recuperación. `publishedAt` representa el último intento confirmado por el broker, no el éxito de ERP/PUSH. El adaptador recrea topic/subscription si publish o pull reciben 404 tras reiniciar el emulador.
 
 Topic `orders-confirmed`; subscription `orders-confirmed-worker`, creados automáticamente. El worker consume secuencialmente con ack deadline de 60 segundos y efectos con timeout de 10 segundos. Usa ack después de ambos destinos; falla o mensaje inválido: nack y pausa antes del retry. No confirma pedidos ni los borra ante errores de ERP/Push.
 
@@ -227,7 +231,7 @@ En Windows el race detector requiere un compilador C compatible en PATH. El targ
 
 Casos adicionales: carrito vacío, cero/negativos, SKU inexistente/duplicado, campaña expirada, combo incompleto, límite/excedente de escala, campañas candidatas e incompatibles, impuestos de regalo, crédito exacto, quote antigua, cambio de request con misma key, aislamiento de scope, JSON inválido, recorrido HTTP y cotizaciones concurrentes. Las pruebas Mongo cubren índices y rollback real; la de Pub/Sub publica, consume, republica el mismo eventId y verifica dos recibos totales.
 
-Si Compose recrea el emulador al ejecutar tests, sus topics, subscriptions y mensajes se pierden porque viven en memoria. Ejecutar `docker compose restart api` para recrear los recursos del demo y comprobar `http://localhost:8080/ready`. Los eventos aún pendientes en Mongo se reintentan; los mensajes ya publicados que se pierdan con el emulador no se recuperan automáticamente. Usar `--no-deps` cuando Mongo y el emulador ya están disponibles evita que el comando de tests los recree.
+Si Compose recrea el emulador, pierde sus recursos en memoria. El adaptador los recrea al recibir 404; la reconciliación repone publicaciones sin efectos completados después de un minuto, siempre que Mongo conserve outbox y progreso. Las pruebas eliminan únicamente sus propios recursos Pub/Sub para reproducir esa pérdida y comprueban deduplicación y éxito parcial. Usar `--no-deps` evita recreaciones innecesarias del entorno activo.
 
 Si Windows bloquea el script de smoke por su política de ejecución, ejecutarlo en un proceso temporal: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/smoke.ps1`. Esto no modifica la política persistente del sistema.
 

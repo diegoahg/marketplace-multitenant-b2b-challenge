@@ -8,6 +8,23 @@ import 'package:marketplace_frontend/models.dart';
 import 'helpers.dart';
 
 void main() {
+  test('new currencies preserve decimals, signs and unambiguous labels', () {
+    for (final entry in {
+      'COP': 'COP',
+      'USD': 'USD',
+      'GTQ': 'Q',
+      'ARS': 'ARS',
+    }.entries) {
+      expect(
+        Money(BigInt.from(123456), entry.key, 2).formatted,
+        '${entry.value} 1.234,56',
+      );
+      expect(
+        Money(BigInt.from(-1), entry.key, 2).formatted,
+        '−${entry.value} 0,01',
+      );
+    }
+  });
   for (final name in ['GT01', 'GT02', 'GT03', 'GT04', 'GT05']) {
     test('$name imported Go snapshot matches canonical backend golden', () {
       final q = goldenQuote(name);

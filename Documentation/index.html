@@ -60,8 +60,27 @@
 <blockquote>
 <p><strong>Objetivo del documento</strong><br>Consolidar el Discovery funcional y técnico de la solución propuesta para la prueba técnica: problema, flujo funcional, journey del cliente, dominio y reglas de negocio, casos de uso, estrategia de pruebas, casos golden, orden de aplicación de palancas comerciales y stack tecnológico.</p>
 </blockquote>
+<nav aria-labelledby="indice">
+<h2 id="indice">Índice</h2>
+<ul class="toc">
+  <li><a href="#seccion-0">0. Descripción del problema</a></li>
+  <li><a href="#seccion-1">1. Diagrama funcional</a></li>
+  <li><a href="#seccion-2">2. Journey del cliente</a></li>
+  <li><a href="#seccion-3">3. Dominio y reglas de negocio</a></li>
+  <li><a href="#seccion-4">4. Casos de uso y pruebas</a></li>
+  <li><a href="#seccion-5">5. Orden de aplicación de palancas</a></li>
+  <li><a href="#seccion-6">6. Justificación del orden de palancas</a></li>
+  <li><a href="#seccion-7">7. ¿Por qué este orden es correcto?</a></li>
+  <li><a href="#seccion-8">8. Stack tecnológico</a></li>
+  <li><a href="#seccion-9">9. Estructura de proyecto actual</a></li>
+  <li><a href="#seccion-10">10. Flujo técnico resumido</a></li>
+  <li><a href="#seccion-11">11. Criterios de éxito</a></li>
+  <li><a href="#seccion-12">12. Limitaciones</a></li>
+</ul>
+<p><a href="adr.html">ADR: decisiones de arquitectura</a></p>
+</nav>
 <hr>
-<h1>1. Descripción del problema</h1>
+<h1 id="seccion-0">0. Descripción del problema</h1>
 <p>La plataforma corresponde a un <strong>marketplace B2B multi-tenant</strong> donde tenderos compran productos a distribuidores de bebidas.</p>
 <p>El journey principal de compra es:</p>
 <pre><code class="language-text">Catálogo → Carrito → Checkout / Cotización → Confirmación → Historial
@@ -75,7 +94,7 @@
 <li>Cupo de crédito.</li>
 </ul>
 <p>La solución debe resolver dos problemas principales:</p>
-<h2>1.1. Motor de cálculo del pedido</h2>
+<h2>0.0. Motor de cálculo del pedido</h2>
 <p>Dado un carrito y un conjunto de reglas comerciales vigentes, el sistema debe calcular:</p>
 <ul>
 <li>Subtotal bruto.</li>
@@ -89,7 +108,7 @@
 <li>Evaluación del cupo de crédito.</li>
 </ul>
 <p>El resultado debe ser <strong>explicable</strong>, es decir, no basta con entregar un total: el cliente debe poder entender cómo se obtuvo.</p>
-<h2>1.2. Confirmación confiable del pedido</h2>
+<h2>0.1. Confirmación confiable del pedido</h2>
 <p>La confirmación debe garantizar que:</p>
 <ol>
 <li>El total confirmado sea exactamente el mismo que el total cotizado.</li>
@@ -99,7 +118,7 @@
 <li>Luego de confirmar el pedido, se publique un evento para integraciones externas.</li>
 <li>ERP y Notificaciones Push se procesen de forma desacoplada respecto de la confirmación del pedido.</li>
 </ol>
-<h2>1.3. Invariantes principales</h2>
+<h2>0.2. Invariantes principales</h2>
 <pre><code class="language-text">I1. Quote.total == Order.total
 
 I2. HTTP 201 =&gt; Order existe y es consultable
@@ -117,9 +136,9 @@ I7. País, moneda, escala decimal e impuestos no deben estar hardcodeados
 I8. Pedido confirmado =&gt; evento de pedido confirmado publicable hacia Pub/Sub
 </code></pre>
 <hr>
-<h1>2. Diagrama funcional</h1>
+<h1 id="seccion-1">1. Diagrama funcional</h1>
 <figure><a href="images/diagrama_funcional.png"><img src="images/diagrama_funcional.png" alt="Diagrama funcional del marketplace B2B"></a><figcaption><a href="images/diagrama_funcional.png">Abrir diagrama funcional en tamaño completo</a>.</figcaption></figure>
-<h2>2.1. Lectura funcional del flujo</h2>
+<h2>1.0. Lectura funcional del flujo</h2>
 <ol>
 <li>El cliente construye su carrito.</li>
 <li>Solicita una cotización.</li>
@@ -133,9 +152,9 @@ I8. Pedido confirmado =&gt; evento de pedido confirmado publicable hacia Pub/Sub
 <li>La orden confirmada queda disponible en historial.</li>
 </ol>
 <hr>
-<h1>3. Journey del cliente</h1>
+<h1 id="seccion-2">2. Journey del cliente</h1>
 <figure><a href="images/journey_de_cliente.png"><img src="images/journey_de_cliente.png" alt="Journey del cliente: cotización, resumen, gestión del pedido, notificaciones e historial"></a><figcaption>Journey funcional de referencia. Abre la imagen para verla en tamaño completo; la secuencia técnica de persistencia y entrega asíncrona está en el punto 18.</figcaption></figure>
-<h2>3.1. Momentos clave del Journey</h2>
+<h2>2.0. Momentos clave del Journey</h2>
 <table>
 <thead>
 <tr>
@@ -189,12 +208,12 @@ I8. Pedido confirmado =&gt; evento de pedido confirmado publicable hacia Pub/Sub
 </tr>
 </tbody></table>
 <hr>
-<h1>4–5. Dominio y reglas de negocio</h1><a class="doc-link" href="dominio.html"><strong>Explorar el dominio y las reglas →</strong>Entidades, dinero, promociones, impuestos, crédito, snapshots e idempotencia.</a>
+<h1 id="seccion-3">3. Dominio y reglas de negocio</h1><a class="doc-link" href="dominio.html"><strong>Explorar el dominio y las reglas →</strong>Entidades, dinero, promociones, impuestos, crédito, snapshots e idempotencia.</a>
 <hr>
-<h1>6–12. Casos de uso y pruebas</h1><a class="doc-link" href="casos.html"><strong>Consultar el catálogo de casos →</strong>Uso, pruebas funcionales, bordes, límites, rendimiento y golden tests, organizados por categoría.</a>
+<h1 id="seccion-4">4. Casos de uso y pruebas</h1><a class="doc-link" href="casos.html"><strong>Consultar el catálogo de casos →</strong>Uso, pruebas funcionales, bordes, límites, rendimiento y golden tests, organizados por categoría.</a>
 <hr>
-<h1>13. Orden de aplicación de palancas</h1>
-<h2>13.1. Decisión</h2>
+<h1 id="seccion-5">5. Orden de aplicación de palancas</h1>
+<h2>5.0. Decisión</h2>
 <p>El orden propuesto es:</p>
 <pre><code class="language-text">1. Resolver contexto Tenant / País
           ↓
@@ -218,9 +237,9 @@ I8. Pedido confirmado =&gt; evento de pedido confirmado publicable hacia Pub/Sub
 10. Generar Quote Snapshot
 </code></pre>
 <hr>
-<h1>14. Justificación del orden de palancas</h1>
+<h1 id="seccion-6">6. Justificación del orden de palancas</h1>
 <p>La decisión se basa en las perspectivas levantadas durante el Discovery con dos perfiles de negocio.</p>
-<h2>14.1. Perspectiva de Gerencia de Marketing Digital</h2>
+<h2>6.0. Perspectiva de Gerencia de Marketing Digital</h2>
 <p>La mirada de Marketing prioriza:</p>
 <ul>
 <li>que el beneficio sea visible;</li>
@@ -244,7 +263,7 @@ Qué reglas quedaron excluidas
 → Scale Discount solo sobre unidades restantes elegibles
 </code></pre>
 <hr>
-<h2>14.2. Perspectiva del Product Owner B2B</h2>
+<h2>6.1. Perspectiva del Product Owner B2B</h2>
 <p>La mirada de Producto prioriza:</p>
 <ol>
 <li>Un motor mínimo pero confiable.</li>
@@ -257,17 +276,17 @@ Qué reglas quedaron excluidas
 <p><strong>Crédito después del total</strong> porque solo puede evaluarse cuando ya se conoce el valor definitivo del pedido.</p>
 <p><strong>Quote Snapshot al final</strong> porque debe persistir exactamente el resultado completo que el cliente visualizó.</p>
 <hr>
-<h1>15. ¿Por qué este orden es correcto?</h1>
+<h1 id="seccion-7">7. ¿Por qué este orden es correcto?</h1>
 <figure style="margin: 1.5rem 0"><a href="images/orden_calculo.svg" aria-label="Abrir infografía del orden de cálculo en tamaño completo"><img src="images/orden_calculo.svg" width="1200" height="1500" style="display:block;width:100%;height:auto" alt="Seis razones del orden de cálculo: evitar beneficios duplicados, conservar el origen, explicar el precio, calcular impuestos sobre la base descontada, evaluar crédito sobre el total y confirmar el snapshot sin recalcular."></a><figcaption><a href="images/orden_calculo.svg">Abrir en tamaño completo</a> · <a href="images/orden_calculo.png" download>Descargar PNG</a></figcaption></figure>
 <p>Los montos y las unidades de la infografía son ilustrativos. Los impuestos usan la tasa configurada; el cupo se evalúa en compras a crédito.</p>
 <details><summary>Leer los seis conceptos en texto</summary>
-<h2>15.1. Evita double dipping</h2>
+<h2>7.0. Evita double dipping</h2>
 <pre><code class="language-text">Unidades usadas por combo
 ≠
 unidades disponibles automáticamente para otro beneficio
 </code></pre>
 <hr>
-<h2>15.2. Mantiene trazabilidad comercial</h2>
+<h2>7.1. Mantiene trazabilidad comercial</h2>
 <p>Cada ajuste conoce:</p>
 <ul>
 <li>promoción;</li>
@@ -277,7 +296,7 @@ unidades disponibles automáticamente para otro beneficio
 <li>origen.</li>
 </ul>
 <hr>
-<h2>15.3. Permite explicar el precio</h2>
+<h2>7.2. Permite explicar el precio</h2>
 <p>El cliente puede recorrer:</p>
 <pre><code class="language-text">Precio base
 → beneficio comercial
@@ -286,13 +305,13 @@ unidades disponibles automáticamente para otro beneficio
 → total
 </code></pre>
 <hr>
-<h2>15.4. Calcula correctamente impuestos</h2>
+<h2>7.3. Calcula correctamente impuestos</h2>
 <p>La base gravable se determina después de los descuentos comerciales.</p>
 <hr>
-<h2>15.5. Evalúa crédito sobre el valor correcto</h2>
+<h2>7.4. Evalúa crédito sobre el valor correcto</h2>
 <p>No se consulta crédito contra subtotal bruto, sino contra el valor final que efectivamente se intentará confirmar.</p>
 <hr>
-<h2>15.6. Protege Quote = Order</h2>
+<h2>7.5. Protege Quote = Order</h2>
 <p>El snapshot se crea únicamente una vez que el cálculo terminó.</p>
 <pre><code class="language-text">Pricing completo
 → Quote Snapshot
@@ -300,8 +319,8 @@ unidades disponibles automáticamente para otro beneficio
 </code></pre>
 </details>
 <hr>
-<h1>16. Stack tecnológico</h1><p>Monolito modular con puertos y adaptadores. El dominio se mantiene independiente de HTTP, MongoDB y mensajería.</p><div class="tech-grid"><article class="tech"><img src="images/logos/go.svg" alt="Logo de Go"><h3>Go</h3><p>API REST, motor de precios y worker.</p></article><article class="tech"><img src="images/logos/mongodb.svg" alt="Logo de MongoDB"><h3>MongoDB</h3><p>Persistencia, transacciones, snapshots y outbox.</p></article><article class="tech"><img src="images/logos/googlecloud.svg" alt="Logo de Google Cloud Pub/Sub"><h3>Google Cloud Pub/Sub</h3><p>Emulador local para eventos OrderConfirmed.</p></article><article class="tech"><img src="images/logos/docker.svg" alt="Logo de Docker Compose"><h3>Docker Compose</h3><p>Servicios y pruebas reproducibles.</p></article><article class="tech"><img src="images/logos/flutter.svg" alt="Logo de Flutter"><h3>Flutter</h3><p>Frontend adaptable y golden tests visuales.</p></article><article class="tech"><img src="images/logos/dart.svg" alt="Logo de Dart"><h3>Dart</h3><p>Lenguaje del frontend Flutter.</p></article><article class="tech"><img src="images/logos/nginx.svg" alt="Logo de nginx"><h3>nginx</h3><p>Servidor web y proxy hacia la API.</p></article><article class="tech"><img src="images/logos/githubactions.svg" alt="Logo de GitHub Actions"><h3>GitHub Actions</h3><p>Tests, sintaxis, complejidad, seguridad y Pages.</p></article><article class="tech"><img src="images/logos/playwright.svg" alt="Logo de Playwright"><h3>Playwright</h3><p>Recorridos de compra en Chrome.</p></article><article class="tech"><img src="images/logos/postman.svg" alt="Logo de Postman"><h3>Postman</h3><p>Colección para probar la API.</p></article></div><p>Go utiliza <code>testing</code> para pruebas unitarias, golden de negocio, integración y concurrencia. Flutter usa su analizador y pruebas de widgets; Playwright verifica el frontend contra la API real. El worker es una aplicación independiente en backend/worker; ejecuta publisher, dos consumidores independientes y alertas DLQ como goroutines y respeta cancelación, reintentos e idempotencia por destino.</p><hr>
-<h1>17. Estructura de proyecto actual</h1><p>Vista resumida de las carpetas existentes; los tests unitarios Go viven junto al código.</p><pre><code>marketplace-multitenant-b2b-challenge/
+<h1 id="seccion-8">8. Stack tecnológico</h1><p>Monolito modular con puertos y adaptadores. El dominio se mantiene independiente de HTTP, MongoDB y mensajería.</p><div class="tech-grid"><article class="tech"><img src="images/logos/go.svg" alt="Logo de Go"><h3>Go</h3><p>API REST, motor de precios y worker.</p></article><article class="tech"><img src="images/logos/mongodb.svg" alt="Logo de MongoDB"><h3>MongoDB</h3><p>Persistencia, transacciones, snapshots y outbox.</p></article><article class="tech"><img src="images/logos/googlecloud.svg" alt="Logo de Google Cloud Pub/Sub"><h3>Google Cloud Pub/Sub</h3><p>Emulador local para eventos OrderConfirmed.</p></article><article class="tech"><img src="images/logos/docker.svg" alt="Logo de Docker Compose"><h3>Docker Compose</h3><p>Servicios y pruebas reproducibles.</p></article><article class="tech"><img src="images/logos/flutter.svg" alt="Logo de Flutter"><h3>Flutter</h3><p>Frontend adaptable y golden tests visuales.</p></article><article class="tech"><img src="images/logos/dart.svg" alt="Logo de Dart"><h3>Dart</h3><p>Lenguaje del frontend Flutter.</p></article><article class="tech"><img src="images/logos/nginx.svg" alt="Logo de nginx"><h3>nginx</h3><p>Servidor web y proxy hacia la API.</p></article><article class="tech"><img src="images/logos/githubactions.svg" alt="Logo de GitHub Actions"><h3>GitHub Actions</h3><p>Tests, sintaxis, complejidad, seguridad y Pages.</p></article><article class="tech"><img src="images/logos/playwright.svg" alt="Logo de Playwright"><h3>Playwright</h3><p>Recorridos de compra en Chrome.</p></article><article class="tech"><img src="images/logos/postman.svg" alt="Logo de Postman"><h3>Postman</h3><p>Colección para probar la API.</p></article></div><p>Go utiliza <code>testing</code> para pruebas unitarias, golden de negocio, integración y concurrencia. Flutter usa su analizador y pruebas de widgets; Playwright verifica el frontend contra la API real. El worker es una aplicación independiente en backend/worker; ejecuta publisher, dos consumidores independientes y alertas DLQ como goroutines y respeta cancelación, reintentos e idempotencia por destino.</p><hr>
+<h1 id="seccion-9">9. Estructura de proyecto actual</h1><p>Vista resumida de las carpetas existentes; los tests unitarios Go viven junto al código.</p><pre><code>marketplace-multitenant-b2b-challenge/
 ├── .github/workflows/       # CI y publicación de documentación
 ├── backend/
 │   ├── api/                 # HTTP API
@@ -329,9 +348,9 @@ unidades disponibles automáticamente para otro beneficio
 ├── Documentation/          # Sitio, ADR e imágenes
 ├── ci/                     # Herramientas y reglas de calidad
 ├── docker-compose.yml</code></pre><hr>
-<h1>18. Flujo técnico resumido</h1><figure><div class="diagram-scroll" tabindex="0" role="region" aria-label="Flujo técnico; desplazamiento horizontal en pantallas pequeñas"><img src="images/arquitectura.svg" alt="Cliente Flutter, API Go y Pricing, snapshot MongoDB, confirmación transaccional con outbox, Pub/Sub y worker hacia ERP y PUSH."></div><figcaption>La API devuelve 201 tras el commit. La entrega a ERP/PUSH es asíncrona. <a href="images/arquitectura.svg">Abrir diagrama completo</a> | <a href="images/arquitectura.png" download>Descargar PNG</a>.</figcaption></figure>
+<h1 id="seccion-10">10. Flujo técnico resumido</h1><figure><div class="diagram-scroll" tabindex="0" role="region" aria-label="Flujo técnico; desplazamiento horizontal en pantallas pequeñas"><img src="images/arquitectura.svg" alt="Cliente Flutter, API Go y Pricing, snapshot MongoDB, confirmación transaccional con outbox, Pub/Sub y worker hacia ERP y PUSH."></div><figcaption>La API devuelve 201 tras el commit. La entrega a ERP/PUSH es asíncrona. <a href="images/arquitectura.svg">Abrir diagrama completo</a> | <a href="images/arquitectura.png" download>Descargar PNG</a>.</figcaption></figure>
 <hr>
-<figure><div class="diagram-scroll" tabindex="0" role="region" aria-label="Dos suscripciones y DLQ"><img src="images/worker_delivery.svg" alt="Un tópico alimenta suscripciones ERP y PUSH independientes; cinco reintentos exponenciales, DLQ Mongo y alerta de correo en Mailpit."></div><figcaption><a href="images/worker_delivery.svg">Ver detalle del worker y la DLQ</a>. Bandeja local de prueba: <a href="http://localhost:8025">Mailpit</a>.</figcaption></figure><h1>19. Criterios de éxito</h1>
+<figure><div class="diagram-scroll" tabindex="0" role="region" aria-label="Dos suscripciones y DLQ"><img src="images/worker_delivery.svg" alt="Un tópico alimenta suscripciones ERP y PUSH independientes; cinco reintentos exponenciales, DLQ Mongo y alerta de correo en Mailpit."></div><figcaption><a href="images/worker_delivery.svg">Ver detalle del worker y la DLQ</a>. Bandeja local de prueba: <a href="http://localhost:8025">Mailpit</a>.</figcaption></figure><h1 id="seccion-11">11. Criterios de éxito</h1>
 <p>La solución se considera satisfactoria si demuestra:</p>
 <pre><code class="language-text">✓ Pricing correcto y explicable
 ✓ Golden Tests ejecutables
@@ -347,7 +366,7 @@ unidades disponibles automáticamente para otro beneficio
 ✓ README y ADR claros
 </code></pre>
 <hr>
-<h1>20. Limitaciones</h1>
+<h1 id="seccion-12">12. Limitaciones</h1>
 <p>Para mantener foco en el problema de negocio:</p>
 <ul>
 <li>No se desplegará Kubernetes.</li>

@@ -2,9 +2,9 @@
 
 [Volver al resumen](Readme.md) · [Versión web](dominio.html)
 
-# 4. Dominio de negocio
+# 0. Dominio de negocio
 
-## 4.1. Agregados y entidades principales
+## 0.0. Agregados y entidades principales
 
 ### Customer
 
@@ -131,7 +131,7 @@ OrderConfirmedEvent
 
 ---
 
-# 5. Reglas de negocio
+# 1. Reglas de negocio
 
 ## RN01 — Dinero exacto
 
@@ -287,6 +287,6 @@ El evento no debe representar un intento de confirmación sino un hecho ya ocurr
 
 ---
 
-## Entrega, reintentos y DLQ
+# 2. Entrega, reintentos y DLQ
 
 Entrega por destino: orders-confirmed alimenta dos suscripciones independientes (ERP y PUSH). Cada acción dummy tiene ACK propio y cinco reintentos exponenciales tras el intento inicial. Al agotar intentos se persiste la DLQ en Mongo antes del ACK; el aviso SMTP se reintenta sin perder el registro.

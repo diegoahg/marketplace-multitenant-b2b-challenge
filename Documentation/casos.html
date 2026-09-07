@@ -54,7 +54,7 @@
 <body>
 <nav class="page-nav" aria-label="Documentación"><a href="index.html">Resumen</a><a href="dominio.html">Dominio y reglas</a><a href="casos.html" aria-current="page">Casos y pruebas</a><a href="adr.html">ADR</a></nav>
 <main>
-<h1>Casos de uso y estrategia de pruebas</h1><p>Elige una categoría y revisa cada escenario por separado. Esta página organiza el catálogo del discovery; los casos descritos no constituyen por sí solos evidencia de ejecución. Consulta los resultados en los informes de validación del repositorio.</p><p><a href="https://github.com/diegoahg/marketplace-multitenant-b2b-challenge/blob/main/backend/VALIDATION.md">Validación backend</a> · <a href="https://github.com/diegoahg/marketplace-multitenant-b2b-challenge/blob/main/frontend/VALIDATION.md">Validación frontend</a></p><ul class="toc"><li><a href="#mensajeria">Worker y DLQ: evidencia actual</a></li><li><a href="#6-casos-de-uso">6. Casos de uso</a></li><li><a href="#7-casos-de-prueba">7. Casos de prueba</a></li><li><a href="#8-casos-de-borde">8. Casos de borde</a></li><li><a href="#9-casos-limite">9. Casos límite</a></li><li><a href="#10-casos-de-rendimiento">10. Casos de rendimiento</a></li><li><a href="#11-casos-golden-obligatorios">11. Casos Golden obligatorios</a></li><li><a href="#12-casos-golden-adicionales-recomendados">12. Casos Golden adicionales recomendados</a></li></ul><h2 id="6-casos-de-uso">6. Casos de uso</h2>
+<h1>Casos de uso y estrategia de pruebas</h1><p>Elige una categoría y revisa cada escenario por separado. Esta página organiza el catálogo del discovery; los casos descritos no constituyen por sí solos evidencia de ejecución. Consulta los resultados en los informes de validación del repositorio.</p><p><a href="https://github.com/diegoahg/marketplace-multitenant-b2b-challenge/blob/main/backend/VALIDATION.md">Validación backend</a> · <a href="https://github.com/diegoahg/marketplace-multitenant-b2b-challenge/blob/main/frontend/VALIDATION.md">Validación frontend</a></p><ul class="toc"><li><a href="#0-casos-de-uso">0. Casos de uso</a></li><li><a href="#1-casos-de-prueba">1. Casos de prueba</a></li><li><a href="#2-casos-de-borde">2. Casos de borde</a></li><li><a href="#3-casos-limite">3. Casos límite</a></li><li><a href="#4-casos-de-rendimiento">4. Casos de rendimiento</a></li><li><a href="#5-casos-golden-obligatorios">5. Casos Golden obligatorios</a></li><li><a href="#6-casos-golden-adicionales-recomendados">6. Casos Golden adicionales recomendados</a></li><li><a href="#mensajeria">7. Mensajería: casos implementados de worker y DLQ</a></li></ul><h2 id="0-casos-de-uso">0. Casos de uso</h2>
 <article class="case" id="uc01-solicitar-cotizacion"><h2>UC01 — Solicitar cotización</h2>
 <p><strong>Actor:</strong> Cliente.</p>
 <h3>Entrada</h3>
@@ -134,8 +134,8 @@
 <li>Confirmar procesamiento del mensaje.</li>
 </ol>
 </article>
-<h2 id="7-casos-de-prueba">7. Casos de prueba</h2>
-<h2>7.1. Casos funcionales</h2>
+<h2 id="1-casos-de-prueba">1. Casos de prueba</h2>
+<h2>1.0. Casos funcionales</h2>
 <table>
 <thead>
 <tr>
@@ -196,7 +196,7 @@
 </tr>
 </tbody></table>
 <hr>
-<h2 id="8-casos-de-borde">8. Casos de borde</h2>
+<h2 id="2-casos-de-borde">2. Casos de borde</h2>
 <article class="case" id="cb01-carrito-vacio"><h2>CB01 — Carrito vacío</h2>
 <p><strong>Entrada:</strong> <code>items=[]</code></p>
 <p><strong>Esperado:</strong> rechazo de validación.</p>
@@ -279,7 +279,7 @@ credit = 100.00
 <article class="case" id="cb15-evento-duplicado-en-pub-sub"><h2>CB15 — Evento duplicado en Pub/Sub</h2>
 <p><strong>Esperado:</strong> worker no debe producir efectos de negocio duplicados.</p>
 </article>
-<h2 id="9-casos-limite">9. Casos límite</h2>
+<h2 id="3-casos-limite">3. Casos límite</h2>
 <article class="case" id="cl01-cantidad-maxima-aceptada-por-linea"><h2>CL01 — Cantidad máxima aceptada por línea</h2>
 <p>Definir un límite técnico configurable.</p>
 <p>El motor debe:</p>
@@ -308,7 +308,7 @@ credit = 100.00
 =&gt; una sola orden
 </code></pre>
 </article>
-<h2 id="10-casos-de-rendimiento">10. Casos de rendimiento</h2>
+<h2 id="4-casos-de-rendimiento">4. Casos de rendimiento</h2>
 <blockquote>
 <p>El enunciado no entrega un SLA o throughput explícito. Los siguientes objetivos son <strong>metas propuestas para la prueba</strong>, enfocadas en detectar regresiones evidentes y demostrar criterio de ingeniería.</p>
 </blockquote>
@@ -356,7 +356,7 @@ credit = 100.00
 <li>no existen efectos duplicados ante redelivery.</li>
 </ul>
 </article>
-<h2 id="11-casos-golden-obligatorios">11. Casos Golden obligatorios</h2>
+<h2 id="5-casos-golden-obligatorios">5. Casos Golden obligatorios</h2>
 <p>Los Golden Tests representan escenarios de negocio cuyo resultado debe permanecer estable ante refactors.</p>
 <article class="case" id="gt01-descuento-por-escala-en-dos-tramos"><h2>GT01 — Descuento por escala en dos tramos</h2>
 <h3>Escenario</h3>
@@ -417,7 +417,7 @@ gift.quantity
 <pre><code class="language-text">Quote.total == Order.total
 </code></pre>
 </article>
-<h2 id="12-casos-golden-adicionales-recomendados">12. Casos Golden adicionales recomendados</h2>
+<h2 id="6-casos-golden-adicionales-recomendados">6. Casos Golden adicionales recomendados</h2>
 <article class="case" id="gt07-idempotencia"><h2>GT07 — Idempotencia</h2>
 <pre><code class="language-text">100 retries
 =&gt; 1 order
@@ -445,7 +445,7 @@ gift.quantity
 <p>Confirmar pedido.</p>
 <p>Validar que solo después del estado <code>CONFIRMED</code> exista publicación hacia Pub/Sub.</p>
 </article>
-<h2 id="mensajeria">Mensajería: casos implementados de worker y DLQ</h2><p>Evidencia reproducible: <code>backend/tests/integration/destination_test.go</code> y <code>node backend/scripts/dlq-smoke.mjs</code>.</p><table><thead><tr><th>Escenario</th><th>Resultado esperado</th></tr></thead><tbody><tr><td>Dos suscripciones</td><td>Un evento en orders-confirmed llega a ERP y PUSH; cada destino genera su recibo dummy.</td></tr><tr><td>Independencia</td><td>ERP falla y PUSH termina; también se verifica el caso inverso.</td></tr><tr><td>Retry durable</td><td>Cinco reintentos tras el inicial: 1/2/4/8/16 s. No ejecutar antes de nextAttempt ni reiniciar contador al recrear el consumidor.</td></tr><tr><td>Recuperación transitoria</td><td>Tras dos fallos el dummy termina; no se crea DLQ.</td></tr><tr><td>Presupuesto agotado</td><td>Sexto fallo: insertar DLQ y marcar destino terminal atómicamente antes del ACK. Un redelivery no vuelve a ejecutar la acción.</td></tr><tr><td>SMTP caído</td><td>El aviso permanece pendiente; al recuperar Mailpit se verifica el correo con identificador del evento y causa.</td></tr><tr><td>Mensaje malformado</td><td>Clave de retry estable, presupuesto acotado y error en DLQ.</td></tr></tbody></table></main>
+<h2 id="mensajeria">7. Mensajería: casos implementados de worker y DLQ</h2><p>Evidencia reproducible: <code>backend/tests/integration/destination_test.go</code> y <code>node backend/scripts/dlq-smoke.mjs</code>.</p><table><thead><tr><th>Escenario</th><th>Resultado esperado</th></tr></thead><tbody><tr><td>Dos suscripciones</td><td>Un evento en orders-confirmed llega a ERP y PUSH; cada destino genera su recibo dummy.</td></tr><tr><td>Independencia</td><td>ERP falla y PUSH termina; también se verifica el caso inverso.</td></tr><tr><td>Retry durable</td><td>Cinco reintentos tras el inicial: 1/2/4/8/16 s. No ejecutar antes de nextAttempt ni reiniciar contador al recrear el consumidor.</td></tr><tr><td>Recuperación transitoria</td><td>Tras dos fallos el dummy termina; no se crea DLQ.</td></tr><tr><td>Presupuesto agotado</td><td>Sexto fallo: insertar DLQ y marcar destino terminal atómicamente antes del ACK. Un redelivery no vuelve a ejecutar la acción.</td></tr><tr><td>SMTP caído</td><td>El aviso permanece pendiente; al recuperar Mailpit se verifica el correo con identificador del evento y causa.</td></tr><tr><td>Mensaje malformado</td><td>Clave de retry estable, presupuesto acotado y error en DLQ.</td></tr></tbody></table></main>
 <script type="module">
   try {
     const { default: mermaid } = await import('https://cdn.jsdelivr.net/npm/mermaid@11.17.2/dist/mermaid.esm.min.mjs');

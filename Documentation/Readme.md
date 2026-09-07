@@ -9,7 +9,7 @@
 
 ---
 
-# 1. Descripción del problema
+# 0. Descripción del problema
 
 La plataforma corresponde a un **marketplace B2B multi-tenant** donde tenderos compran productos a distribuidores de bebidas.
 
@@ -29,7 +29,7 @@ Sobre un mismo pedido pueden coexistir distintas **palancas comerciales**:
 
 La solución debe resolver dos problemas principales:
 
-## 1.1. Motor de cálculo del pedido
+## 0.0. Motor de cálculo del pedido
 
 Dado un carrito y un conjunto de reglas comerciales vigentes, el sistema debe calcular:
 
@@ -45,7 +45,7 @@ Dado un carrito y un conjunto de reglas comerciales vigentes, el sistema debe ca
 
 El resultado debe ser **explicable**, es decir, no basta con entregar un total: el cliente debe poder entender cómo se obtuvo.
 
-## 1.2. Confirmación confiable del pedido
+## 0.1. Confirmación confiable del pedido
 
 La confirmación debe garantizar que:
 
@@ -56,7 +56,7 @@ La confirmación debe garantizar que:
 5. Luego de confirmar el pedido, se publique un evento para integraciones externas.
 6. ERP y Notificaciones Push se procesen de forma desacoplada respecto de la confirmación del pedido.
 
-## 1.3. Invariantes principales
+## 0.2. Invariantes principales
 
 ```text
 I1. Quote.total == Order.total
@@ -78,11 +78,11 @@ I8. Pedido confirmado => evento de pedido confirmado publicable hacia Pub/Sub
 
 ---
 
-# 2. Diagrama funcional
+# 1. Diagrama funcional
 
 [![Diagrama funcional del marketplace B2B](images/diagrama_funcional.png)](images/diagrama_funcional.png)
 
-## 2.1. Lectura funcional del flujo
+## 1.0. Lectura funcional del flujo
 
 1. El cliente construye su carrito.
 2. Solicita una cotización.
@@ -97,11 +97,11 @@ I8. Pedido confirmado => evento de pedido confirmado publicable hacia Pub/Sub
 
 ---
 
-# 3. Journey del cliente
+# 2. Journey del cliente
 
 ![Journey del cliente](images/journey_de_cliente.png)
 
-## 3.1. Momentos clave del Journey
+## 2.0. Momentos clave del Journey
 
 | Momento | Expectativa del cliente | Riesgo | Respuesta de diseño |
 |---|---|---|---|
@@ -115,17 +115,17 @@ I8. Pedido confirmado => evento de pedido confirmado publicable hacia Pub/Sub
 
 ---
 
-# 4–5. Dominio y reglas de negocio
+# 3. Dominio y reglas de negocio
 
 [Ver entidades y reglas de negocio](dominio.md).
 
-# 6–12. Casos de uso y pruebas
+# 4. Casos de uso y pruebas
 
 [Ver casos de uso, pruebas, bordes, límites, rendimiento y golden tests](casos.md).
 
-# 13. Orden de aplicación de palancas
+# 5. Orden de aplicación de palancas
 
-## 13.1. Decisión
+## 5.0. Decisión
 
 El orden propuesto es:
 
@@ -154,11 +154,11 @@ El orden propuesto es:
 
 ---
 
-# 14. Justificación del orden de palancas
+# 6. Justificación del orden de palancas
 
 La decisión se basa en las perspectivas levantadas durante el Discovery con dos perfiles de negocio.
 
-## 14.1. Perspectiva de Gerencia de Marketing Digital
+## 6.0. Perspectiva de Gerencia de Marketing Digital
 
 La mirada de Marketing prioriza:
 
@@ -193,7 +193,7 @@ Combo
 
 ---
 
-## 14.2. Perspectiva del Product Owner B2B
+## 6.1. Perspectiva del Product Owner B2B
 
 La mirada de Producto prioriza:
 
@@ -212,7 +212,7 @@ La mirada de Producto prioriza:
 
 ---
 
-# 15. ¿Por qué este orden es correcto?
+# 7. ¿Por qué este orden es correcto?
 
 ![Infografía: seis razones del orden de cálculo, desde evitar beneficios duplicados hasta confirmar el pedido sin recalcular.](images/orden_calculo.svg)
 
@@ -223,7 +223,7 @@ Los montos y las unidades de la infografía son ilustrativos. Los impuestos usan
 <details>
 <summary>Leer los seis conceptos en texto</summary>
 
-## 15.1. Evita double dipping
+## 7.0. Evita double dipping
 
 ```text
 Unidades usadas por combo
@@ -233,7 +233,7 @@ unidades disponibles automáticamente para otro beneficio
 
 ---
 
-## 15.2. Mantiene trazabilidad comercial
+## 7.1. Mantiene trazabilidad comercial
 
 Cada ajuste conoce:
 
@@ -245,7 +245,7 @@ Cada ajuste conoce:
 
 ---
 
-## 15.3. Permite explicar el precio
+## 7.2. Permite explicar el precio
 
 El cliente puede recorrer:
 
@@ -259,19 +259,19 @@ Precio base
 
 ---
 
-## 15.4. Calcula correctamente impuestos
+## 7.3. Calcula correctamente impuestos
 
 La base gravable se determina después de los descuentos comerciales.
 
 ---
 
-## 15.5. Evalúa crédito sobre el valor correcto
+## 7.4. Evalúa crédito sobre el valor correcto
 
 No se consulta crédito contra subtotal bruto, sino contra el valor final que efectivamente se intentará confirmar.
 
 ---
 
-## 15.6. Protege Quote = Order
+## 7.5. Protege Quote = Order
 
 El snapshot se crea únicamente una vez que el cálculo terminó.
 
@@ -285,7 +285,7 @@ Pricing completo
 
 </details>
 
-# 16. Stack tecnológico
+# 8. Stack tecnológico
 
 Monolito modular con puertos y adaptadores.
 
@@ -309,7 +309,7 @@ Monolito modular con puertos y adaptadores.
 
 <img src="images/logos/postman.svg" alt="Logo de Postman" width="48" height="48"> **Postman** — Colección para probar la API.
 
-# 17. Estructura de proyecto actual
+# 9. Estructura de proyecto actual
 
 ```text
 marketplace-multitenant-b2b-challenge/
@@ -342,7 +342,7 @@ marketplace-multitenant-b2b-challenge/
 ├── docker-compose.yml
 ```
 
-# 18. Flujo técnico resumido
+# 10. Flujo técnico resumido
 
 ![Flujo técnico resumido](images/arquitectura.svg)
 
@@ -354,7 +354,7 @@ La API devuelve 201 tras el commit; ERP/PUSH se procesan de forma asíncrona.
 
 Bandeja local de correo: http://localhost:8025. Un tópico de negocio y dos suscripciones; DLQ durable en MongoDB.
 
-# 19. Criterios de éxito
+# 11. Criterios de éxito
 
 La solución se considera satisfactoria si demuestra:
 
@@ -375,7 +375,7 @@ La solución se considera satisfactoria si demuestra:
 
 ---
 
-# 20. Limitaciones
+# 12. Limitaciones
 
 Para mantener foco en el problema de negocio:
 

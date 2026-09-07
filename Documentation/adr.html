@@ -65,37 +65,37 @@
       </header>
       <div class="grid">
         <section>
-          <h2><span>01</span> Contexto y diseño</h2>
+          <h2><span>0.</span> Contexto y diseño</h2>
           <p>Tomé <strong>Grupo Mariposa como referencia</strong> para MariposaMarket: compra B2B, paleta azul/turquesa y CTA amarillo. Prioricé un resumen con líneas, origen de descuentos, obsequios, impuestos y total. Descarté tarjetas de altura fija y texto truncado: los componentes adaptan el contenido, protegen controles del teclado y barras del sistema, y escalan las imágenes con el mismo criterio.</p>
         </section>
         <section>
-          <h2><span>02</span> Stack y uso de IA</h2>
+          <h2><span>1.</span> Stack y uso de IA</h2>
           <p>Elegí <strong>Go por mis años de experiencia</strong>, flexibilidad y curva de aprendizaje ya recorrida; aprender otro backend habría restado foco al dominio. Frente a Angular, elegí Flutter por el ecosistema Google y su alcance multidispositivo. Acepté aprenderlo, aunque no lo conocía. <strong>Desarrollé la solución con apoyo de IA</strong> y validé con pruebas; esa asistencia no sustituye mi responsabilidad de revisar el código.</p>
         </section>
         <section>
-          <h2><span>03</span> La prioridad difícil: precios</h2>
+          <h2><span>2.</span> La prioridad difícil: precios</h2>
           <p>Exploré las prioridades <strong>con IA, simulando las perspectivas de una encargada de Marketing y una Product Owner</strong>. Contrasté claridad de beneficios y consistencia de compra; esa exploración orientó mi decisión:</p>
           <p class="flow">Combo → escala → obsequios → impuestos → total → crédito</p>
           <p>El combo reserva unidades; la escala usa el saldo y acumula por familia, asignando tramos por SKU ascendente para independizar el resultado del orden del carrito. Respeto prioridades e incompatibilidades, con dinero entero y reglas por país. <strong>Confirmo el snapshot</strong>: descarté recalcular para conservar el precio aceptado.</p>
         </section>
         <section>
-          <h2><span>04</span> Una intención, un pedido</h2>
+          <h2><span>3.</span> Una intención, un pedido</h2>
           <p>Descarté confiar solo en deshabilitar el botón. El frontend persiste la clave antes de enviar y la reutiliza tras recargas. <strong>Tenant + clave + hash</strong> permiten replay o rechazo de contenido distinto. Una transacción Mongo guarda pedido, débito condicional, idempotencia y outbox, e impide confirmar dos veces la cotización. El 201 llega después del commit: pedido consultable y débito único.</p>
         </section>
         <section>
-          <h2><span>05</span> ERP y notificaciones PUSH</h2>
+          <h2><span>4.</span> ERP y notificaciones PUSH</h2>
           <p>Separé <strong>API y worker</strong>; la API confirma aun sin broker. Un tópico alimenta <strong>dos suscripciones: ERP y PUSH</strong>, con dummies y ACK independiente. Cada fallo espera 1/2/4/8/16 s, sin ACK. Tras cinco reintentos, persisto la DLQ en Mongo antes del ACK y envío correo a Mailpit. Descarté el consumidor conjunto y el conteo aproximado del broker: prioricé independencia y presupuesto durable.</p>
         </section>
         <section>
-          <h2><span>06</span> Despliegue y alcance consciente</h2>
+          <h2><span>5.</span> Despliegue y alcance consciente</h2>
           <p>Elegí <strong>Compose</strong> con Go, Mongo replica set, Pub/Sub emulado y Flutter Web/nginx; preparé documentación para Pages. Dejé fuera autenticación productiva, ERP/PUSH reales y builds nativos para concentrar la prueba en precios y consistencia, con adaptadores simulados durables. Postergué despliegue cloud y operación avanzada: requieren infraestructura y contratos reales. La entrega incluye CI de pruebas, sintaxis, complejidad y seguridad.</p>
         </section>
         <section>
-          <h2><span>07</span> Mi revisión de código</h2>
+          <h2><span>6.</span> Mi revisión de código</h2>
           <p>Si lo hubiera escrito otra persona, revisaría aislamiento por tenant/país, overflow, redondeo, tramos por familia, atomicidad y carreras de idempotencia. Exigiría pruebas de respuesta perdida, reinicio del broker y fallo entre efecto externo y registro local. Revisaría accesibilidad y controles con teclado. <strong>La revisión llevó a dividir funciones complejas y actualizar dependencias</strong>; mantengo esos controles en CI para prevenir regresiones.</p>
         </section>
         <section>
-          <h2><span>08</span> Riesgo y mitigación</h2>
+          <h2><span>7.</span> Riesgo y mitigación</h2>
           <p><strong>Riesgo:</strong> el receptor acepta un efecto y el worker cae antes de guardar éxito. Exijo deduplicar <strong>evento:destino</strong>. La reconciliación conserva IDs y excluye destinos en DLQ. Si SMTP falla, el aviso permanece pendiente; el correo puede duplicarse tras una caída y conserva Message-ID. Para producción quedan métricas, redrive supervisado y SMTP seguro. No prometo exactly-once distribuido.</p>
         </section>
       </div>

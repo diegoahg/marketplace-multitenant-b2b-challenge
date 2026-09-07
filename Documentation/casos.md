@@ -4,7 +4,7 @@
 
 Catálogo de escenarios del discovery; consultar los informes de validación del repositorio para la evidencia ejecutada.
 
-# 6. Casos de uso
+# 0. Casos de uso
 
 ## UC01 — Solicitar cotización
 
@@ -106,9 +106,9 @@ Evento `OrderConfirmed` disponible en Pub/Sub.
 
 ---
 
-# 7. Casos de prueba
+# 1. Casos de prueba
 
-## 7.1. Casos funcionales
+## 1.0. Casos funcionales
 
 | ID | Caso | Resultado esperado |
 |---|---|---|
@@ -125,7 +125,7 @@ Evento `OrderConfirmed` disponible en Pub/Sub.
 
 ---
 
-# 8. Casos de borde
+# 2. Casos de borde
 
 ## CB01 — Carrito vacío
 
@@ -272,7 +272,7 @@ antes de confirmar.
 
 ---
 
-# 9. Casos límite
+# 3. Casos límite
 
 ## CL01 — Cantidad máxima aceptada por línea
 
@@ -319,7 +319,7 @@ N retries con misma Idempotency-Key
 
 ---
 
-# 10. Casos de rendimiento
+# 4. Casos de rendimiento
 
 > El enunciado no entrega un SLA o throughput explícito. Los siguientes objetivos son **metas propuestas para la prueba**, enfocadas en detectar regresiones evidentes y demostrar criterio de ingeniería.
 
@@ -390,7 +390,7 @@ Validar:
 
 ---
 
-# 11. Casos Golden obligatorios
+# 5. Casos Golden obligatorios
 
 Los Golden Tests representan escenarios de negocio cuyo resultado debe permanecer estable ante refactors.
 
@@ -487,7 +487,7 @@ Quote.total == Order.total
 
 ---
 
-# 12. Casos Golden adicionales recomendados
+# 6. Casos Golden adicionales recomendados
 
 ## GT07 — Idempotencia
 
@@ -535,7 +535,7 @@ Validar que solo después del estado `CONFIRMED` exista publicación hacia Pub/S
 
 ---
 
-## Mensajería: casos implementados de worker y DLQ
+# 7. Mensajería: casos implementados de worker y DLQ
 
 Evidencia: `backend/tests/integration/destination_test.go` y `node backend/scripts/dlq-smoke.mjs`.
 

@@ -18,12 +18,15 @@ docker compose --profile frontend-test run --build --no-deps --rm frontend-tests
 docker compose --profile test run --build --no-deps --rm tests
 ```
 
+Roadmap
+![Roadmap](Documentation/images/roadmap.png)
+
 Detalles de ejecución, arquitectura, pruebas y límites: [frontend](frontend/README.md), [backend](backend/README.md), [documentación del desafío](Documentation/Readme.md). [ADR de una página](Documentation/adr.html) · [PDF](Documentation/ADR.pdf).
 
 ![Arquitectura actual](Documentation/images/arquitectura.svg)
 
 [Descargar arquitectura en PNG](Documentation/images/arquitectura.png).
 
-[Revisión final contra el PDF](Documentation/revision-final.md) · [Colección de Postman y entorno](backend/contracts/postman/README.md) · [Worker, reintentos y DLQ](backend/worker/README.md).
+[Colección de Postman y entorno](backend/contracts/postman/README.md) · [Worker, reintentos y DLQ](backend/worker/README.md).
 
 Integración continua: [workflow de pruebas, sintaxis, complejidad y seguridad](.github/workflows/ci.yml). Consulta los controles y la evidencia local e histórica en [ci/README.md](ci/README.md). El estado de una ejecución anterior no acredita los cambios todavía sin publicar.

@@ -9,6 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 	"go.mongodb.org/mongo-driver/v2/mongo/readconcern"
 	"go.mongodb.org/mongo-driver/v2/mongo/writeconcern"
+	"log/slog"
 	"marketplace/internal/application"
 	d "marketplace/internal/domain"
 	"marketplace/internal/ports"
@@ -73,7 +74,9 @@ func (s *Store) Confirm(ctx context.Context, input ports.Confirmation) (d.Order,
 				return application.Replay(record, input.Idempotency.RequestHash)
 			}
 		}
+		slog.Warn("order transaction failed", "orderId", input.Order.OrderID, "quoteId", input.Quote.QuoteID, "error", e)
 		return d.Order{}, fmt.Errorf("confirm transaction: %w", e)
 	}
+	slog.Info("order transaction committed", "orderId", result.(d.Order).OrderID, "quoteId", input.Quote.QuoteID, "paymentMethod", input.Quote.PaymentMethod, "outboxDurable", true)
 	return result.(d.Order), nil
 }

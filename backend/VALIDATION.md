@@ -65,3 +65,10 @@ Al ejecutar el perfil test sin `--no-deps`, Compose recreó Mongo y Pub/Sub. Mon
 Recrear o reiniciar el emulador puede perder mensajes ya publicados que todavía no se consumieron. La outbox recupera eventos pendientes de publicación, pero no reproduce automáticamente eventos marcados como publicados. Esta validación no demuestra durabilidad del emulador ante pérdida de proceso ni comportamiento de servicios cloud productivos.
 
 El entorno Docker quedó levantado con la API disponible en `http://localhost:8080`.
+
+
+## Detalle y observabilidad — 7 de septiembre de 2026
+
+`go test -race -tags=integration ./...` y `go vet -tags=integration ./...` pasan. La ampliación del seed cubre nueve escenarios nuevos de promociones por cada uno de los seis países (54 combinaciones). El detalle conserva la cotización confirmada y rechaza otro tenant, país o cliente antes de consultar entregas. La prueba Mongo de destinos verifica que el estado consultado refleja ERP recuperado o en DLQ y PUSH confirmado independientemente.
+
+Se observaron logs JSON de commit, publicación de outbox, intento y confirmación persistida por destino. GoSec: cero hallazgos. Trivy con la configuración de CI: cero vulnerabilidades reportadas y ningún secreto detectado.

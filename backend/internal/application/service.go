@@ -17,6 +17,7 @@ type Service struct {
 	Catalog  ports.Catalog
 	Quotes   ports.Quotes
 	Orders   ports.Orders
+	Tracking ports.OrderTracking
 	Now      func() time.Time
 	QuoteTTL time.Duration
 }

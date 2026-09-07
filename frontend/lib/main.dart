@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'api.dart';
 import 'models.dart';
 import 'shop_controller.dart';
 import 'store.dart';
+import 'order_history.dart';
 import 'widgets.dart';
 import 'adaptive_components.dart';
 
@@ -98,6 +98,7 @@ class _ShopPageState extends State<ShopPage> {
   String search = '';
   final orderInput = TextEditingController();
   final basketKey = GlobalKey();
+  final checkoutKey = GlobalKey();
   Timer? timer;
   @override
   void initState() {
@@ -536,14 +537,45 @@ class _ShopPageState extends State<ShopPage> {
               preset('Por volumen · 12 uds.', {'SKU-001': 12}),
               preset('Combo + volumen', {'SKU-001': 8, 'SKU-002': 1}),
               preset('Con obsequio · 6 uds.', {'SKU-001': 6}),
+              preset('Aguas · escala por familia', {
+                'SKU-003': 12,
+                'SKU-004': 12,
+              }),
+              preset('Jugos + vaso de regalo', {'SKU-005': 6}),
+              preset('Energéticas + bolsa térmica', {'SKU-009': 12}),
+              preset('Combo refrescante', {'SKU-003': 2, 'SKU-005': 1}),
             ],
           ),
-          if (shop.quote != null) ...[
-            const SizedBox(height: 26),
-            breakdown(shop.quote!),
-          ],
         ],
       );
+      if (shop.quote != null) {
+        final benefits = breakdown(shop.quote!);
+        if (wide) {
+          return Row(
+            key: checkoutKey,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  children: [benefits, const SizedBox(height: 28), catalog],
+                ),
+              ),
+              const SizedBox(width: 25),
+              SizedBox(width: 360, child: basket()),
+            ],
+          );
+        }
+        return Column(
+          key: checkoutKey,
+          children: [
+            benefits,
+            const SizedBox(height: 18),
+            basket(),
+            const SizedBox(height: 28),
+            catalog,
+          ],
+        );
+      }
       if (wide) {
         return Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -570,6 +602,19 @@ class _ShopPageState extends State<ShopPage> {
     ),
     child: Text(label),
   );
+
+  Future<void> quoteAndReveal() async {
+    await shop.createQuote();
+    if (!mounted || shop.quote == null) return;
+    await WidgetsBinding.instance.endOfFrame;
+    final target = checkoutKey.currentContext;
+    if (target != null && target.mounted) {
+      await Scrollable.ensureVisible(
+        target,
+        duration: const Duration(milliseconds: 250),
+      );
+    }
+  }
 
   Widget basket() {
     final q = shop.quote;
@@ -700,7 +745,7 @@ class _ShopPageState extends State<ShopPage> {
               SizedBox(
                 width: double.infinity,
                 child: FilledButton.icon(
-                  onPressed: shop.locked ? null : shop.createQuote,
+                  onPressed: shop.locked ? null : quoteAndReveal,
                   icon: shop.busy
                       ? spinner()
                       : const Icon(Icons.arrow_forward, size: 18),
@@ -823,7 +868,7 @@ class _ShopPageState extends State<ShopPage> {
                   SizedBox(
                     width: double.infinity,
                     child: TextButton(
-                      onPressed: shop.locked ? null : shop.createQuote,
+                      onPressed: shop.locked ? null : quoteAndReveal,
                       child: const Text('Actualizar cotización'),
                     ),
                   ),
@@ -1054,6 +1099,18 @@ class _ShopPageState extends State<ShopPage> {
     ),
   );
 
+  Future<void> showSearchedOrder(String id) async {
+    await shop.findOrder(id);
+    if (!mounted || shop.failure != null || id.trim().isEmpty) return;
+    final order = shop.scopedOrders.where((o) => o.id == id.trim()).firstOrNull;
+    if (order != null) {
+      await showDialog<void>(
+        context: context,
+        builder: (_) => OrderDetailsDialog(order: order, api: shop.api),
+      );
+    }
+  }
+
   Widget history() => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
@@ -1067,7 +1124,7 @@ class _ShopPageState extends State<ShopPage> {
       ),
       const SizedBox(height: 10),
       const Text(
-        'Consulta una compra y vuelve a su precio confirmado.',
+        historyDemoNotice,
         style: TextStyle(fontSize: 13, color: muted),
       ),
       const SizedBox(height: 25),
@@ -1087,7 +1144,7 @@ class _ShopPageState extends State<ShopPage> {
             const SizedBox(height: 16),
             TextField(
               controller: orderInput,
-              onSubmitted: shop.busy ? null : shop.findOrder,
+              onSubmitted: shop.busy ? null : showSearchedOrder,
               decoration: const InputDecoration(
                 label: Text(
                   'Identificador del pedido',
@@ -1101,7 +1158,7 @@ class _ShopPageState extends State<ShopPage> {
             FilledButton(
               onPressed: shop.busy
                   ? null
-                  : () => shop.findOrder(orderInput.text),
+                  : () => showSearchedOrder(orderInput.text),
               child: Text(shop.busy ? 'Consultando…' : 'Consultar pedido'),
             ),
           ],
@@ -1131,71 +1188,10 @@ class _ShopPageState extends State<ShopPage> {
           ),
         ),
       ...shop.scopedOrders.map(
-        (o) => Padding(
-          padding: const EdgeInsets.only(bottom: 14),
-          child: Surface(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Wrap(
-                  spacing: 20,
-                  runSpacing: 12,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: [
-                    const Tag('CONFIRMADO'),
-                    Text(
-                      o.total.formatted,
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    Text(
-                      o.total.currency,
-                      style: const TextStyle(fontSize: 12, color: muted),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 13),
-                Text(
-                  o.id,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 12,
-                  ),
-                ),
-                const SizedBox(height: 7),
-                Text(
-                  '${o.scope.country} · ${o.scope.customer}',
-                  style: const TextStyle(fontSize: 11, color: muted),
-                ),
-                const SizedBox(height: 12),
-                Wrap(
-                  spacing: 10,
-                  children: [
-                    OutlinedButton.icon(
-                      onPressed: () async {
-                        await Clipboard.setData(ClipboardData(text: o.id));
-                        if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Identificador copiado'),
-                            ),
-                          );
-                        }
-                      },
-                      icon: const Icon(Icons.copy, size: 15),
-                      label: const Text('Copiar ID'),
-                    ),
-                    TextButton(
-                      onPressed: shop.busy ? null : () => shop.findOrder(o.id),
-                      child: const Text('Consultar de nuevo'),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
+        (o) => OrderHistoryCard(
+          key: ValueKey(o.scope.key + o.id),
+          order: o,
+          api: shop.api,
         ),
       ),
     ],

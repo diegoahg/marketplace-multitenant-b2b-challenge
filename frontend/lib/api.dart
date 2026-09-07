@@ -122,5 +122,7 @@ class MarketplaceApi {
   );
   Future<Order> order(Scope scope, String id) async =>
       Order(await request('GET', '/orders/${Uri.encodeComponent(id)}', scope));
+  Future<Json> orderDetails(Scope scope, String id) =>
+      request('GET', '/orders/${Uri.encodeComponent(id)}/details', scope);
   void close() => client.close();
 }

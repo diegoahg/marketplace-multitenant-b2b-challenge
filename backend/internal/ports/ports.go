@@ -29,6 +29,10 @@ type Outbox interface {
 	Pending(context.Context, int) ([]d.OrderConfirmedEvent, error)
 	MarkPublished(context.Context, string) error
 }
+
+type OrderTracking interface {
+	OrderDeliveries(context.Context, d.Scope, string) (map[string]d.DeliveryState, error)
+}
 type Publisher interface {
 	Publish(context.Context, d.OrderConfirmedEvent) error
 }

@@ -40,6 +40,15 @@ class FakeApi extends MarketplaceApi {
   Future<Order> Function(Quote, String)? onConfirm;
   Scope? searchedScope;
   @override
+  Future<Json> orderDetails(Scope scope, String id) async => {
+    'order': sampleOrder(result).json,
+    'quote': result.json,
+    'deliveries': {
+      'erp': {'done': true, 'dead': false, 'failures': 0},
+      'push': {'done': false, 'dead': false, 'failures': 1},
+    },
+  };
+  @override
   Future<bool> ready() async => true;
   @override
   Future<Quote> quote(

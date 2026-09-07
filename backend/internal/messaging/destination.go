@@ -66,6 +66,7 @@ func (w *Destination) Process(ctx context.Context, event d.OrderConfirmedEvent, 
 	}
 	err = validateEvent(event)
 	if err == nil {
+		slog.Info("destination attempt started", "eventId", event.EventID, "orderId", event.Order.OrderID, "destination", w.Kind, "attempt", state.Failures+1)
 		effectCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
 		err = w.Send(effectCtx, event)
 		cancel()
@@ -75,6 +76,9 @@ func (w *Destination) Process(ctx context.Context, event d.OrderConfirmedEvent, 
 	}
 	if err == nil {
 		err = w.Store.CompleteEffect(ctx, event.EventID, w.Kind, owner)
+		if err == nil {
+			slog.Info("destination confirmed and persisted", "eventId", event.EventID, "orderId", event.Order.OrderID, "destination", w.Kind, "attempt", state.Failures+1)
+		}
 		return err == nil, time.Second, err
 	}
 	failures := state.Failures + 1
@@ -84,6 +88,7 @@ func (w *Destination) Process(ctx context.Context, event d.OrderConfirmedEvent, 
 	if saveErr := w.Store.FailDelivery(ctx, letter, owner, w.Now().UTC().Add(delay), terminal); saveErr != nil {
 		return false, time.Second, saveErr
 	}
+	slog.Warn("destination retry state persisted", "eventId", event.EventID, "orderId", event.Order.OrderID, "destination", w.Kind, "attempt", failures, "dlq", terminal, "retryDelay", delay)
 	return terminal, delay, err
 }
 

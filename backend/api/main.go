@@ -31,6 +31,7 @@ func run() error {
 		return e
 	}
 	log := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: level}))
+	slog.SetDefault(log.With("service", "api"))
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 	startup, cancel := context.WithTimeout(ctx, 60*time.Second)
@@ -47,7 +48,7 @@ func run() error {
 	if e = store.Init(startup); e != nil {
 		return e
 	}
-	service := &application.Service{Catalog: store, Quotes: store, Orders: store, Now: time.Now, QuoteTTL: cfg.QuoteTTL}
+	service := &application.Service{Catalog: store, Quotes: store, Orders: store, Tracking: store, Now: time.Now, QuoteTTL: cfg.QuoteTTL}
 	ready := store.Ping
 	server := &http.Server{Addr: ":" + cfg.Port, Handler: api.Router(service, ready, log), ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 10 * time.Second, WriteTimeout: 35 * time.Second, IdleTimeout: 60 * time.Second}
 	result := make(chan error, 1)

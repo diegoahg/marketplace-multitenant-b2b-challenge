@@ -71,6 +71,7 @@ func DispatchOnce(ctx context.Context, outbox ports.Outbox, publisher ports.Publ
 		if e = outbox.MarkPublished(ctx, event.EventID); e != nil {
 			return e
 		}
+		slog.Info("outbox published and recorded", "eventId", event.EventID, "orderId", event.Order.OrderID)
 	}
 	return nil
 }

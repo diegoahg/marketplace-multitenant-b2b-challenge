@@ -1,13 +1,13 @@
 # Validación del frontend
 
-Cierre: **6 de septiembre de 2026**. Flutter Web 3.44.0 compilado en Docker Linux; navegador Chrome headless mediante Playwright 1.63.0.
+Cierre: **7 de septiembre de 2026**. Flutter Web 3.44.0 compilado en Docker Linux; navegador Chrome headless mediante Playwright 1.63.0.
 
 | Comprobación | Resultado |
 |---|---|
 | Build release y nginx con proxy `/api` | PASS; frontend levantado en http://localhost:3000 |
 | `flutter analyze` | PASS, sin incidencias |
-| `flutter test` | **43 pruebas**; incluye las cuatro monedas nuevas y comparación de ocho PNG golden |
-| `npm run test:e2e` | **8 recorridos**, incluidos cotización y confirmación en Colombia, Ecuador, Guatemala y Argentina |
+| `flutter test` | **45 pruebas**; incluye las cuatro monedas nuevas y comparación de ocho PNG golden |
+| `npm run test:e2e` | **9 recorridos**, incluidos cotización y confirmación en Colombia, Ecuador, Guatemala y Argentina |
 | Consola del navegador | Se comprueban errores Flutter/JS en todos los recorridos; solo se permite el error de red provocado deliberadamente en la prueba de respuesta perdida |
 | `GET /api/ready` | `ready` |
 
@@ -55,3 +55,10 @@ docker compose --profile frontend-test run --build --no-deps --rm frontend-tests
 Desde `frontend`: `npm ci` y `npm run test:e2e`. Requiere backend disponible y Chrome instalado. Las capturas de navegador quedan en `test-results/`; las ocho referencias visuales de la entrega están en `test/goldens/`.
 
 La entrega configura Flutter Web adaptable; no incluye builds nativos Android/iOS ni autenticación de producción.
+
+
+## Ampliación del catálogo y detalle de pedidos — 7 de septiembre de 2026
+
+Se verificaron 12 productos comprables, beneficios junto al resumen, navegación al cotizar y detalle de orden con estados independientes ERP/PUSH. La suite de widgets incorpora estados pendiente, confirmado, reintento, DLQ y ausencia de información, y la apertura del detalle en 390 px. Se regeneraron los PNG de los cambios visuales y se volvió a ejecutar la comparación sin actualizar goldens.
+
+El nuevo recorrido Chrome verifica el vaso de regalo, los beneficios visibles junto al resumen, el total preservado y las confirmaciones ERP/PUSH consultadas desde el backend, antes de abrir el detalle de la orden. Los ocho recorridos anteriores y el nuevo escenario pasaron.

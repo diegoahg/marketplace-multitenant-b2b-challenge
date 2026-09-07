@@ -24,3 +24,8 @@ Desde la raíz, `node backend/scripts/worker-smoke.mjs` verifica la separación 
 `node backend/scripts/dlq-smoke.mjs` crea tres pedidos CASH: ERP falla seis veces, PUSH falla seis veces y un tercer ERP se recupera tras dos fallos. Verifica independencia, DLQ y entrega de correos después de una caída de SMTP. Restaura worker/Mailpit al finalizar y conserva la evidencia.
 
 La antigua suscripción `orders-confirmed-worker` ya no se consume. En un entorno anterior puede seguir existiendo hasta reiniciar el emulador; el outbox en Mongo conserva los pendientes. No se borran suscripciones ajenas automáticamente.
+
+
+Logs JSON informativos para seguir una orden: `outbox published and recorded`, `destination attempt started`, `destination confirmed and persisted` y `destination retry state persisted`. Se correlacionan por `orderId`, `eventId` y `destination`, con número de intento y estado DLQ. La confirmación de un destino se registra solo después de persistir su efecto; publicar en Pub/Sub no confirma ERP/PUSH.
+
+Desde la raíz del repositorio: `docker compose logs -f api worker`. Estos procesos escriben a stdout, por lo que el mismo formato queda disponible en los logs del contenedor.

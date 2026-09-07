@@ -1,6 +1,6 @@
 # MariposaMarket · Flutter frontend
 
-Interfaz minimalista y adaptable para el marketplace B2B. Flutter Web 3.44.0, Material 3 y tipografía local. Paleta: primario `#123B5D`, secundario `#00A6A6`, acciones `#FFC629`, éxito `#22A06B`, fondo `#F5F7F8` y texto `#17212B`. Los CTA amarillos usan texto oscuro; las superficies secundarias usan tintes suaves. Los colores compartidos están en `lib/widgets.dart` y el tema Material en `lib/main.dart`. El catálogo presenta los dos productos comprables del seed; sus nombres e ilustraciones son de demostración. Los precios, promociones, impuestos, regalos y crédito siempre llegan desde Go.
+Interfaz minimalista y adaptable para el marketplace B2B. Flutter Web 3.44.0, Material 3 y tipografía local. Paleta: primario `#123B5D`, secundario `#00A6A6`, acciones `#FFC629`, éxito `#22A06B`, fondo `#F5F7F8` y texto `#17212B`. Los CTA amarillos usan texto oscuro; las superficies secundarias usan tintes suaves. Los colores compartidos están en `lib/widgets.dart` y el tema Material en `lib/main.dart`. El catálogo presenta los doce productos comprables del seed, disponibles en los seis países; sus nombres e ilustraciones son de demostración. Los precios, promociones, impuestos, regalos y crédito siempre llegan desde Go.
 
 ## Ejecutar con Docker
 
@@ -112,7 +112,8 @@ lib/models.dart            Money exacto, Scope, Quote, Order, catálogo visual
 lib/api.dart               Contratos HTTP, errores y timeout
 lib/store.dart             Persistencia local del intento e historial
 lib/shop_controller.dart   Flujo de compra, invalidación y recuperación
-lib/main.dart              Catálogo, carrito, desglose e historial adaptables
+lib/main.dart              Catálogo, carrito y beneficios junto al resumen
+lib/order_history.dart     Detalle de orden y estados demostrativos ERP/PUSH
 lib/widgets.dart           Componentes, editor de cantidades e ilustraciones
 lib/adaptive_components.dart Reglas compartidas de texto, insets, diálogo y grid
 test/                     Tests de estado, contrato, widgets y PNG golden
@@ -125,4 +126,6 @@ Dockerfile / nginx.conf    Build reproducible y proxy de mismo origen
 
 Con Flutter 3.44.0 instalado: `flutter pub get`, `flutter analyze`, `flutter test` y `flutter build web --release --no-web-resources-cdn`. Servir el build con el proxy nginx suministrado; el backend no habilita CORS para `flutter run -d chrome` directo a otro puerto. El proceso de compilación sigue la [documentación oficial de Flutter Web](https://docs.flutter.dev/deployment/web).
 
-Esta entrega configura **Flutter Web**, con layout móvil; no añade proyectos Android/iOS. Tenant y cliente corresponden al seed de demostración, no a autenticación. El catálogo del backend no dispone de un endpoint de lectura: el frontend incluye sus SKU y nombres visuales, pero nunca un precio definitivo estático. No se muestran estados de ERP/Push porque la API no los expone. La deduplicación de efectos se valida con las pruebas de integración del backend. No se ofrecen pagos reales ni inventario. El almacenamiento del navegador no es un historial central ni una garantía de sincronización entre pestañas.
+Esta entrega configura **Flutter Web**, con layout móvil; no añade proyectos Android/iOS. Tenant y cliente corresponden al seed de demostración, no a autenticación. El catálogo del backend no dispone de un endpoint de lectura: el frontend incluye sus SKU y nombres visuales, pero nunca un precio definitivo estático. El detalle consulta `GET /orders/{id}/details`: muestra el snapshot original y los estados persistidos de ERP/PUSH. Esta sección es demostrativa para visualizar la prueba técnica; no representa la experiencia de un marketplace real. Los estados pendientes se actualizan cada diez segundos mientras el historial está abierto; también pueden actualizarse manualmente. La deduplicación de efectos se valida con las pruebas de integración del backend. No se ofrecen pagos reales ni inventario. El almacenamiento del navegador no es un historial central ni una garantía de sincronización entre pestañas.
+
+El seed agrega dos combos, cinco escalas por familia (5%, 10% y 15% por tramo) y dos regalos: vaso reutilizable y bolsa térmica. Los presets permiten probar cada beneficio. Al cotizar, la vista se desplaza al desglose y al resumen; en escritorio aparecen lado a lado.

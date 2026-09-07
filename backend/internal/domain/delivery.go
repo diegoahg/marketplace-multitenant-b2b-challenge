@@ -4,10 +4,10 @@ import "time"
 
 // Retries counts failed executions; one initial attempt plus five retries.
 type DeliveryState struct {
-	Failures    int       `bson:"failures"`
-	NextAttempt time.Time `bson:"nextAttempt"`
-	Done        bool      `bson:"done"`
-	Dead        bool      `bson:"dead"`
+	Failures    int       `bson:"failures" json:"failures"`
+	NextAttempt time.Time `bson:"nextAttempt" json:"nextAttempt"`
+	Done        bool      `bson:"done" json:"done"`
+	Dead        bool      `bson:"dead" json:"dead"`
 }
 
 type DeadLetter struct {

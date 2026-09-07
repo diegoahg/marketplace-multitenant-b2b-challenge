@@ -111,13 +111,80 @@ const products = [
     'Línea de bebidas · Producto demo',
     0xFFE5F6F6,
   ),
+  Product(
+    'SKU-003',
+    'Agua mineral',
+    'Volumen por familia · Hasta 15% por tramo',
+    0xFFE5F6F6,
+  ),
+  Product(
+    'SKU-004',
+    'Agua con gas',
+    'Volumen por familia · Hasta 15% por tramo',
+    0xFFE5F6F6,
+  ),
+  Product(
+    'SKU-005',
+    'Jugo de naranja',
+    'Volumen por familia · Hasta 15% por tramo',
+    0xFFFFF4CE,
+  ),
+  Product(
+    'SKU-006',
+    'Jugo tropical',
+    'Volumen por familia · Hasta 15% por tramo',
+    0xFFFFF4CE,
+  ),
+  Product(
+    'SKU-007',
+    'Té de durazno',
+    'Volumen por familia · Hasta 15% por tramo',
+    0xFFFFE8DC,
+  ),
+  Product(
+    'SKU-008',
+    'Té de limón',
+    'Volumen por familia · Hasta 15% por tramo',
+    0xFFFFE8DC,
+  ),
+  Product(
+    'SKU-009',
+    'Energética clásica',
+    'Volumen por familia · Hasta 15% por tramo',
+    0xFFECE8FA,
+  ),
+  Product(
+    'SKU-010',
+    'Energética sin azúcar',
+    'Volumen por familia · Hasta 15% por tramo',
+    0xFFECE8FA,
+  ),
+  Product(
+    'SKU-011',
+    'Soda de limón',
+    'Volumen por familia · Hasta 15% por tramo',
+    0xFFE9F3DB,
+  ),
+  Product(
+    'SKU-012',
+    'Soda de pomelo',
+    'Volumen por familia · Hasta 15% por tramo',
+    0xFFE9F3DB,
+  ),
 ];
-String productName(String sku) => switch (sku) {
-  'SKU-001' => 'Bebida original',
-  'SKU-002' => 'Bebida selección',
-  'GIFT-001' => 'Obsequio de la casa',
-  _ => sku,
-};
+String productName(String sku) {
+  for (final p in products) {
+    if (p.sku == sku) return p.name;
+  }
+  return switch (sku) {
+    'SKU-001' => 'Bebida original',
+    'SKU-002' => 'Bebida selección',
+    'GIFT-001' => 'Obsequio de la casa',
+    'GIFT-002' => 'Vaso reutilizable',
+    'GIFT-003' => 'Bolsa térmica',
+    _ => sku,
+  };
+}
 
 String newKey() {
   final random = Random.secure();

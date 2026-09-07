@@ -79,6 +79,15 @@ func TestDestinationRetriesAndDurableDLQ(t *testing.T) {
 				}
 				now = now.Add(delay)
 			}
+			states, err := store.OrderDeliveries(ctx, q.Scope, event.Order.OrderID)
+			if err != nil || !states["push"].Done || states["erp"].Done != (failCount == 5) || states["erp"].Dead != (failCount == 6) {
+				t.Fatalf("order tracking does not match durable delivery: %+v, %v", states, err)
+			}
+			other := q.Scope
+			other.CustomerID = "another-customer"
+			if states, err := store.OrderDeliveries(ctx, other, event.Order.OrderID); err != nil || states != nil {
+				t.Fatal("tracking leaked across customer scope", states, err)
+			}
 			if calls != 6 {
 				t.Fatal("wrong attempt count", calls)
 			}

@@ -385,3 +385,86 @@ Para mantener foco en el problema de negocio:
 - No se implementará un motor genérico de promociones ilimitado.
 - No se implementará un ERP real.
 - No se implementará un proveedor Push real.
+
+---
+
+# 13. Promociones de prueba
+
+Catálogo demostrativo basado en [backend/testdata/seed.json](../backend/testdata/seed.json) y en las reglas implementadas en [el motor de precios](../backend/internal/pricing/engine.go). Son datos sintéticos para evaluar la prueba técnica; no son ofertas comerciales reales.
+
+## 13.0. Alcance y condiciones comunes
+
+Hay **12 promociones por país**: 3 combos, 6 descuentos por escala y 3 reglas de regalo. Están disponibles para `tenant-demo` en Perú (PE/PEN), Chile (CL/CLP), Colombia (CO/COP), Ecuador (EC/USD), Guatemala (GT/GTQ) y Argentina (AR/ARS). Para reproducirlas en la tienda se utiliza el cliente demo `CUSTOMER-001`.
+
+La vigencia configurada va desde `2020-01-01T00:00:00Z` (inclusive) hasta `2100-01-01T00:00:00Z` (exclusive). Las promociones originales `COMBO-001`, `SCALE-001` y `GIFT-001` tienen prioridad 1; las restantes, prioridad 2. Todas tienen la lista de incompatibilidades vacía. Dentro de cada tipo se ordenan por prioridad ascendente y después por ID.
+
+El cálculo aplica **combo → escala → regalo → impuestos → total → evaluación de crédito**. Las unidades incluidas en un combo no reciben además descuento por escala. Los regalos sí cuentan todas las unidades del SKU que los activa, incluso las incluidas en combos. Las promociones aplican tanto al contado como a crédito; el crédito se valida sobre el total final.
+
+## 13.1. Combos
+
+| ID | Composición de un combo | Ahorro sobre el precio bruto de sus productos |
+| --- | --- | --- |
+| `COMBO-001` | 2 × `SKU-001` — Bebida original + 1 × `SKU-002` — Bebida selección | 25% |
+| `COMBO-002` | 2 × `SKU-003` — Agua mineral + 1 × `SKU-005` — Jugo de naranja | 15% |
+| `COMBO-003` | 2 × `SKU-007` — Té de durazno + 1 × `SKU-011` — Soda de limón | 15% |
+
+Los siguientes importes son el **precio de un combo antes de impuestos**, en la moneda indicada. Se leen del seed; no representan conversiones de divisas.
+
+| País / moneda | COMBO-001 | COMBO-002 | COMBO-003 |
+| --- | --- | --- | --- |
+| PE / PEN | 3,00 | 6,80 | 18,70 |
+| CL / CLP | 3.000 | 6.800 | 18.700 |
+| CO / COP | 3,00 | 6,80 | 18,70 |
+| EC / USD | 3,00 | 6,80 | 18,70 |
+| GT / GTQ | 3,00 | 6,80 | 18,70 |
+| AR / ARS | 3,00 | 6,80 | 18,70 |
+
+El combo se repite tantas veces como permita su componente más escaso. Ejemplo: 4 unidades de `SKU-003` y 2 de `SKU-005` forman dos `COMBO-002`. Si falta un componente, no se aplica el combo y las unidades se evalúan con las demás reglas.
+
+## 13.2. Descuentos por escala
+
+| ID | Productos elegibles | Tramos de unidades elegibles |
+| --- | --- | --- |
+| `SCALE-001` | `SKU-001` — Bebida original | 1–5: 0%; 6–10: 5%; Desde 11: 10% |
+| `SCALE-002` | Familia `water`: `SKU-003` — Agua mineral; `SKU-004` — Agua con gas | 1–5: 0%; 6–11: 5%; 12–23: 10%; Desde 24: 15% |
+| `SCALE-003` | Familia `juice`: `SKU-005` — Jugo de naranja; `SKU-006` — Jugo tropical | 1–5: 0%; 6–11: 5%; 12–23: 10%; Desde 24: 15% |
+| `SCALE-004` | Familia `tea`: `SKU-007` — Té de durazno; `SKU-008` — Té de limón | 1–5: 0%; 6–11: 5%; 12–23: 10%; Desde 24: 15% |
+| `SCALE-005` | Familia `energy`: `SKU-009` — Energética clásica; `SKU-010` — Energética sin azúcar | 1–5: 0%; 6–11: 5%; 12–23: 10%; Desde 24: 15% |
+| `SCALE-006` | Familia `soda`: `SKU-011` — Soda de limón; `SKU-012` — Soda de pomelo | 1–5: 0%; 6–11: 5%; 12–23: 10%; Desde 24: 15% |
+
+Los tramos son **acumulativos y marginales**: alcanzar el 15% no aplica ese porcentaje a todo el carrito. Se descuenta únicamente la cantidad que cae en cada tramo. En las escalas por familia se suman las unidades elegibles restantes después de los combos y se asignan los tramos por SKU ascendente, sin depender del orden del carrito.
+
+Ejemplos en Perú, antes de impuestos: 12 unidades de `SKU-001` generan 5 unidades al 0%, 5 al 5% y 2 al 10%: descuento total **0,45 PEN**. En la familia de aguas, 12 unidades de `SKU-003` y 12 de `SKU-004` generan 5 al 0%, 6 al 5%, 12 al 10% y 1 al 15%: descuento total **4,55 PEN**. El segundo carrito no forma combo porque no contiene `SKU-005`.
+
+## 13.3. Regalos
+
+| ID de la promoción | Condición | Regalo por cada múltiplo completo |
+| --- | --- | --- |
+| `GIFT-001` | 6 unidades de `SKU-001` — Bebida original | 1 × `GIFT-001` — Obsequio de la casa |
+| `GIFT-002` | 6 unidades de `SKU-005` — Jugo de naranja | 1 × `GIFT-002` — Vaso reutilizable |
+| `GIFT-003` | 12 unidades de `SKU-009` — Energética clásica | 1 × `GIFT-003` — Bolsa térmica |
+
+Cantidad de regalos = parte entera de (unidades del SKU elegible / mínimo requerido) × cantidad de regalo configurada. Así, 12 unidades de `SKU-001` dan 2 obsequios de la casa; 12 de `SKU-005`, 2 vasos; y 24 de `SKU-009`, 2 bolsas térmicas. No es necesario agregar el regalo al carrito: aparece al cotizar.
+
+El valor de referencia del regalo es informativo, no se suma al total a pagar. El seed configura `taxGifts: false` en los seis países; por eso el impuesto del regalo es cero en estos escenarios. Los productos comprados sí se gravan según la configuración del país.
+
+## 13.4. Carritos para reproducir las promociones
+
+En el catálogo, usa las selecciones de «¿Por dónde empezar?» o ajusta manualmente las cantidades. Elige el país y el pago al contado para aislar las promociones del cupo de crédito, pulsa **Cotizar pedido** y revisa «Cada beneficio, a la vista» junto al resumen. Una nueva selección reemplaza el carrito anterior.
+
+| Selección de la tienda / prueba manual | Carrito | Beneficio esperado |
+| --- | --- | --- |
+| Por volumen · 12 uds. | 12 × `SKU-001` | `SCALE-001` y 2 × `GIFT-001`. |
+| Combo + volumen | 8 × `SKU-001` + 1 × `SKU-002` | 1 × `COMBO-001`; escala sobre las 6 unidades restantes de SKU-001 (solo una al 5%); 1 × `GIFT-001` por las 8 unidades compradas. |
+| Con obsequio · 6 uds. | 6 × `SKU-001` | 1 × `GIFT-001` y escala al 5% sobre la sexta unidad. |
+| Aguas · escala por familia | 12 × `SKU-003` + 12 × `SKU-004` | `SCALE-002` sobre 24 unidades de la familia water; la última entra al tramo del 15%. |
+| Jugos + vaso de regalo | 6 × `SKU-005` | 1 × `GIFT-002` y `SCALE-003` al 5% sobre la sexta unidad. |
+| Energéticas + bolsa térmica | 12 × `SKU-009` | 1 × `GIFT-003` y `SCALE-005`: 6 unidades al 5% y 1 al 10%. |
+| Combo refrescante | 2 × `SKU-003` + 1 × `SKU-005` | 1 × `COMBO-002`; esas unidades no reciben escala. |
+| Manual: segundo combo nuevo | 2 × `SKU-007` + 1 × `SKU-011` | 1 × `COMBO-003`. |
+| Manual: escala de té | 24 × `SKU-007` | `SCALE-004`; una unidad llega al tramo del 15%. |
+| Manual: escala de soda | 24 × `SKU-011` | `SCALE-006`; una unidad llega al tramo del 15%. |
+
+Para comprobar límites, prueba 5 y 6 unidades de `SKU-001` o `SKU-005`, y 11 y 12 de `SKU-009`: el regalo aparece al alcanzar su mínimo. En las escalas por familia, compara 11/12 y 23/24 unidades para observar el cambio de tramo. Si también agregas productos de un combo, las cantidades disponibles para escala pueden disminuir.
+
+La cobertura de las nueve promociones nuevas en los seis países está en [seed_test.go](../backend/internal/pricing/seed_test.go). Los recorridos de navegador y el detalle de beneficios se documentan en [Validación del frontend](../frontend/VALIDATION.md).

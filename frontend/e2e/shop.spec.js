@@ -110,10 +110,11 @@ test('real quote, gifts, preserved snapshot and safe replay after lost response 
   expect((await response.json()).orderId).toBe(confirmed.orderId);
   await expect(page.getByText('PEDIDO CONFIRMADO', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Ver mis pedidos', exact: true }).click();
-  await expect(page.getByText(confirmed.orderId, { exact: true })).toBeVisible();
-  const read = page.waitForResponse(r => r.url().endsWith(`/api/orders/${confirmed.orderId}`));
-  await page.getByRole('button', { name: 'Consultar de nuevo', exact: true }).click();
-  expect((await (await read).json()).total).toEqual(quote.total);
+  await expect(page.getByRole('button', { name: `Ver detalle del pedido ${confirmed.orderId}`, exact: true })).toBeVisible();
+  const read = page.waitForResponse(r => r.url().endsWith(`/api/orders/${confirmed.orderId}/details`));
+  await page.getByRole('button', { name: `Ver detalle del pedido ${confirmed.orderId}`, exact: true }).click();
+  expect((await (await read).json()).order.total).toEqual(quote.total);
+  await page.getByRole('button', { name: 'Cerrar detalle', exact: true }).click();
   await page.getByRole('textbox', { name: 'Identificador del pedido' }).fill(confirmed.orderId);
   const lookup = page.waitForResponse(r => r.url().endsWith(`/api/orders/${confirmed.orderId}`));
   await page.getByRole('button', { name: 'Consultar pedido', exact: true }).click();
@@ -162,4 +163,38 @@ test('mobile country change, CLP quote and insufficient credit cannot confirm', 
   expect(q.creditEvaluation.eligible).toBe(false);
   await expect(page.getByText('Crédito insuficiente', { exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Confirmar pedido', exact: true })).toBeDisabled();
+});
+
+test('expanded catalog, gifts and order delivery detail remain visible', async ({ page, request }, testInfo) => {
+  await openShop(page);
+  await expect(page.getByText('12 PRODUCTOS', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Jugos + vaso de regalo', exact: true }).click();
+  await page.getByText('Contado', { exact: true }).click();
+  const response = page.waitForResponse(r => r.url().endsWith('/api/quotes'));
+  await page.getByRole('button', { name: 'Cotizar pedido', exact: true }).click();
+  const quote = await (await response).json();
+  expect(quote.gifts.some(g => g.sku === 'GIFT-002')).toBe(true);
+  await page.getByText('Cada beneficio, a la vista', { exact: true }).scrollIntoViewIfNeeded();
+  await expect(page.getByText('Cada beneficio, a la vista', { exact: true })).toBeInViewport();
+  await expect(page.getByText('Tu pedido', { exact: true })).toBeInViewport();
+  await page.screenshot({ path: testInfo.outputPath('benefits-beside-summary.png') });
+  const confirmation = page.waitForResponse(r => r.url().endsWith('/api/orders') && r.request().method() === 'POST');
+  await page.getByRole('button', { name: 'Confirmar pedido', exact: true }).click();
+  const order = await (await confirmation).json();
+  const headers = { 'X-Tenant-ID': order.tenantId, 'X-Country': order.country, 'X-Customer-ID': order.customerId };
+  await expect.poll(async () => {
+    const result = await request.get(`/api/orders/${order.orderId}/details`, { headers });
+    expect(result.status()).toBe(200);
+    const detail = await result.json();
+    expect(detail.quote.total).toEqual(order.total);
+    return detail.deliveries.erp.done && detail.deliveries.push.done;
+  }, { timeout: 30000 }).toBe(true);
+  await page.getByRole('button', { name: 'Ver mis pedidos', exact: true }).click();
+  await expect(page.getByText(/Sección demostrativa:/)).toBeVisible();
+  await expect(page.getByRole('checkbox', { name: 'ERP: Confirmado', exact: true })).toBeVisible();
+  await expect(page.getByRole('checkbox', { name: 'Notificaciones PUSH: Confirmado', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: `Ver detalle del pedido ${order.orderId}`, exact: true }).click();
+  await expect(page.getByRole('dialog')).toBeVisible();
+  await expect(page.getByRole('dialog').getByText(/Productos confirmados/)).toBeVisible();
+  await page.screenshot({ path: testInfo.outputPath('order-detail.png') });
 });

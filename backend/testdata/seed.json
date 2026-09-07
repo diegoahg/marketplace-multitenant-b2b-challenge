@@ -301,6 +301,942 @@
         "scale": 2
       },
       "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "PE",
+      "sku": "SKU-003",
+      "description": "Agua mineral",
+      "family": "water",
+      "unitPrice": {
+        "amount": "200",
+        "currency": "PEN",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "PE",
+      "sku": "SKU-004",
+      "description": "Agua con gas",
+      "family": "water",
+      "unitPrice": {
+        "amount": "300",
+        "currency": "PEN",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "PE",
+      "sku": "SKU-005",
+      "description": "Jugo de naranja",
+      "family": "juice",
+      "unitPrice": {
+        "amount": "400",
+        "currency": "PEN",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "PE",
+      "sku": "SKU-006",
+      "description": "Jugo tropical",
+      "family": "juice",
+      "unitPrice": {
+        "amount": "500",
+        "currency": "PEN",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "PE",
+      "sku": "SKU-007",
+      "description": "Té de durazno",
+      "family": "tea",
+      "unitPrice": {
+        "amount": "600",
+        "currency": "PEN",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "PE",
+      "sku": "SKU-008",
+      "description": "Té de limón",
+      "family": "tea",
+      "unitPrice": {
+        "amount": "700",
+        "currency": "PEN",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "PE",
+      "sku": "SKU-009",
+      "description": "Energética clásica",
+      "family": "energy",
+      "unitPrice": {
+        "amount": "800",
+        "currency": "PEN",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "PE",
+      "sku": "SKU-010",
+      "description": "Energética sin azúcar",
+      "family": "energy",
+      "unitPrice": {
+        "amount": "900",
+        "currency": "PEN",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "PE",
+      "sku": "SKU-011",
+      "description": "Soda de limón",
+      "family": "soda",
+      "unitPrice": {
+        "amount": "1000",
+        "currency": "PEN",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "PE",
+      "sku": "SKU-012",
+      "description": "Soda de pomelo",
+      "family": "soda",
+      "unitPrice": {
+        "amount": "1100",
+        "currency": "PEN",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "PE",
+      "sku": "GIFT-002",
+      "description": "Vaso reutilizable",
+      "family": "gifts",
+      "unitPrice": {
+        "amount": "100",
+        "currency": "PEN",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "PE",
+      "sku": "GIFT-003",
+      "description": "Bolsa térmica",
+      "family": "gifts",
+      "unitPrice": {
+        "amount": "100",
+        "currency": "PEN",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "CL",
+      "sku": "SKU-003",
+      "description": "Agua mineral",
+      "family": "water",
+      "unitPrice": {
+        "amount": "2000",
+        "currency": "CLP",
+        "scale": 0
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "CL",
+      "sku": "SKU-004",
+      "description": "Agua con gas",
+      "family": "water",
+      "unitPrice": {
+        "amount": "3000",
+        "currency": "CLP",
+        "scale": 0
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "CL",
+      "sku": "SKU-005",
+      "description": "Jugo de naranja",
+      "family": "juice",
+      "unitPrice": {
+        "amount": "4000",
+        "currency": "CLP",
+        "scale": 0
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "CL",
+      "sku": "SKU-006",
+      "description": "Jugo tropical",
+      "family": "juice",
+      "unitPrice": {
+        "amount": "5000",
+        "currency": "CLP",
+        "scale": 0
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "CL",
+      "sku": "SKU-007",
+      "description": "Té de durazno",
+      "family": "tea",
+      "unitPrice": {
+        "amount": "6000",
+        "currency": "CLP",
+        "scale": 0
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "CL",
+      "sku": "SKU-008",
+      "description": "Té de limón",
+      "family": "tea",
+      "unitPrice": {
+        "amount": "7000",
+        "currency": "CLP",
+        "scale": 0
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "CL",
+      "sku": "SKU-009",
+      "description": "Energética clásica",
+      "family": "energy",
+      "unitPrice": {
+        "amount": "8000",
+        "currency": "CLP",
+        "scale": 0
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "CL",
+      "sku": "SKU-010",
+      "description": "Energética sin azúcar",
+      "family": "energy",
+      "unitPrice": {
+        "amount": "9000",
+        "currency": "CLP",
+        "scale": 0
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "CL",
+      "sku": "SKU-011",
+      "description": "Soda de limón",
+      "family": "soda",
+      "unitPrice": {
+        "amount": "10000",
+        "currency": "CLP",
+        "scale": 0
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "CL",
+      "sku": "SKU-012",
+      "description": "Soda de pomelo",
+      "family": "soda",
+      "unitPrice": {
+        "amount": "11000",
+        "currency": "CLP",
+        "scale": 0
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "CL",
+      "sku": "GIFT-002",
+      "description": "Vaso reutilizable",
+      "family": "gifts",
+      "unitPrice": {
+        "amount": "1000",
+        "currency": "CLP",
+        "scale": 0
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "CL",
+      "sku": "GIFT-003",
+      "description": "Bolsa térmica",
+      "family": "gifts",
+      "unitPrice": {
+        "amount": "1000",
+        "currency": "CLP",
+        "scale": 0
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "CO",
+      "sku": "SKU-003",
+      "description": "Agua mineral",
+      "family": "water",
+      "unitPrice": {
+        "amount": "200",
+        "currency": "COP",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "CO",
+      "sku": "SKU-004",
+      "description": "Agua con gas",
+      "family": "water",
+      "unitPrice": {
+        "amount": "300",
+        "currency": "COP",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "CO",
+      "sku": "SKU-005",
+      "description": "Jugo de naranja",
+      "family": "juice",
+      "unitPrice": {
+        "amount": "400",
+        "currency": "COP",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "CO",
+      "sku": "SKU-006",
+      "description": "Jugo tropical",
+      "family": "juice",
+      "unitPrice": {
+        "amount": "500",
+        "currency": "COP",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "CO",
+      "sku": "SKU-007",
+      "description": "Té de durazno",
+      "family": "tea",
+      "unitPrice": {
+        "amount": "600",
+        "currency": "COP",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "CO",
+      "sku": "SKU-008",
+      "description": "Té de limón",
+      "family": "tea",
+      "unitPrice": {
+        "amount": "700",
+        "currency": "COP",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "CO",
+      "sku": "SKU-009",
+      "description": "Energética clásica",
+      "family": "energy",
+      "unitPrice": {
+        "amount": "800",
+        "currency": "COP",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "CO",
+      "sku": "SKU-010",
+      "description": "Energética sin azúcar",
+      "family": "energy",
+      "unitPrice": {
+        "amount": "900",
+        "currency": "COP",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "CO",
+      "sku": "SKU-011",
+      "description": "Soda de limón",
+      "family": "soda",
+      "unitPrice": {
+        "amount": "1000",
+        "currency": "COP",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "CO",
+      "sku": "SKU-012",
+      "description": "Soda de pomelo",
+      "family": "soda",
+      "unitPrice": {
+        "amount": "1100",
+        "currency": "COP",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "CO",
+      "sku": "GIFT-002",
+      "description": "Vaso reutilizable",
+      "family": "gifts",
+      "unitPrice": {
+        "amount": "100",
+        "currency": "COP",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "CO",
+      "sku": "GIFT-003",
+      "description": "Bolsa térmica",
+      "family": "gifts",
+      "unitPrice": {
+        "amount": "100",
+        "currency": "COP",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "EC",
+      "sku": "SKU-003",
+      "description": "Agua mineral",
+      "family": "water",
+      "unitPrice": {
+        "amount": "200",
+        "currency": "USD",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "EC",
+      "sku": "SKU-004",
+      "description": "Agua con gas",
+      "family": "water",
+      "unitPrice": {
+        "amount": "300",
+        "currency": "USD",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "EC",
+      "sku": "SKU-005",
+      "description": "Jugo de naranja",
+      "family": "juice",
+      "unitPrice": {
+        "amount": "400",
+        "currency": "USD",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "EC",
+      "sku": "SKU-006",
+      "description": "Jugo tropical",
+      "family": "juice",
+      "unitPrice": {
+        "amount": "500",
+        "currency": "USD",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "EC",
+      "sku": "SKU-007",
+      "description": "Té de durazno",
+      "family": "tea",
+      "unitPrice": {
+        "amount": "600",
+        "currency": "USD",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "EC",
+      "sku": "SKU-008",
+      "description": "Té de limón",
+      "family": "tea",
+      "unitPrice": {
+        "amount": "700",
+        "currency": "USD",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "EC",
+      "sku": "SKU-009",
+      "description": "Energética clásica",
+      "family": "energy",
+      "unitPrice": {
+        "amount": "800",
+        "currency": "USD",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "EC",
+      "sku": "SKU-010",
+      "description": "Energética sin azúcar",
+      "family": "energy",
+      "unitPrice": {
+        "amount": "900",
+        "currency": "USD",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "EC",
+      "sku": "SKU-011",
+      "description": "Soda de limón",
+      "family": "soda",
+      "unitPrice": {
+        "amount": "1000",
+        "currency": "USD",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "EC",
+      "sku": "SKU-012",
+      "description": "Soda de pomelo",
+      "family": "soda",
+      "unitPrice": {
+        "amount": "1100",
+        "currency": "USD",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "EC",
+      "sku": "GIFT-002",
+      "description": "Vaso reutilizable",
+      "family": "gifts",
+      "unitPrice": {
+        "amount": "100",
+        "currency": "USD",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "EC",
+      "sku": "GIFT-003",
+      "description": "Bolsa térmica",
+      "family": "gifts",
+      "unitPrice": {
+        "amount": "100",
+        "currency": "USD",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "GT",
+      "sku": "SKU-003",
+      "description": "Agua mineral",
+      "family": "water",
+      "unitPrice": {
+        "amount": "200",
+        "currency": "GTQ",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "GT",
+      "sku": "SKU-004",
+      "description": "Agua con gas",
+      "family": "water",
+      "unitPrice": {
+        "amount": "300",
+        "currency": "GTQ",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "GT",
+      "sku": "SKU-005",
+      "description": "Jugo de naranja",
+      "family": "juice",
+      "unitPrice": {
+        "amount": "400",
+        "currency": "GTQ",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "GT",
+      "sku": "SKU-006",
+      "description": "Jugo tropical",
+      "family": "juice",
+      "unitPrice": {
+        "amount": "500",
+        "currency": "GTQ",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "GT",
+      "sku": "SKU-007",
+      "description": "Té de durazno",
+      "family": "tea",
+      "unitPrice": {
+        "amount": "600",
+        "currency": "GTQ",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "GT",
+      "sku": "SKU-008",
+      "description": "Té de limón",
+      "family": "tea",
+      "unitPrice": {
+        "amount": "700",
+        "currency": "GTQ",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "GT",
+      "sku": "SKU-009",
+      "description": "Energética clásica",
+      "family": "energy",
+      "unitPrice": {
+        "amount": "800",
+        "currency": "GTQ",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "GT",
+      "sku": "SKU-010",
+      "description": "Energética sin azúcar",
+      "family": "energy",
+      "unitPrice": {
+        "amount": "900",
+        "currency": "GTQ",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "GT",
+      "sku": "SKU-011",
+      "description": "Soda de limón",
+      "family": "soda",
+      "unitPrice": {
+        "amount": "1000",
+        "currency": "GTQ",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "GT",
+      "sku": "SKU-012",
+      "description": "Soda de pomelo",
+      "family": "soda",
+      "unitPrice": {
+        "amount": "1100",
+        "currency": "GTQ",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "GT",
+      "sku": "GIFT-002",
+      "description": "Vaso reutilizable",
+      "family": "gifts",
+      "unitPrice": {
+        "amount": "100",
+        "currency": "GTQ",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "GT",
+      "sku": "GIFT-003",
+      "description": "Bolsa térmica",
+      "family": "gifts",
+      "unitPrice": {
+        "amount": "100",
+        "currency": "GTQ",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "AR",
+      "sku": "SKU-003",
+      "description": "Agua mineral",
+      "family": "water",
+      "unitPrice": {
+        "amount": "200",
+        "currency": "ARS",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "AR",
+      "sku": "SKU-004",
+      "description": "Agua con gas",
+      "family": "water",
+      "unitPrice": {
+        "amount": "300",
+        "currency": "ARS",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "AR",
+      "sku": "SKU-005",
+      "description": "Jugo de naranja",
+      "family": "juice",
+      "unitPrice": {
+        "amount": "400",
+        "currency": "ARS",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "AR",
+      "sku": "SKU-006",
+      "description": "Jugo tropical",
+      "family": "juice",
+      "unitPrice": {
+        "amount": "500",
+        "currency": "ARS",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "AR",
+      "sku": "SKU-007",
+      "description": "Té de durazno",
+      "family": "tea",
+      "unitPrice": {
+        "amount": "600",
+        "currency": "ARS",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "AR",
+      "sku": "SKU-008",
+      "description": "Té de limón",
+      "family": "tea",
+      "unitPrice": {
+        "amount": "700",
+        "currency": "ARS",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "AR",
+      "sku": "SKU-009",
+      "description": "Energética clásica",
+      "family": "energy",
+      "unitPrice": {
+        "amount": "800",
+        "currency": "ARS",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "AR",
+      "sku": "SKU-010",
+      "description": "Energética sin azúcar",
+      "family": "energy",
+      "unitPrice": {
+        "amount": "900",
+        "currency": "ARS",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "AR",
+      "sku": "SKU-011",
+      "description": "Soda de limón",
+      "family": "soda",
+      "unitPrice": {
+        "amount": "1000",
+        "currency": "ARS",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "AR",
+      "sku": "SKU-012",
+      "description": "Soda de pomelo",
+      "family": "soda",
+      "unitPrice": {
+        "amount": "1100",
+        "currency": "ARS",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "AR",
+      "sku": "GIFT-002",
+      "description": "Vaso reutilizable",
+      "family": "gifts",
+      "unitPrice": {
+        "amount": "100",
+        "currency": "ARS",
+        "scale": 2
+      },
+      "taxCategory": "standard"
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "AR",
+      "sku": "GIFT-003",
+      "description": "Bolsa térmica",
+      "family": "gifts",
+      "unitPrice": {
+        "amount": "100",
+        "currency": "ARS",
+        "scale": 2
+      },
+      "taxCategory": "standard"
     }
   ],
   "customers": [
@@ -767,6 +1703,1560 @@
       },
       "giftSku": "GIFT-001",
       "giftQuantity": 1
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "PE",
+      "priority": 2,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "SCALE-002",
+      "type": "SCALE",
+      "eligibility": {
+        "family": "water"
+      },
+      "tiers": [
+        {
+          "from": 1,
+          "to": 5,
+          "bps": 0
+        },
+        {
+          "from": 6,
+          "to": 11,
+          "bps": 500
+        },
+        {
+          "from": 12,
+          "to": 23,
+          "bps": 1000
+        },
+        {
+          "from": 24,
+          "to": 0,
+          "bps": 1500
+        }
+      ]
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "PE",
+      "priority": 2,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "SCALE-003",
+      "type": "SCALE",
+      "eligibility": {
+        "family": "juice"
+      },
+      "tiers": [
+        {
+          "from": 1,
+          "to": 5,
+          "bps": 0
+        },
+        {
+          "from": 6,
+          "to": 11,
+          "bps": 500
+        },
+        {
+          "from": 12,
+          "to": 23,
+          "bps": 1000
+        },
+        {
+          "from": 24,
+          "to": 0,
+          "bps": 1500
+        }
+      ]
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "PE",
+      "priority": 2,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "SCALE-004",
+      "type": "SCALE",
+      "eligibility": {
+        "family": "tea"
+      },
+      "tiers": [
+        {
+          "from": 1,
+          "to": 5,
+          "bps": 0
+        },
+        {
+          "from": 6,
+          "to": 11,
+          "bps": 500
+        },
+        {
+          "from": 12,
+          "to": 23,
+          "bps": 1000
+        },
+        {
+          "from": 24,
+          "to": 0,
+          "bps": 1500
+        }
+      ]
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "PE",
+      "priority": 2,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "SCALE-005",
+      "type": "SCALE",
+      "eligibility": {
+        "family": "energy"
+      },
+      "tiers": [
+        {
+          "from": 1,
+          "to": 5,
+          "bps": 0
+        },
+        {
+          "from": 6,
+          "to": 11,
+          "bps": 500
+        },
+        {
+          "from": 12,
+          "to": 23,
+          "bps": 1000
+        },
+        {
+          "from": 24,
+          "to": 0,
+          "bps": 1500
+        }
+      ]
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "PE",
+      "priority": 2,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "SCALE-006",
+      "type": "SCALE",
+      "eligibility": {
+        "family": "soda"
+      },
+      "tiers": [
+        {
+          "from": 1,
+          "to": 5,
+          "bps": 0
+        },
+        {
+          "from": 6,
+          "to": 11,
+          "bps": 500
+        },
+        {
+          "from": 12,
+          "to": 23,
+          "bps": 1000
+        },
+        {
+          "from": 24,
+          "to": 0,
+          "bps": 1500
+        }
+      ]
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "PE",
+      "priority": 2,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "GIFT-002",
+      "type": "GIFT",
+      "eligibility": {
+        "sku": "SKU-005",
+        "minimum": 6
+      },
+      "giftSku": "GIFT-002",
+      "giftQuantity": 1
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "PE",
+      "priority": 2,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "GIFT-003",
+      "type": "GIFT",
+      "eligibility": {
+        "sku": "SKU-009",
+        "minimum": 12
+      },
+      "giftSku": "GIFT-003",
+      "giftQuantity": 1
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "PE",
+      "priority": 2,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "COMBO-002",
+      "type": "COMBO",
+      "eligibility": {},
+      "items": [
+        {
+          "sku": "SKU-003",
+          "quantity": 2
+        },
+        {
+          "sku": "SKU-005",
+          "quantity": 1
+        }
+      ],
+      "comboPrice": {
+        "amount": "680",
+        "currency": "PEN",
+        "scale": 2
+      }
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "PE",
+      "priority": 2,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "COMBO-003",
+      "type": "COMBO",
+      "eligibility": {},
+      "items": [
+        {
+          "sku": "SKU-007",
+          "quantity": 2
+        },
+        {
+          "sku": "SKU-011",
+          "quantity": 1
+        }
+      ],
+      "comboPrice": {
+        "amount": "1870",
+        "currency": "PEN",
+        "scale": 2
+      }
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "CL",
+      "priority": 2,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "SCALE-002",
+      "type": "SCALE",
+      "eligibility": {
+        "family": "water"
+      },
+      "tiers": [
+        {
+          "from": 1,
+          "to": 5,
+          "bps": 0
+        },
+        {
+          "from": 6,
+          "to": 11,
+          "bps": 500
+        },
+        {
+          "from": 12,
+          "to": 23,
+          "bps": 1000
+        },
+        {
+          "from": 24,
+          "to": 0,
+          "bps": 1500
+        }
+      ]
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "CL",
+      "priority": 2,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "SCALE-003",
+      "type": "SCALE",
+      "eligibility": {
+        "family": "juice"
+      },
+      "tiers": [
+        {
+          "from": 1,
+          "to": 5,
+          "bps": 0
+        },
+        {
+          "from": 6,
+          "to": 11,
+          "bps": 500
+        },
+        {
+          "from": 12,
+          "to": 23,
+          "bps": 1000
+        },
+        {
+          "from": 24,
+          "to": 0,
+          "bps": 1500
+        }
+      ]
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "CL",
+      "priority": 2,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "SCALE-004",
+      "type": "SCALE",
+      "eligibility": {
+        "family": "tea"
+      },
+      "tiers": [
+        {
+          "from": 1,
+          "to": 5,
+          "bps": 0
+        },
+        {
+          "from": 6,
+          "to": 11,
+          "bps": 500
+        },
+        {
+          "from": 12,
+          "to": 23,
+          "bps": 1000
+        },
+        {
+          "from": 24,
+          "to": 0,
+          "bps": 1500
+        }
+      ]
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "CL",
+      "priority": 2,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "SCALE-005",
+      "type": "SCALE",
+      "eligibility": {
+        "family": "energy"
+      },
+      "tiers": [
+        {
+          "from": 1,
+          "to": 5,
+          "bps": 0
+        },
+        {
+          "from": 6,
+          "to": 11,
+          "bps": 500
+        },
+        {
+          "from": 12,
+          "to": 23,
+          "bps": 1000
+        },
+        {
+          "from": 24,
+          "to": 0,
+          "bps": 1500
+        }
+      ]
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "CL",
+      "priority": 2,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "SCALE-006",
+      "type": "SCALE",
+      "eligibility": {
+        "family": "soda"
+      },
+      "tiers": [
+        {
+          "from": 1,
+          "to": 5,
+          "bps": 0
+        },
+        {
+          "from": 6,
+          "to": 11,
+          "bps": 500
+        },
+        {
+          "from": 12,
+          "to": 23,
+          "bps": 1000
+        },
+        {
+          "from": 24,
+          "to": 0,
+          "bps": 1500
+        }
+      ]
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "CL",
+      "priority": 2,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "GIFT-002",
+      "type": "GIFT",
+      "eligibility": {
+        "sku": "SKU-005",
+        "minimum": 6
+      },
+      "giftSku": "GIFT-002",
+      "giftQuantity": 1
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "CL",
+      "priority": 2,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "GIFT-003",
+      "type": "GIFT",
+      "eligibility": {
+        "sku": "SKU-009",
+        "minimum": 12
+      },
+      "giftSku": "GIFT-003",
+      "giftQuantity": 1
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "CL",
+      "priority": 2,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "COMBO-002",
+      "type": "COMBO",
+      "eligibility": {},
+      "items": [
+        {
+          "sku": "SKU-003",
+          "quantity": 2
+        },
+        {
+          "sku": "SKU-005",
+          "quantity": 1
+        }
+      ],
+      "comboPrice": {
+        "amount": "6800",
+        "currency": "CLP",
+        "scale": 0
+      }
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "CL",
+      "priority": 2,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "COMBO-003",
+      "type": "COMBO",
+      "eligibility": {},
+      "items": [
+        {
+          "sku": "SKU-007",
+          "quantity": 2
+        },
+        {
+          "sku": "SKU-011",
+          "quantity": 1
+        }
+      ],
+      "comboPrice": {
+        "amount": "18700",
+        "currency": "CLP",
+        "scale": 0
+      }
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "CO",
+      "priority": 2,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "SCALE-002",
+      "type": "SCALE",
+      "eligibility": {
+        "family": "water"
+      },
+      "tiers": [
+        {
+          "from": 1,
+          "to": 5,
+          "bps": 0
+        },
+        {
+          "from": 6,
+          "to": 11,
+          "bps": 500
+        },
+        {
+          "from": 12,
+          "to": 23,
+          "bps": 1000
+        },
+        {
+          "from": 24,
+          "to": 0,
+          "bps": 1500
+        }
+      ]
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "CO",
+      "priority": 2,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "SCALE-003",
+      "type": "SCALE",
+      "eligibility": {
+        "family": "juice"
+      },
+      "tiers": [
+        {
+          "from": 1,
+          "to": 5,
+          "bps": 0
+        },
+        {
+          "from": 6,
+          "to": 11,
+          "bps": 500
+        },
+        {
+          "from": 12,
+          "to": 23,
+          "bps": 1000
+        },
+        {
+          "from": 24,
+          "to": 0,
+          "bps": 1500
+        }
+      ]
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "CO",
+      "priority": 2,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "SCALE-004",
+      "type": "SCALE",
+      "eligibility": {
+        "family": "tea"
+      },
+      "tiers": [
+        {
+          "from": 1,
+          "to": 5,
+          "bps": 0
+        },
+        {
+          "from": 6,
+          "to": 11,
+          "bps": 500
+        },
+        {
+          "from": 12,
+          "to": 23,
+          "bps": 1000
+        },
+        {
+          "from": 24,
+          "to": 0,
+          "bps": 1500
+        }
+      ]
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "CO",
+      "priority": 2,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "SCALE-005",
+      "type": "SCALE",
+      "eligibility": {
+        "family": "energy"
+      },
+      "tiers": [
+        {
+          "from": 1,
+          "to": 5,
+          "bps": 0
+        },
+        {
+          "from": 6,
+          "to": 11,
+          "bps": 500
+        },
+        {
+          "from": 12,
+          "to": 23,
+          "bps": 1000
+        },
+        {
+          "from": 24,
+          "to": 0,
+          "bps": 1500
+        }
+      ]
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "CO",
+      "priority": 2,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "SCALE-006",
+      "type": "SCALE",
+      "eligibility": {
+        "family": "soda"
+      },
+      "tiers": [
+        {
+          "from": 1,
+          "to": 5,
+          "bps": 0
+        },
+        {
+          "from": 6,
+          "to": 11,
+          "bps": 500
+        },
+        {
+          "from": 12,
+          "to": 23,
+          "bps": 1000
+        },
+        {
+          "from": 24,
+          "to": 0,
+          "bps": 1500
+        }
+      ]
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "CO",
+      "priority": 2,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "GIFT-002",
+      "type": "GIFT",
+      "eligibility": {
+        "sku": "SKU-005",
+        "minimum": 6
+      },
+      "giftSku": "GIFT-002",
+      "giftQuantity": 1
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "CO",
+      "priority": 2,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "GIFT-003",
+      "type": "GIFT",
+      "eligibility": {
+        "sku": "SKU-009",
+        "minimum": 12
+      },
+      "giftSku": "GIFT-003",
+      "giftQuantity": 1
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "CO",
+      "priority": 2,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "COMBO-002",
+      "type": "COMBO",
+      "eligibility": {},
+      "items": [
+        {
+          "sku": "SKU-003",
+          "quantity": 2
+        },
+        {
+          "sku": "SKU-005",
+          "quantity": 1
+        }
+      ],
+      "comboPrice": {
+        "amount": "680",
+        "currency": "COP",
+        "scale": 2
+      }
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "CO",
+      "priority": 2,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "COMBO-003",
+      "type": "COMBO",
+      "eligibility": {},
+      "items": [
+        {
+          "sku": "SKU-007",
+          "quantity": 2
+        },
+        {
+          "sku": "SKU-011",
+          "quantity": 1
+        }
+      ],
+      "comboPrice": {
+        "amount": "1870",
+        "currency": "COP",
+        "scale": 2
+      }
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "EC",
+      "priority": 2,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "SCALE-002",
+      "type": "SCALE",
+      "eligibility": {
+        "family": "water"
+      },
+      "tiers": [
+        {
+          "from": 1,
+          "to": 5,
+          "bps": 0
+        },
+        {
+          "from": 6,
+          "to": 11,
+          "bps": 500
+        },
+        {
+          "from": 12,
+          "to": 23,
+          "bps": 1000
+        },
+        {
+          "from": 24,
+          "to": 0,
+          "bps": 1500
+        }
+      ]
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "EC",
+      "priority": 2,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "SCALE-003",
+      "type": "SCALE",
+      "eligibility": {
+        "family": "juice"
+      },
+      "tiers": [
+        {
+          "from": 1,
+          "to": 5,
+          "bps": 0
+        },
+        {
+          "from": 6,
+          "to": 11,
+          "bps": 500
+        },
+        {
+          "from": 12,
+          "to": 23,
+          "bps": 1000
+        },
+        {
+          "from": 24,
+          "to": 0,
+          "bps": 1500
+        }
+      ]
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "EC",
+      "priority": 2,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "SCALE-004",
+      "type": "SCALE",
+      "eligibility": {
+        "family": "tea"
+      },
+      "tiers": [
+        {
+          "from": 1,
+          "to": 5,
+          "bps": 0
+        },
+        {
+          "from": 6,
+          "to": 11,
+          "bps": 500
+        },
+        {
+          "from": 12,
+          "to": 23,
+          "bps": 1000
+        },
+        {
+          "from": 24,
+          "to": 0,
+          "bps": 1500
+        }
+      ]
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "EC",
+      "priority": 2,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "SCALE-005",
+      "type": "SCALE",
+      "eligibility": {
+        "family": "energy"
+      },
+      "tiers": [
+        {
+          "from": 1,
+          "to": 5,
+          "bps": 0
+        },
+        {
+          "from": 6,
+          "to": 11,
+          "bps": 500
+        },
+        {
+          "from": 12,
+          "to": 23,
+          "bps": 1000
+        },
+        {
+          "from": 24,
+          "to": 0,
+          "bps": 1500
+        }
+      ]
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "EC",
+      "priority": 2,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "SCALE-006",
+      "type": "SCALE",
+      "eligibility": {
+        "family": "soda"
+      },
+      "tiers": [
+        {
+          "from": 1,
+          "to": 5,
+          "bps": 0
+        },
+        {
+          "from": 6,
+          "to": 11,
+          "bps": 500
+        },
+        {
+          "from": 12,
+          "to": 23,
+          "bps": 1000
+        },
+        {
+          "from": 24,
+          "to": 0,
+          "bps": 1500
+        }
+      ]
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "EC",
+      "priority": 2,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "GIFT-002",
+      "type": "GIFT",
+      "eligibility": {
+        "sku": "SKU-005",
+        "minimum": 6
+      },
+      "giftSku": "GIFT-002",
+      "giftQuantity": 1
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "EC",
+      "priority": 2,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "GIFT-003",
+      "type": "GIFT",
+      "eligibility": {
+        "sku": "SKU-009",
+        "minimum": 12
+      },
+      "giftSku": "GIFT-003",
+      "giftQuantity": 1
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "EC",
+      "priority": 2,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "COMBO-002",
+      "type": "COMBO",
+      "eligibility": {},
+      "items": [
+        {
+          "sku": "SKU-003",
+          "quantity": 2
+        },
+        {
+          "sku": "SKU-005",
+          "quantity": 1
+        }
+      ],
+      "comboPrice": {
+        "amount": "680",
+        "currency": "USD",
+        "scale": 2
+      }
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "EC",
+      "priority": 2,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "COMBO-003",
+      "type": "COMBO",
+      "eligibility": {},
+      "items": [
+        {
+          "sku": "SKU-007",
+          "quantity": 2
+        },
+        {
+          "sku": "SKU-011",
+          "quantity": 1
+        }
+      ],
+      "comboPrice": {
+        "amount": "1870",
+        "currency": "USD",
+        "scale": 2
+      }
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "GT",
+      "priority": 2,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "SCALE-002",
+      "type": "SCALE",
+      "eligibility": {
+        "family": "water"
+      },
+      "tiers": [
+        {
+          "from": 1,
+          "to": 5,
+          "bps": 0
+        },
+        {
+          "from": 6,
+          "to": 11,
+          "bps": 500
+        },
+        {
+          "from": 12,
+          "to": 23,
+          "bps": 1000
+        },
+        {
+          "from": 24,
+          "to": 0,
+          "bps": 1500
+        }
+      ]
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "GT",
+      "priority": 2,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "SCALE-003",
+      "type": "SCALE",
+      "eligibility": {
+        "family": "juice"
+      },
+      "tiers": [
+        {
+          "from": 1,
+          "to": 5,
+          "bps": 0
+        },
+        {
+          "from": 6,
+          "to": 11,
+          "bps": 500
+        },
+        {
+          "from": 12,
+          "to": 23,
+          "bps": 1000
+        },
+        {
+          "from": 24,
+          "to": 0,
+          "bps": 1500
+        }
+      ]
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "GT",
+      "priority": 2,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "SCALE-004",
+      "type": "SCALE",
+      "eligibility": {
+        "family": "tea"
+      },
+      "tiers": [
+        {
+          "from": 1,
+          "to": 5,
+          "bps": 0
+        },
+        {
+          "from": 6,
+          "to": 11,
+          "bps": 500
+        },
+        {
+          "from": 12,
+          "to": 23,
+          "bps": 1000
+        },
+        {
+          "from": 24,
+          "to": 0,
+          "bps": 1500
+        }
+      ]
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "GT",
+      "priority": 2,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "SCALE-005",
+      "type": "SCALE",
+      "eligibility": {
+        "family": "energy"
+      },
+      "tiers": [
+        {
+          "from": 1,
+          "to": 5,
+          "bps": 0
+        },
+        {
+          "from": 6,
+          "to": 11,
+          "bps": 500
+        },
+        {
+          "from": 12,
+          "to": 23,
+          "bps": 1000
+        },
+        {
+          "from": 24,
+          "to": 0,
+          "bps": 1500
+        }
+      ]
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "GT",
+      "priority": 2,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "SCALE-006",
+      "type": "SCALE",
+      "eligibility": {
+        "family": "soda"
+      },
+      "tiers": [
+        {
+          "from": 1,
+          "to": 5,
+          "bps": 0
+        },
+        {
+          "from": 6,
+          "to": 11,
+          "bps": 500
+        },
+        {
+          "from": 12,
+          "to": 23,
+          "bps": 1000
+        },
+        {
+          "from": 24,
+          "to": 0,
+          "bps": 1500
+        }
+      ]
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "GT",
+      "priority": 2,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "GIFT-002",
+      "type": "GIFT",
+      "eligibility": {
+        "sku": "SKU-005",
+        "minimum": 6
+      },
+      "giftSku": "GIFT-002",
+      "giftQuantity": 1
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "GT",
+      "priority": 2,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "GIFT-003",
+      "type": "GIFT",
+      "eligibility": {
+        "sku": "SKU-009",
+        "minimum": 12
+      },
+      "giftSku": "GIFT-003",
+      "giftQuantity": 1
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "GT",
+      "priority": 2,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "COMBO-002",
+      "type": "COMBO",
+      "eligibility": {},
+      "items": [
+        {
+          "sku": "SKU-003",
+          "quantity": 2
+        },
+        {
+          "sku": "SKU-005",
+          "quantity": 1
+        }
+      ],
+      "comboPrice": {
+        "amount": "680",
+        "currency": "GTQ",
+        "scale": 2
+      }
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "GT",
+      "priority": 2,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "COMBO-003",
+      "type": "COMBO",
+      "eligibility": {},
+      "items": [
+        {
+          "sku": "SKU-007",
+          "quantity": 2
+        },
+        {
+          "sku": "SKU-011",
+          "quantity": 1
+        }
+      ],
+      "comboPrice": {
+        "amount": "1870",
+        "currency": "GTQ",
+        "scale": 2
+      }
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "AR",
+      "priority": 2,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "SCALE-002",
+      "type": "SCALE",
+      "eligibility": {
+        "family": "water"
+      },
+      "tiers": [
+        {
+          "from": 1,
+          "to": 5,
+          "bps": 0
+        },
+        {
+          "from": 6,
+          "to": 11,
+          "bps": 500
+        },
+        {
+          "from": 12,
+          "to": 23,
+          "bps": 1000
+        },
+        {
+          "from": 24,
+          "to": 0,
+          "bps": 1500
+        }
+      ]
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "AR",
+      "priority": 2,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "SCALE-003",
+      "type": "SCALE",
+      "eligibility": {
+        "family": "juice"
+      },
+      "tiers": [
+        {
+          "from": 1,
+          "to": 5,
+          "bps": 0
+        },
+        {
+          "from": 6,
+          "to": 11,
+          "bps": 500
+        },
+        {
+          "from": 12,
+          "to": 23,
+          "bps": 1000
+        },
+        {
+          "from": 24,
+          "to": 0,
+          "bps": 1500
+        }
+      ]
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "AR",
+      "priority": 2,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "SCALE-004",
+      "type": "SCALE",
+      "eligibility": {
+        "family": "tea"
+      },
+      "tiers": [
+        {
+          "from": 1,
+          "to": 5,
+          "bps": 0
+        },
+        {
+          "from": 6,
+          "to": 11,
+          "bps": 500
+        },
+        {
+          "from": 12,
+          "to": 23,
+          "bps": 1000
+        },
+        {
+          "from": 24,
+          "to": 0,
+          "bps": 1500
+        }
+      ]
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "AR",
+      "priority": 2,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "SCALE-005",
+      "type": "SCALE",
+      "eligibility": {
+        "family": "energy"
+      },
+      "tiers": [
+        {
+          "from": 1,
+          "to": 5,
+          "bps": 0
+        },
+        {
+          "from": 6,
+          "to": 11,
+          "bps": 500
+        },
+        {
+          "from": 12,
+          "to": 23,
+          "bps": 1000
+        },
+        {
+          "from": 24,
+          "to": 0,
+          "bps": 1500
+        }
+      ]
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "AR",
+      "priority": 2,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "SCALE-006",
+      "type": "SCALE",
+      "eligibility": {
+        "family": "soda"
+      },
+      "tiers": [
+        {
+          "from": 1,
+          "to": 5,
+          "bps": 0
+        },
+        {
+          "from": 6,
+          "to": 11,
+          "bps": 500
+        },
+        {
+          "from": 12,
+          "to": 23,
+          "bps": 1000
+        },
+        {
+          "from": 24,
+          "to": 0,
+          "bps": 1500
+        }
+      ]
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "AR",
+      "priority": 2,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "GIFT-002",
+      "type": "GIFT",
+      "eligibility": {
+        "sku": "SKU-005",
+        "minimum": 6
+      },
+      "giftSku": "GIFT-002",
+      "giftQuantity": 1
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "AR",
+      "priority": 2,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "GIFT-003",
+      "type": "GIFT",
+      "eligibility": {
+        "sku": "SKU-009",
+        "minimum": 12
+      },
+      "giftSku": "GIFT-003",
+      "giftQuantity": 1
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "AR",
+      "priority": 2,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "COMBO-002",
+      "type": "COMBO",
+      "eligibility": {},
+      "items": [
+        {
+          "sku": "SKU-003",
+          "quantity": 2
+        },
+        {
+          "sku": "SKU-005",
+          "quantity": 1
+        }
+      ],
+      "comboPrice": {
+        "amount": "680",
+        "currency": "ARS",
+        "scale": 2
+      }
+    },
+    {
+      "tenantId": "tenant-demo",
+      "country": "AR",
+      "priority": 2,
+      "validFrom": "2020-01-01T00:00:00Z",
+      "validTo": "2100-01-01T00:00:00Z",
+      "incompatibleWith": [],
+      "id": "COMBO-003",
+      "type": "COMBO",
+      "eligibility": {},
+      "items": [
+        {
+          "sku": "SKU-007",
+          "quantity": 2
+        },
+        {
+          "sku": "SKU-011",
+          "quantity": 1
+        }
+      ],
+      "comboPrice": {
+        "amount": "1870",
+        "currency": "ARS",
+        "scale": 2
+      }
     }
   ],
   "credits": [

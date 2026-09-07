@@ -459,6 +459,100 @@
           }
         }
       }
+    },
+    "/orders/{id}/details": {
+      "get": {
+        "summary": "Detalle de la orden, snapshot confirmado y estados demostrativos de ERP/PUSH",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Country",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Customer-ID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Documento del tenant/país/cliente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderDetails"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error de negocio o servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error de negocio o servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error de negocio o servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error de negocio o servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -830,6 +924,62 @@
           },
           "traceId": {
             "type": "string"
+          }
+        }
+      },
+      "DeliveryState": {
+        "type": "object",
+        "required": [
+          "done",
+          "dead",
+          "failures",
+          "nextAttempt"
+        ],
+        "properties": {
+          "done": {
+            "type": "boolean"
+          },
+          "dead": {
+            "type": "boolean"
+          },
+          "failures": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "nextAttempt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "OrderDetails": {
+        "type": "object",
+        "required": [
+          "order",
+          "quote",
+          "deliveries"
+        ],
+        "properties": {
+          "order": {
+            "$ref": "#/components/schemas/Order"
+          },
+          "quote": {
+            "$ref": "#/components/schemas/Quote"
+          },
+          "deliveries": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "erp": {
+                "$ref": "#/components/schemas/DeliveryState"
+              },
+              "push": {
+                "$ref": "#/components/schemas/DeliveryState"
+              }
+            },
+            "description": "Estado persistido por destino. null significa sin información disponible; done solo es true tras completar y persistir el efecto."
           }
         }
       }

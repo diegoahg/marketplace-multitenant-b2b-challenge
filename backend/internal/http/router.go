@@ -59,6 +59,7 @@ func Router(service *application.Service, ready func(context.Context) error, log
 			return e
 		}
 		w.Header().Set("Location", "/quotes/"+q.QuoteID)
+		log.Info("quote persisted", "traceId", w.Header().Get("X-Trace-ID"), "quoteId", q.QuoteID, "tenantId", scope.TenantID, "country", scope.Country)
 		write(w, 201, q)
 		return nil
 	}))
@@ -80,7 +81,16 @@ func Router(service *application.Service, ready func(context.Context) error, log
 			return e
 		}
 		w.Header().Set("Location", "/orders/"+order.OrderID)
+		log.Info("order confirmation available", "traceId", w.Header().Get("X-Trace-ID"), "orderId", order.OrderID, "quoteId", order.QuoteID, "status", order.Status)
 		write(w, 201, order)
+		return nil
+	}))
+	mux.HandleFunc("GET /orders/{id}/details", handle(func(w http.ResponseWriter, r *http.Request, scope d.Scope) error {
+		details, e := service.OrderDetails(r.Context(), scope, r.PathValue("id"))
+		if e != nil {
+			return e
+		}
+		write(w, 200, details)
 		return nil
 	}))
 	mux.HandleFunc("GET /orders/{id}", handle(func(w http.ResponseWriter, r *http.Request, scope d.Scope) error {

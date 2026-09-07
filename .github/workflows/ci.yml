@@ -164,6 +164,7 @@ jobs:
           done
           exit 1
       - name: Install browser test dependencies
+        # The smoke test below uses Node and the real independent Compose services.
         working-directory: frontend
         run: |
           npm ci
@@ -173,6 +174,10 @@ jobs:
       - name: Test release against real API
         working-directory: frontend
         run: npm run test:e2e
+      - name: Verify independent worker and outbox recovery
+        run: node backend/scripts/worker-smoke.mjs
+      - name: Verify destination retries, DLQ and email
+        run: node backend/scripts/dlq-smoke.mjs
       - name: Collect service logs
         if: always()
         run: |

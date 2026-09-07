@@ -17,7 +17,7 @@ func (s *Store) Pending(ctx context.Context, limit int) ([]d.OrderConfirmedEvent
 		{{Key: "$match", Value: bson.M{"$or": bson.A{bson.M{"publishedAt": bson.M{"$exists": false}}, bson.M{"publishedAt": bson.M{"$lte": cutoff}}}}}},
 		{{Key: "$sort", Value: bson.D{{Key: "publishedAt", Value: 1}, {Key: "occurredAt", Value: 1}}}},
 		{{Key: "$lookup", Value: bson.M{"from": "processed_events", "localField": "eventId", "foreignField": "eventId", "as": "progress"}}},
-		{{Key: "$match", Value: bson.M{"$or": bson.A{bson.M{"progress.effects.erp.done": bson.M{"$ne": true}}, bson.M{"progress.effects.push.done": bson.M{"$ne": true}}}}}},
+		{{Key: "$match", Value: bson.M{"$or": bson.A{bson.M{"progress.effects.erp.done": bson.M{"$ne": true}, "progress.effects.erp.dead": bson.M{"$ne": true}}, bson.M{"progress.effects.push.done": bson.M{"$ne": true}, "progress.effects.push.dead": bson.M{"$ne": true}}}}}},
 		{{Key: "$limit", Value: int64(limit)}},
 		{{Key: "$unset", Value: "progress"}},
 	})

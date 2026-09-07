@@ -20,10 +20,10 @@ Las requests guardan `quoteId`, `orderId`, `idempotencyKey` y snapshots en varia
 
 ## Cobertura
 
-- Health y readiness de Mongo/PubSub.
+- Health del proceso API y readiness de MongoDB. La API permanece disponible sin worker ni Pub/Sub.
 - Cotización con escalas acumuladas, origen de descuentos, obsequios, impuestos y aritmética exacta en unidades menores.
 - Lectura del snapshot, compra al contado, consulta del pedido y conservación del total.
-- Replay idéntico, conflicto al cambiar el payload y rechazo de otra clave para una cotización ya confirmada.
+- Replay equivalente en campos de negocio y fechas a milisegundos, conflicto al cambiar el payload y rechazo de otra clave para una cotización ya confirmada.
 - Cotizaciones en PEN, CLP, COP, USD, GTQ y ARS.
 - Cotización a crédito no elegible y rechazo de la confirmación sin saldo.
 - Errores de contexto, cantidad, SKU duplicado/inexistente, campo desconocido, clave ausente y aislamiento por tenant, cliente y país.
@@ -31,6 +31,8 @@ Las requests guardan `quoteId`, `orderId`, `idempotencyKey` y snapshots en varia
 Requiere los precios y promociones originales del seed. Los cuatro países nuevos tienen impuestos sintéticos en cero y precios nominales; no se convierten divisas. El caso de crédito insuficiente usa PE y presupone su saldo de demostración. Volver a ejecutar el seed no restaura datos modificados.
 
 Cada ejecución crea cotizaciones y un pedido **CASH**; no descuenta crédito. La colección no elimina datos. ERP/PUSH asíncronos, carreras entre confirmaciones y recuperación del broker se prueban en `backend/tests/integration`, ya que no existe una API pública para consultar esos efectos.
+
+Revalidación del 7 de septiembre de 2026: **28 requests y 71 aserciones aprobadas** después de separar API/worker y agregar dos suscripciones, DLQ y correo. Los contratos HTTP no cambiaron. Para los efectos asíncronos, ejecutar desde la raíz `node backend/scripts/worker-smoke.mjs` y `node backend/scripts/dlq-smoke.mjs`; la bandeja de prueba está en `http://localhost:8025`.
 
 Las comparaciones de snapshots y replay normalizan únicamente `createdAt` y `expiresAt` a milisegundos: Go entrega nanosegundos en la respuesta inicial y BSON conserva milisegundos. Los demás campos se comparan íntegramente, sin tolerancias monetarias. Por esta diferencia de fechas el replay actual es equivalente a precisión de persistencia, pero no idéntico byte a byte.
 

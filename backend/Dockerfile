@@ -3,10 +3,15 @@ WORKDIR /src
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
-RUN CGO_ENABLED=0 go build -trimpath -o /out/api ./cmd/api && CGO_ENABLED=0 go build -trimpath -o /out/seed ./cmd/seed
+RUN CGO_ENABLED=0 go build -trimpath -o /out/api ./api && CGO_ENABLED=0 go build -trimpath -o /out/worker ./worker && CGO_ENABLED=0 go build -trimpath -o /out/seed ./cmd/seed
 
 FROM build AS test
 CMD ["go", "test", "-race", "./..."]
+
+FROM gcr.io/distroless/static-debian12:nonroot AS worker
+WORKDIR /app
+COPY --from=build /out/worker /app/worker
+CMD ["/app/worker"]
 
 FROM gcr.io/distroless/static-debian12:nonroot AS runtime
 WORKDIR /app

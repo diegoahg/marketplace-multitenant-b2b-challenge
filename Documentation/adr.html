@@ -85,7 +85,7 @@
         </section>
         <section>
           <h2><span>05</span> ERP y notificaciones PUSH</h2>
-          <p>Descarté llamadas síncronas al confirmar y publicar sin outbox: una caída podría bloquear la compra o perder el evento. La <strong>outbox transaccional</strong> publica en Pub/Sub al menos una vez. El worker usa leases, progreso por destino y reintentos; si ERP termina y PUSH falla, continúa con PUSH. Acepté consistencia eventual y más coordinación para recuperar fallos.</p>
+          <p>Separé <strong>API y worker</strong>; la API confirma aun sin broker. Un tópico alimenta <strong>dos suscripciones: ERP y PUSH</strong>, con dummies y ACK independiente. Cada fallo espera 1/2/4/8/16 s, sin ACK. Tras cinco reintentos, persisto la DLQ en Mongo antes del ACK y envío correo a Mailpit. Descarté el consumidor conjunto y el conteo aproximado del broker: prioricé independencia y presupuesto durable.</p>
         </section>
         <section>
           <h2><span>06</span> Despliegue y alcance consciente</h2>
@@ -97,7 +97,7 @@
         </section>
         <section>
           <h2><span>08</span> Riesgo y mitigación</h2>
-          <p><strong>Riesgo:</strong> el receptor acepta el efecto y el worker cae antes de registrar éxito. Exijo deduplicar <strong>evento:destino</strong> atómicamente en el receptor. La reconciliación ya repone eventos publicados sin destinos completados después de un minuto, conservando su ID. Probé pérdida de mensajes y éxito parcial. Para producción quedan alertas y cola de fallos. No prometo exactly-once distribuido.</p>
+          <p><strong>Riesgo:</strong> el receptor acepta un efecto y el worker cae antes de guardar éxito. Exijo deduplicar <strong>evento:destino</strong>. La reconciliación conserva IDs y excluye destinos en DLQ. Si SMTP falla, el aviso permanece pendiente; el correo puede duplicarse tras una caída y conserva Message-ID. Para producción quedan métricas, redrive supervisado y SMTP seguro. No prometo exactly-once distribuido.</p>
         </section>
       </div>
       <footer>Validación: golden de negocio y visuales, carreras, recuperación y compra en seis países. Decisión guía: proteger precio e intención de compra y recuperar sus efectos.</footer>

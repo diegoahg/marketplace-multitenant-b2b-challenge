@@ -34,11 +34,29 @@ services:
       HTTP_PORT: "8080"
       MONGO_URI: mongodb://mongo:27017/?replicaSet=rs0
       MONGO_DATABASE: marketplace
+      QUOTE_TTL: ${QUOTE_TTL:-15m}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    depends_on:
+      seed: {condition: service_completed_successfully}
+    stop_grace_period: 50s
+    networks: [backend]
+
+  worker:
+    build:
+      context: .
+      target: worker
+    restart: unless-stopped
+    environment:
+      MONGO_URI: mongodb://mongo:27017/?replicaSet=rs0
+      MONGO_DATABASE: marketplace
       PUBSUB_EMULATOR_HOST: pubsub-emulator:8085
       PUBSUB_PROJECT_ID: local-marketplace
       PUBSUB_TOPIC: orders-confirmed
-      PUBSUB_SUBSCRIPTION: orders-confirmed-worker
-      QUOTE_TTL: ${QUOTE_TTL:-15m}
+      PUBSUB_ERP_SUBSCRIPTION: orders-confirmed-erp
+      PUBSUB_PUSH_SUBSCRIPTION: orders-confirmed-push
+      SMTP_ADDRESS: mailpit:1025
+      DLQ_MAIL_FROM: worker@mariposamarket.test
+      DLQ_MAIL_TO: operations@mariposamarket.test
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       ERP_BASE_URL: ${ERP_BASE_URL:-}
       PUSH_BASE_URL: ${PUSH_BASE_URL:-}
@@ -46,6 +64,14 @@ services:
       seed: {condition: service_completed_successfully}
       pubsub-emulator: {condition: service_started}
     stop_grace_period: 50s
+    networks: [backend]
+
+  mailpit:
+    image: axllent/mailpit:v1.31.1
+    ports: ["127.0.0.1:8025:8025", "127.0.0.1:1025:1025"]
+    environment:
+      MP_DATABASE: /data/mailpit.db
+    volumes: ["mail-data:/data"]
     networks: [backend]
 
   tests:
@@ -63,6 +89,7 @@ services:
     networks: [backend]
 
 volumes:
+  mail-data:
   mongo-data:
 networks:
   backend:

@@ -43,7 +43,8 @@ func unique(keys ...string) driver.IndexModel {
 }
 func (s *Store) Init(ctx context.Context) error {
 	indices := map[string][]driver.IndexModel{
-		"countries": {unique("tenantId", "country")}, "products": {unique("tenantId", "country", "sku")},
+		"dead_letters": {{Keys: bson.D{{Key: "emailedAt", Value: 1}, {Key: "nextMail", Value: 1}, {Key: "until", Value: 1}, {Key: "createdAt", Value: 1}}}},
+		"countries":    {unique("tenantId", "country")}, "products": {unique("tenantId", "country", "sku")},
 		"customers": {unique("tenantId", "country", "customerId")}, "promotions": {unique("tenantId", "country", "id")},
 		"credits": {unique("tenantId", "country", "customerId")}, "quotes": {unique("tenantId", "country", "quoteId")},
 		"orders":      {unique("tenantId", "orderId"), unique("tenantId", "country", "quoteId")},

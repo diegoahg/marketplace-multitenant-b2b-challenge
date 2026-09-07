@@ -7,13 +7,10 @@ import (
 	"marketplace/internal/application"
 	"marketplace/internal/config"
 	api "marketplace/internal/http"
-	"marketplace/internal/integration"
-	"marketplace/internal/messaging"
 	mongo "marketplace/internal/repository/mongo"
 	"net/http"
 	"os"
 	"os/signal"
-	"sync"
 	"syscall"
 	"time"
 )
@@ -50,34 +47,8 @@ func run() error {
 	if e = store.Init(startup); e != nil {
 		return e
 	}
-	pubsub, e := messaging.NewEmulator(cfg.Emulator, cfg.Project, cfg.Topic, cfg.Subscription)
-	if e != nil {
-		return e
-	}
-	for {
-		if e = pubsub.Setup(startup); e == nil {
-			break
-		}
-		select {
-		case <-startup.Done():
-			return e
-		case <-time.After(time.Second):
-		}
-	}
 	service := &application.Service{Catalog: store, Quotes: store, Orders: store, Now: time.Now, QuoteTTL: cfg.QuoteTTL}
-	worker := &messaging.Worker{Effects: store, ERP: integration.New("erp", cfg.ERP, store.DB), Push: integration.New("push", cfg.Push, store.DB)}
-	workCtx, stopWork := context.WithCancel(context.Background())
-	defer stopWork()
-	var wg sync.WaitGroup
-	wg.Add(2)
-	go func() { defer wg.Done(); messaging.RunPublisher(workCtx, store, pubsub, log) }()
-	go func() { defer wg.Done(); messaging.RunConsumer(workCtx, pubsub, worker, log) }()
-	ready := func(ctx context.Context) error {
-		if e := store.Ping(ctx); e != nil {
-			return e
-		}
-		return pubsub.Ready(ctx)
-	}
+	ready := store.Ping
 	server := &http.Server{Addr: ":" + cfg.Port, Handler: api.Router(service, ready, log), ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 10 * time.Second, WriteTimeout: 35 * time.Second, IdleTimeout: 60 * time.Second}
 	result := make(chan error, 1)
 	go func() { log.Info("API listening", "port", cfg.Port); result <- server.ListenAndServe() }()
@@ -92,8 +63,6 @@ func run() error {
 	if shutdownErr != nil {
 		_ = server.Close()
 	}
-	stopWork()
-	wg.Wait()
 	if serveErr != nil && !errors.Is(serveErr, http.ErrServerClosed) {
 		return serveErr
 	}

@@ -1,28 +1,16 @@
 # Marketplace Order Engine
 
-Backend ejecutable de la prueba técnica: Go, API REST, MongoDB con transacciones, outbox y Google Pub/Sub Emulator. El punto de entrada es `cmd/api`; `cmd/seed` carga el escenario de demostración. La interfaz Flutter Web está en [`../frontend`](../frontend/README.md); el Compose de la raíz levanta el conjunto en `http://localhost:3000`.
+Backend ejecutable de la prueba técnica: Go, API REST, MongoDB con transacciones, outbox y Google Pub/Sub Emulator. Las aplicaciones `api/` y `worker/` se ejecutan en procesos y contenedores independientes, compartiendo el módulo Go y `internal/`. `cmd/seed` carga el escenario de demostración. La interfaz Flutter Web está en [`../frontend`](../frontend/README.md); el Compose de la raíz levanta el conjunto en `http://localhost:3000`.
 
 ## Contexto, problema y objetivos
 
-Un tendero cotiza bebidas de un distribuidor en un marketplace B2B multi-tenant y multi-país. Combos, descuentos por tramos, obsequios, impuestos y crédito deben producir un resultado explicable. Al confirmar se conserva el precio visto, se evita comprar dos veces por un reintento y se registra un evento recuperable.
+Un tendero cotiza bebidas de un distribuidor en un marketplace B2B multi-tenant. Combos, descuentos por tramos, obsequios, impuestos y crédito deben producir un resultado explicable. Al confirmar se conserva el precio visto, se evita comprar dos veces por un reintento y se registra un evento recuperable.
 
 Journey: catálogo → carrito → `POST /quotes` → revisión → `POST /orders` → `GET /orders/{id}`. Catálogo y reglas se cargan como datos; esta entrega no agrega una API administrativa.
 
 ## Arquitectura y stack
 
-```mermaid
-flowchart TD
-  H[HTTP net/http] --> A[Application: quote y confirmación]
-  A --> P[Pricing puro / Money exacto]
-  A --> R[Ports / MongoDB]
-  R --> T[Transacción: quote claim + order + credit + idempotency + outbox]
-  T --> O[Outbox publisher goroutine]
-  O --> Q[Pub/Sub Emulator]
-  Q --> W[Worker goroutine]
-  W --> E[ERP adapter]
-  W --> N[Push adapter]
-  W --> D[processed_events: progreso por destino]
-```
+![Arquitectura actual](../Documentation/images/arquitectura.svg)
 
 - `internal/domain`: Money, entidades, eventos y errores.
 - `internal/pricing`: cálculo determinista, sin HTTP ni base de datos.
@@ -47,7 +35,7 @@ docker compose logs -f api
 curl http://localhost:8080/ready
 ```
 
-También: `make docker-up`. Compose inicia el replica set, espera a que tenga un primario, ejecuta el seed y arranca la API. La API espera hasta 60 segundos por el emulador y crea el topic y la subscription. Si una descarga inicial tarda o el emulador no llega a estar disponible, consultar los logs y reiniciar `docker compose up -d api`.
+También: `make docker-up`. Compose inicia el replica set, espera a que tenga un primario, ejecuta el seed y arranca API y worker. La API solo requiere MongoDB: puede cotizar y confirmar con el broker o worker detenidos. El worker espera hasta 60 segundos por el emulador y crea el topic y la subscription; Compose lo reinicia ante fallos. Consultar `docker compose logs -f worker` para publicación y entrega a ERP/PUSH.
 
 El seed usa `$setOnInsert`: repetirlo no restaura el crédito gastado ni sobrescribe precios modificados. Los datos viven en el volumen `mongo-data`. `docker compose down` detiene el entorno y conserva los datos.
 
@@ -57,7 +45,9 @@ Para ejecutar Go en el host:
 docker compose up -d mongo pubsub-emulator
 # Exportar las variables de .env.example en la shell; Go no carga .env automáticamente.
 go run ./cmd/seed
-go run ./cmd/api
+go run ./api
+# En otra terminal, con las mismas variables MongoDB y las de mensajería:
+go run ./worker
 ```
 
 Los valores por defecto funcionan contra los puertos locales. El URI del host incluye `directConnection=true` porque el replica set anuncia el nombre Docker `mongo`. `.env` lo interpreta Compose para sus variables; nunca se guarda en Git.
@@ -85,7 +75,7 @@ Estos headers representan un contexto **de demostración**, no autenticación. E
 | `POST /orders` | 201, pedido ya persistido; requiere Idempotency-Key UUID |
 | `GET /orders/{id}` | 200, pedido del scope indicado |
 | `GET /health` | 200, proceso activo |
-| `GET /ready` | 200 si Mongo y subscription están disponibles; 503 si no |
+| `GET /ready` | 200 si Mongo está disponible; 503 si no. No mide disponibilidad del worker ni del broker. |
 
 ### Ejemplos curl
 
@@ -176,13 +166,21 @@ Se usan transacciones con snapshot y write concern majority. Los conflictos de e
 
 ## Transactional Outbox, Pub/Sub y Worker
 
+`api/` guarda pedido, crédito, idempotencia y outbox en una transacción; no publica ni consume mensajes. `worker/` ejecuta publisher/reconciliador, consumidor ERP, consumidor PUSH y envío de alertas DLQ. Publica eventos nuevos y recupera pendientes. Cada destino tiene su propia suscripción al tópico `orders-confirmed`, de modo que un fallo ERP no bloquea PUSH. No se eliminan los registros históricos del outbox.
+
+Para validar esta separación en Docker, desde la raíz ejecuta `node backend/scripts/worker-smoke.mjs`. Detiene temporalmente worker y emulador, confirma dos pedidos CASH con la API disponible, simula una publicación perdida y comprueba recuperación y recibos ERP/PUSH. Requiere los adaptadores mock de demo; siempre vuelve a iniciar ambos servicios y conserva los pedidos creados. CI ejecuta este recorrido después de Chrome.
+
 El publisher consulta hasta 50 eventos pendientes cada segundo. Publica y espera la respuesta de Pub/Sub antes de marcar `publishedAt`. Si se cae entre ambos pasos, vuelve a publicar; esto es **at-least-once**. Los eventos permanecen en Mongo durante una indisponibilidad del emulador.
 
-La consulta reconcilia también publicaciones de más de un minuto sin ambos destinos completados. Reenvía el mismo `eventId`; el progreso por destino y los receptores idempotentes evitan repetir efectos. Los eventos completados se filtran antes del límite del lote para que no bloqueen la recuperación. `publishedAt` representa el último intento confirmado por el broker, no el éxito de ERP/PUSH. El adaptador recrea topic/subscription si publish o pull reciben 404 tras reiniciar el emulador.
+La consulta reconcilia publicaciones de más de un minuto con algún destino pendiente; un destino completado o en DLQ es terminal. Reenvía el mismo `eventId` sin reiniciar contadores. Los eventos terminales se filtran antes del límite del lote. `publishedAt` representa la confirmación del broker, no el éxito de ERP/PUSH. El publisher asegura ambas suscripciones antes de publicar, también tras perder recursos del emulador.
 
-Topic `orders-confirmed`; subscription `orders-confirmed-worker`, creados automáticamente. El worker consume secuencialmente con ack deadline de 60 segundos y efectos con timeout de 10 segundos. Usa ack después de ambos destinos; falla o mensaje inválido: nack y pausa antes del retry. No confirma pedidos ni los borra ante errores de ERP/Push.
+Tópico `orders-confirmed`; suscripciones `orders-confirmed-erp` y `orders-confirmed-push`, creadas automáticamente. Cada consumidor usa ACK después de su acción, timeout de 10 segundos y plazo inicial de ACK de 60 segundos. Ante fallo no hace ACK: aplaza la entrega y guarda la próxima fecha. Hay cinco reintentos tras el inicial, con esperas de 1, 2, 4, 8 y 16 segundos. Al agotar los seis intentos se persiste una entrada única en la DLQ Mongo `dead_letters` y el estado terminal en una transacción; solo después se hace ACK del mensaje fuente.
 
-`processed_events` tiene índice único por `eventId`, progreso por destino y leases de un minuto con owner token. Si ERP tuvo éxito y Push falla, el retry continúa con Push. Un lease abandonado vence y puede recuperarse. No se promete exactly-once distribuido: si un destino confirmó y el worker murió antes de guardar el progreso, debe ser el propio destino quien deduplique.
+`processed_events` tiene índice único por `eventId`, progreso, errores, contador y próxima fecha por destino, además de leases de un minuto. Reiniciar el worker no pierde la política de retry. Si un destino confirmó y el worker murió antes de guardar el progreso, el receptor debe deduplicar: no se promete exactly-once distribuido.
+
+La DLQ conserva evento, destino, error, seis intentos y fecha. Un bucle independiente envía correo a **Mailpit, http://localhost:8025**; si SMTP falla reintenta tras 30 segundos sin borrar el registro. La alerta usa un Message-ID estable, pero puede repetirse si hay una caída después de enviarla y antes de guardar éxito. No hay redrive automático. [Configuración y prueba de fallos](worker/README.md). CI ejecuta `node backend/scripts/dlq-smoke.mjs` para comprobar ambos destinos, DLQ y recuperación del correo.
+
+La política se implementa en la aplicación para persistir un presupuesto por evento/destino; [Pub/Sub describe el forwarding nativo a DLQ como best-effort](https://docs.cloud.google.com/pubsub/docs/dead-letter-topics). Mailpit ofrece [SMTP y bandeja de pruebas local](https://mailpit.axllent.org/docs/usage/sending-messages/). Esta entrega mantiene exactamente dos suscripciones de negocio y utiliza Mongo como cola DLQ durable.
 
 ## ERP / Push
 

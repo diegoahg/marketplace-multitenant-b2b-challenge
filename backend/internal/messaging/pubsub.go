@@ -120,3 +120,14 @@ func (p *Emulator) Ack(ctx context.Context, id string) error {
 func (p *Emulator) Nack(ctx context.Context, id string) error {
 	return p.call(ctx, http.MethodPost, p.Subscription+":modifyAckDeadline", map[string]any{"ackIds": []string{id}, "ackDeadlineSeconds": 0}, nil, false)
 }
+
+func (p *Emulator) Defer(ctx context.Context, id string, delay time.Duration) error {
+	seconds := int((delay + time.Second - 1) / time.Second)
+	if seconds < 1 {
+		seconds = 1
+	}
+	if seconds > 600 {
+		seconds = 600
+	}
+	return p.call(ctx, http.MethodPost, p.Subscription+":modifyAckDeadline", map[string]any{"ackIds": []string{id}, "ackDeadlineSeconds": seconds}, nil, false)
+}

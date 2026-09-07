@@ -18,7 +18,7 @@ Si el backend ya está funcionando:
 docker compose up --build --no-deps -d frontend
 ```
 
-Si se recreó el emulador, el backend recupera sus recursos al recibir 404. La reconciliación repone eventos sin efectos completados después de un minuto; `/api/ready` refleja la recuperación. El emulador es volátil y Mongo conserva la outbox.
+Si se recreó el emulador, la aplicación worker recupera sus recursos al recibir 404. La reconciliación repone eventos sin efectos completados después de un minuto. `/api/ready` solo comprueba MongoDB; la API sigue aceptando compras mientras el worker o broker están detenidos. El emulador es volátil y Mongo conserva la outbox.
 
 ## Recorrido
 

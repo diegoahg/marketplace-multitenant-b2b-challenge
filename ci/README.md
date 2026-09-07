@@ -17,6 +17,8 @@ Para impedir merges con controles fallidos, seleccionar **CI required** como com
 
 ## Validación inicial del 6 de septiembre de 2026
 
+**Estado posterior:** el commit `9205099` pasó CI y Pages. El workspace incorpora después aplicaciones API/worker, dos suscripciones, DLQ y correo; el job de navegador incluye ahora `worker-smoke.mjs` y `dlq-smoke.mjs`. Esos cambios tienen evidencia local y requieren una nueva ejecución remota al publicarse. La revisión contra el PDF está en [revision-final.md](../Documentation/revision-final.md). Los resultados iniciales siguientes son históricos.
+
 Los comandos se ejecutaron en Docker sobre el workspace; el workflow todavía no se ha ejecutado en GitHub Actions.
 
 - Actionlint: sin errores de sintaxis/expresiones en los workflows.

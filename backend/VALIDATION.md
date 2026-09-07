@@ -1,5 +1,9 @@
 # Validación local
 
+**Dos suscripciones y DLQ — 7 de septiembre de 2026:** `destination_test.go` verifica retry 1/2/4/8/16 s persistido, reconstrucción del consumidor, sexto intento, éxito independiente, DLQ terminal, fallo SMTP y recuperación sin repetir correos ya registrados. `dlq-smoke.mjs` pasó con los procesos Docker reales: ERP y PUSH fallaron seis veces en pedidos distintos, otro ERP se recuperó tras dos fallos y las dos alertas llegaron a Mailpit después de interrumpir SMTP. Los mensajes originales se confirman solo tras éxito o commit de DLQ. `worker-smoke.mjs` también pasó con ambas suscripciones. Esta evidencia es local; CI incluye ambos recorridos.
+
+**Separación API/worker — 7 de septiembre de 2026:** build Docker de ambos ejecutables aprobado; pruebas Go `-race -tags=integration -count=1`, `go vet`, complejidad máxima 20 y actionlint aprobados. `worker-smoke.mjs` confirmó pedidos con worker/broker detenidos y verificó publicación pendiente, recuperación de publicación perdida y un recibo ERP/PUSH por evento al volver. Los ocho recorridos Chrome también pasaron. CI incorpora esta prueba de separación; estos resultados corresponden a la ejecución local.
+
 **Actualización posterior:** se corrigió la limitación del emulador descrita al final de esta validación histórica. Las pruebas de integración ya eliminan recursos Pub/Sub del propio test y verifican recreación, republicación por reconciliación, éxito parcial y ausencia de efectos duplicados. También pasan los nuevos casos de escala por familia. La documentación vigente está en [README.md](README.md).
 
 Ejecutada el 5 de septiembre de 2026 (hora de Chile), sobre el código de `168aceb`, con Docker Desktop 4.88.1, Engine 29.7.2, Compose v5.4.0 y contenedores Linux amd64. Go dentro de la imagen: 1.25.14. No se requirió instalar Go en Windows.

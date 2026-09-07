@@ -1,9 +1,13 @@
-.PHONY: build run test test-unit test-integration test-race docker-up docker-down seed lint verify benchmark
+.PHONY: build run worker test test-unit test-integration test-race docker-up docker-down seed lint verify benchmark
 build:
-	go build -o bin/api ./cmd/api
+	go build -o bin/api ./api
+	go build -o bin/worker ./worker
 	go build -o bin/seed ./cmd/seed
 run:
-	go run ./cmd/api
+	go run ./api
+
+worker:
+	go run ./worker
 test:
 	go test ./...
 test-unit: test

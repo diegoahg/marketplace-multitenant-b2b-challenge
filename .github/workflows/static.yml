@@ -42,6 +42,11 @@ jobs:
           test -s Documentation/index.html
           test -s Documentation/adr.html
           test -s Documentation/ADR.pdf
+          test -s Documentation/dominio.html
+          test -s Documentation/casos.html
+          test -s Documentation/revision-final.html
+          test -s Documentation/images/arquitectura.svg
+          test -s Documentation/images/worker_delivery.svg
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

@@ -2,8 +2,6 @@ package messaging
 
 import (
 	"context"
-	"encoding/base64"
-	"encoding/json"
 	"fmt"
 	"log/slog"
 	"marketplace/internal/application"
@@ -82,46 +80,6 @@ func RunPublisher(ctx context.Context, outbox ports.Outbox, publisher ports.Publ
 			log.Error("outbox retry", "error", e)
 		}
 		if !pause(ctx, time.Second) {
-			return
-		}
-	}
-}
-func RunConsumer(ctx context.Context, p *Emulator, w *Worker, log *slog.Logger) {
-	for ctx.Err() == nil {
-		deliveries, e := p.Pull(ctx)
-		if e != nil {
-			if ctx.Err() == nil {
-				log.Error("pubsub pull retry", "error", e)
-			}
-			if !pause(ctx, time.Second) {
-				return
-			}
-			continue
-		}
-		for _, msg := range deliveries {
-			bytes, err := base64.StdEncoding.DecodeString(msg.Message.Data)
-			var event d.OrderConfirmedEvent
-			if err == nil {
-				err = json.Unmarshal(bytes, &event)
-			}
-			if err == nil {
-				err = w.Handle(ctx, event)
-			}
-			if err != nil {
-				log.Error("event processing retry", "eventId", event.EventID, "error", err)
-				if nackErr := p.Nack(ctx, msg.AckID); nackErr != nil && ctx.Err() == nil {
-					log.Error("nack failed", "error", nackErr)
-				}
-				if !pause(ctx, time.Second) {
-					return
-				}
-				continue
-			}
-			if e = p.Ack(ctx, msg.AckID); e != nil && ctx.Err() == nil {
-				log.Error("ack failed; redelivery is safe", "error", e)
-			}
-		}
-		if len(deliveries) == 0 && !pause(ctx, 200*time.Millisecond) {
 			return
 		}
 	}

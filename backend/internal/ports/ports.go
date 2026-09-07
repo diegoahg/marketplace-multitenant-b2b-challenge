@@ -43,3 +43,18 @@ type Effects interface {
 	CompleteEffect(context.Context, string, string, string) error
 	ReleaseEffect(context.Context, string, string, string) error
 }
+
+type Deliveries interface {
+	Effects
+	DeliveryState(context.Context, string, string) (d.DeliveryState, error)
+	FailDelivery(context.Context, d.DeadLetter, string, time.Time, bool) error
+}
+
+type DeadLetters interface {
+	ClaimAlert(context.Context, string, time.Time) (d.DeadLetter, bool, error)
+	FinishAlert(context.Context, string, string, bool, string) error
+}
+
+type AlertSender interface {
+	Send(context.Context, d.DeadLetter) error
+}

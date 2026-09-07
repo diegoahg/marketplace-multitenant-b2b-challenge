@@ -1,0 +1,1546 @@
+{
+  "info": {
+    "name": "MariposaMarket - Backend",
+    "description": "Pruebas de API contra el seed de demostración. Ejecutar la colección completa en orden. Crea cotizaciones y un pedido CASH por iteración; no consume crédito. No verifica efectos asíncronos ERP/PUSH ni concurrencia: esos escenarios están en los tests de integración Go. Los headers de contexto son de demo, no autenticación. Los importes esperados requieren el seed original; repetir seed no sobrescribe datos modificados.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "tenantId",
+      "value": "tenant-demo",
+      "type": "string"
+    },
+    {
+      "key": "country",
+      "value": "PE",
+      "type": "string"
+    },
+    {
+      "key": "customerId",
+      "value": "CUSTOMER-001",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "01 - Disponibilidad",
+      "item": [
+        {
+          "name": "Health",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/health",
+            "description": "Health"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Proceso activo\", () => pm.expect(pm.response.json().status).to.eql(\"ok\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ready",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/ready",
+            "description": "Ready"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Dependencias listas\", () => pm.expect(pm.response.json().status).to.eql(\"ready\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "02 - Compra e idempotencia (ejecutar en orden)",
+      "item": [
+        {
+          "name": "01 - Cotizar 12 unidades",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Tenant-ID",
+                "value": "{{tenantId}}"
+              },
+              {
+                "key": "X-Country",
+                "value": "{{country}}"
+              },
+              {
+                "key": "X-Customer-ID",
+                "value": "{{customerId}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/quotes",
+            "description": "01 - Cotizar 12 unidades",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenantId\": \"{{tenantId}}\",\n  \"country\": \"{{country}}\",\n  \"customerId\": \"{{customerId}}\",\n  \"paymentMethod\": \"CASH\",\n  \"items\": [\n    {\n      \"sku\": \"SKU-001\",\n      \"quantity\": 12\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "[\"quoteId\",\"quoteSnapshot\",\"orderId\",\"orderSnapshot\"].forEach(k => pm.collectionVariables.unset(k));",
+                  "pm.collectionVariables.set(\"idempotencyKey\", pm.variables.replaceIn(\"{{$guid}}\"));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "",
+                  "const q = pm.response.json();",
+                  "const expected = {PE:[\"PEN\",2,\"1363\"],CL:[\"CLP\",0,\"13745\"],CO:[\"COP\",2,\"1155\"],EC:[\"USD\",2,\"1155\"],GT:[\"GTQ\",2,\"1155\"],AR:[\"ARS\",2,\"1155\"]}[q.country];",
+                  "pm.test(\"Moneda, escala y total del seed\", () => {",
+                  "  pm.expect(expected, \"País soportado\").to.be.an(\"array\");",
+                  "  pm.expect(q.total).to.eql({currency:expected[0],scale:expected[1],amount:expected[2]});",
+                  "});",
+                  "pm.test(\"Desglose y origen de beneficios\", () => {",
+                  "  pm.expect(q.lines).to.have.lengthOf(1);",
+                  "  pm.expect(q.lines[0].quantity).to.eql(12);",
+                  "  pm.expect(q.adjustments).to.have.lengthOf(2);",
+                  "  q.adjustments.forEach(a => { pm.expect(a.promotionType).to.eql(\"SCALE\"); pm.expect(a.promotionId).to.eql(\"SCALE-001\"); });",
+                  "  pm.expect(q.gifts[0].quantity).to.eql(2);",
+                  "  pm.expect(q.gifts[0].promotionId).to.eql(\"GIFT-001\");",
+                  "});",
+                  "pm.test(\"Aritmética exacta en unidades menores\", () => {",
+                  "  pm.expect(BigInt(q.grossSubtotal.amount)-BigInt(q.discountTotal.amount)).to.eql(BigInt(q.taxableBase.amount));",
+                  "  pm.expect(BigInt(q.taxableBase.amount)+BigInt(q.taxTotal.amount)).to.eql(BigInt(q.total.amount));",
+                  "});",
+                  "",
+                  "pm.test(\"Location de cotización\", () => pm.expect(pm.response.headers.get(\"Location\")).to.eql(\"/quotes/\"+q.quoteId));",
+                  "pm.collectionVariables.set(\"quoteId\", q.quoteId);",
+                  "pm.collectionVariables.set(\"quoteSnapshot\", JSON.stringify(q));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "02 - Consultar snapshot",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Tenant-ID",
+                "value": "{{tenantId}}"
+              },
+              {
+                "key": "X-Country",
+                "value": "{{country}}"
+              },
+              {
+                "key": "X-Customer-ID",
+                "value": "{{customerId}}"
+              }
+            ],
+            "url": "{{baseUrl}}/quotes/{{quoteId}}",
+            "description": "02 - Consultar snapshot"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// BSON dates preserve milliseconds; all other snapshot fields remain exact.",
+                  "function persistedPrecision(value) {",
+                  "  for (const key of [\"createdAt\", \"expiresAt\"]) {",
+                  "    if (value[key]) value[key] = new Date(value[key]).toISOString();",
+                  "  }",
+                  "  return value;",
+                  "}",
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test(\"Snapshot íntegro conservado\", () => pm.expect(persistedPrecision(pm.response.json())).to.eql(persistedPrecision(JSON.parse(pm.collectionVariables.get(\"quoteSnapshot\")))));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "03 - Confirmar al contado",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Tenant-ID",
+                "value": "{{tenantId}}"
+              },
+              {
+                "key": "X-Country",
+                "value": "{{country}}"
+              },
+              {
+                "key": "X-Customer-ID",
+                "value": "{{customerId}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Idempotency-Key",
+                "value": "{{idempotencyKey}}"
+              }
+            ],
+            "url": "{{baseUrl}}/orders",
+            "description": "03 - Confirmar al contado",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quoteId\": \"{{quoteId}}\",\n  \"customerId\": \"{{customerId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "",
+                  "const o = pm.response.json();",
+                  "pm.test(\"Pedido confirmado con precio cotizado\", () => {",
+                  " pm.expect(o.status).to.eql(\"CONFIRMED\");",
+                  " pm.expect(o.quoteId).to.eql(pm.collectionVariables.get(\"quoteId\"));",
+                  " pm.expect(o.total).to.eql(JSON.parse(pm.collectionVariables.get(\"quoteSnapshot\")).total);",
+                  " pm.expect(pm.response.headers.get(\"Location\")).to.eql(\"/orders/\"+o.orderId);",
+                  "});",
+                  "pm.collectionVariables.set(\"orderId\",o.orderId);",
+                  "pm.collectionVariables.set(\"orderSnapshot\",JSON.stringify(o));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "04 - Repetir misma confirmación",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Tenant-ID",
+                "value": "{{tenantId}}"
+              },
+              {
+                "key": "X-Country",
+                "value": "{{country}}"
+              },
+              {
+                "key": "X-Customer-ID",
+                "value": "{{customerId}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Idempotency-Key",
+                "value": "{{idempotencyKey}}"
+              }
+            ],
+            "url": "{{baseUrl}}/orders",
+            "description": "04 - Repetir misma confirmación",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quoteId\": \"{{quoteId}}\",\n  \"customerId\": \"{{customerId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// BSON dates preserve milliseconds; all other snapshot fields remain exact.",
+                  "function persistedPrecision(value) {",
+                  "  for (const key of [\"createdAt\", \"expiresAt\"]) {",
+                  "    if (value[key]) value[key] = new Date(value[key]).toISOString();",
+                  "  }",
+                  "  return value;",
+                  "}",
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "",
+                  "pm.test(\"Replay conserva el pedido (fechas a milisegundos)\", () => pm.expect(persistedPrecision(pm.response.json())).to.eql(persistedPrecision(JSON.parse(pm.collectionVariables.get(\"orderSnapshot\")))));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "05 - Consultar pedido",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Tenant-ID",
+                "value": "{{tenantId}}"
+              },
+              {
+                "key": "X-Country",
+                "value": "{{country}}"
+              },
+              {
+                "key": "X-Customer-ID",
+                "value": "{{customerId}}"
+              }
+            ],
+            "url": "{{baseUrl}}/orders/{{orderId}}",
+            "description": "05 - Consultar pedido"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// BSON dates preserve milliseconds; all other snapshot fields remain exact.",
+                  "function persistedPrecision(value) {",
+                  "  for (const key of [\"createdAt\", \"expiresAt\"]) {",
+                  "    if (value[key]) value[key] = new Date(value[key]).toISOString();",
+                  "  }",
+                  "  return value;",
+                  "}",
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test(\"Pedido persistido íntegro\", () => pm.expect(persistedPrecision(pm.response.json())).to.eql(persistedPrecision(JSON.parse(pm.collectionVariables.get(\"orderSnapshot\")))));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "06 - Otra clave para la misma cotización",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Tenant-ID",
+                "value": "{{tenantId}}"
+              },
+              {
+                "key": "X-Country",
+                "value": "{{country}}"
+              },
+              {
+                "key": "X-Customer-ID",
+                "value": "{{customerId}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Idempotency-Key",
+                "value": "{{$guid}}"
+              }
+            ],
+            "url": "{{baseUrl}}/orders",
+            "description": "06 - Otra clave para la misma cotización",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quoteId\": \"{{quoteId}}\",\n  \"customerId\": \"{{customerId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 409\", () => pm.response.to.have.status(409));",
+                  "pm.test(\"QUOTE_INVALID y trazabilidad\", () => { const e = pm.response.json(); pm.expect(e.code).to.eql(\"QUOTE_INVALID\"); pm.expect(e.message).to.be.a(\"string\").and.not.empty; pm.expect(e.traceId).to.eql(pm.response.headers.get(\"X-Trace-ID\")); pm.expect(e.traceId).to.be.a(\"string\").and.not.empty; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "07 - Misma clave con otro payload",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Tenant-ID",
+                "value": "{{tenantId}}"
+              },
+              {
+                "key": "X-Country",
+                "value": "{{country}}"
+              },
+              {
+                "key": "X-Customer-ID",
+                "value": "{{customerId}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Idempotency-Key",
+                "value": "{{idempotencyKey}}"
+              }
+            ],
+            "url": "{{baseUrl}}/orders",
+            "description": "07 - Misma clave con otro payload",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quoteId\": \"00000000-0000-4000-8000-000000000000\",\n  \"customerId\": \"{{customerId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 409\", () => pm.response.to.have.status(409));",
+                  "pm.test(\"IDEMPOTENCY_CONFLICT y trazabilidad\", () => { const e = pm.response.json(); pm.expect(e.code).to.eql(\"IDEMPOTENCY_CONFLICT\"); pm.expect(e.message).to.be.a(\"string\").and.not.empty; pm.expect(e.traceId).to.eql(pm.response.headers.get(\"X-Trace-ID\")); pm.expect(e.traceId).to.be.a(\"string\").and.not.empty; });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "03 - Cotizaciones en seis países",
+      "item": [
+        {
+          "name": "PE - Volumen y obsequios",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Tenant-ID",
+                "value": "{{tenantId}}"
+              },
+              {
+                "key": "X-Country",
+                "value": "PE"
+              },
+              {
+                "key": "X-Customer-ID",
+                "value": "{{customerId}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/quotes",
+            "description": "PE - Volumen y obsequios",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenantId\": \"{{tenantId}}\",\n  \"country\": \"PE\",\n  \"customerId\": \"{{customerId}}\",\n  \"paymentMethod\": \"CASH\",\n  \"items\": [\n    {\n      \"sku\": \"SKU-001\",\n      \"quantity\": 12\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "",
+                  "const q = pm.response.json();",
+                  "const expected = {PE:[\"PEN\",2,\"1363\"],CL:[\"CLP\",0,\"13745\"],CO:[\"COP\",2,\"1155\"],EC:[\"USD\",2,\"1155\"],GT:[\"GTQ\",2,\"1155\"],AR:[\"ARS\",2,\"1155\"]}[q.country];",
+                  "pm.test(\"Moneda, escala y total del seed\", () => {",
+                  "  pm.expect(expected, \"País soportado\").to.be.an(\"array\");",
+                  "  pm.expect(q.total).to.eql({currency:expected[0],scale:expected[1],amount:expected[2]});",
+                  "});",
+                  "pm.test(\"Desglose y origen de beneficios\", () => {",
+                  "  pm.expect(q.lines).to.have.lengthOf(1);",
+                  "  pm.expect(q.lines[0].quantity).to.eql(12);",
+                  "  pm.expect(q.adjustments).to.have.lengthOf(2);",
+                  "  q.adjustments.forEach(a => { pm.expect(a.promotionType).to.eql(\"SCALE\"); pm.expect(a.promotionId).to.eql(\"SCALE-001\"); });",
+                  "  pm.expect(q.gifts[0].quantity).to.eql(2);",
+                  "  pm.expect(q.gifts[0].promotionId).to.eql(\"GIFT-001\");",
+                  "});",
+                  "pm.test(\"Aritmética exacta en unidades menores\", () => {",
+                  "  pm.expect(BigInt(q.grossSubtotal.amount)-BigInt(q.discountTotal.amount)).to.eql(BigInt(q.taxableBase.amount));",
+                  "  pm.expect(BigInt(q.taxableBase.amount)+BigInt(q.taxTotal.amount)).to.eql(BigInt(q.total.amount));",
+                  "});",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "CL - Volumen y obsequios",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Tenant-ID",
+                "value": "{{tenantId}}"
+              },
+              {
+                "key": "X-Country",
+                "value": "CL"
+              },
+              {
+                "key": "X-Customer-ID",
+                "value": "{{customerId}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/quotes",
+            "description": "CL - Volumen y obsequios",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenantId\": \"{{tenantId}}\",\n  \"country\": \"CL\",\n  \"customerId\": \"{{customerId}}\",\n  \"paymentMethod\": \"CASH\",\n  \"items\": [\n    {\n      \"sku\": \"SKU-001\",\n      \"quantity\": 12\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "",
+                  "const q = pm.response.json();",
+                  "const expected = {PE:[\"PEN\",2,\"1363\"],CL:[\"CLP\",0,\"13745\"],CO:[\"COP\",2,\"1155\"],EC:[\"USD\",2,\"1155\"],GT:[\"GTQ\",2,\"1155\"],AR:[\"ARS\",2,\"1155\"]}[q.country];",
+                  "pm.test(\"Moneda, escala y total del seed\", () => {",
+                  "  pm.expect(expected, \"País soportado\").to.be.an(\"array\");",
+                  "  pm.expect(q.total).to.eql({currency:expected[0],scale:expected[1],amount:expected[2]});",
+                  "});",
+                  "pm.test(\"Desglose y origen de beneficios\", () => {",
+                  "  pm.expect(q.lines).to.have.lengthOf(1);",
+                  "  pm.expect(q.lines[0].quantity).to.eql(12);",
+                  "  pm.expect(q.adjustments).to.have.lengthOf(2);",
+                  "  q.adjustments.forEach(a => { pm.expect(a.promotionType).to.eql(\"SCALE\"); pm.expect(a.promotionId).to.eql(\"SCALE-001\"); });",
+                  "  pm.expect(q.gifts[0].quantity).to.eql(2);",
+                  "  pm.expect(q.gifts[0].promotionId).to.eql(\"GIFT-001\");",
+                  "});",
+                  "pm.test(\"Aritmética exacta en unidades menores\", () => {",
+                  "  pm.expect(BigInt(q.grossSubtotal.amount)-BigInt(q.discountTotal.amount)).to.eql(BigInt(q.taxableBase.amount));",
+                  "  pm.expect(BigInt(q.taxableBase.amount)+BigInt(q.taxTotal.amount)).to.eql(BigInt(q.total.amount));",
+                  "});",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "CO - Volumen y obsequios",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Tenant-ID",
+                "value": "{{tenantId}}"
+              },
+              {
+                "key": "X-Country",
+                "value": "CO"
+              },
+              {
+                "key": "X-Customer-ID",
+                "value": "{{customerId}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/quotes",
+            "description": "CO - Volumen y obsequios",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenantId\": \"{{tenantId}}\",\n  \"country\": \"CO\",\n  \"customerId\": \"{{customerId}}\",\n  \"paymentMethod\": \"CASH\",\n  \"items\": [\n    {\n      \"sku\": \"SKU-001\",\n      \"quantity\": 12\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "",
+                  "const q = pm.response.json();",
+                  "const expected = {PE:[\"PEN\",2,\"1363\"],CL:[\"CLP\",0,\"13745\"],CO:[\"COP\",2,\"1155\"],EC:[\"USD\",2,\"1155\"],GT:[\"GTQ\",2,\"1155\"],AR:[\"ARS\",2,\"1155\"]}[q.country];",
+                  "pm.test(\"Moneda, escala y total del seed\", () => {",
+                  "  pm.expect(expected, \"País soportado\").to.be.an(\"array\");",
+                  "  pm.expect(q.total).to.eql({currency:expected[0],scale:expected[1],amount:expected[2]});",
+                  "});",
+                  "pm.test(\"Desglose y origen de beneficios\", () => {",
+                  "  pm.expect(q.lines).to.have.lengthOf(1);",
+                  "  pm.expect(q.lines[0].quantity).to.eql(12);",
+                  "  pm.expect(q.adjustments).to.have.lengthOf(2);",
+                  "  q.adjustments.forEach(a => { pm.expect(a.promotionType).to.eql(\"SCALE\"); pm.expect(a.promotionId).to.eql(\"SCALE-001\"); });",
+                  "  pm.expect(q.gifts[0].quantity).to.eql(2);",
+                  "  pm.expect(q.gifts[0].promotionId).to.eql(\"GIFT-001\");",
+                  "});",
+                  "pm.test(\"Aritmética exacta en unidades menores\", () => {",
+                  "  pm.expect(BigInt(q.grossSubtotal.amount)-BigInt(q.discountTotal.amount)).to.eql(BigInt(q.taxableBase.amount));",
+                  "  pm.expect(BigInt(q.taxableBase.amount)+BigInt(q.taxTotal.amount)).to.eql(BigInt(q.total.amount));",
+                  "});",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "EC - Volumen y obsequios",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Tenant-ID",
+                "value": "{{tenantId}}"
+              },
+              {
+                "key": "X-Country",
+                "value": "EC"
+              },
+              {
+                "key": "X-Customer-ID",
+                "value": "{{customerId}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/quotes",
+            "description": "EC - Volumen y obsequios",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenantId\": \"{{tenantId}}\",\n  \"country\": \"EC\",\n  \"customerId\": \"{{customerId}}\",\n  \"paymentMethod\": \"CASH\",\n  \"items\": [\n    {\n      \"sku\": \"SKU-001\",\n      \"quantity\": 12\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "",
+                  "const q = pm.response.json();",
+                  "const expected = {PE:[\"PEN\",2,\"1363\"],CL:[\"CLP\",0,\"13745\"],CO:[\"COP\",2,\"1155\"],EC:[\"USD\",2,\"1155\"],GT:[\"GTQ\",2,\"1155\"],AR:[\"ARS\",2,\"1155\"]}[q.country];",
+                  "pm.test(\"Moneda, escala y total del seed\", () => {",
+                  "  pm.expect(expected, \"País soportado\").to.be.an(\"array\");",
+                  "  pm.expect(q.total).to.eql({currency:expected[0],scale:expected[1],amount:expected[2]});",
+                  "});",
+                  "pm.test(\"Desglose y origen de beneficios\", () => {",
+                  "  pm.expect(q.lines).to.have.lengthOf(1);",
+                  "  pm.expect(q.lines[0].quantity).to.eql(12);",
+                  "  pm.expect(q.adjustments).to.have.lengthOf(2);",
+                  "  q.adjustments.forEach(a => { pm.expect(a.promotionType).to.eql(\"SCALE\"); pm.expect(a.promotionId).to.eql(\"SCALE-001\"); });",
+                  "  pm.expect(q.gifts[0].quantity).to.eql(2);",
+                  "  pm.expect(q.gifts[0].promotionId).to.eql(\"GIFT-001\");",
+                  "});",
+                  "pm.test(\"Aritmética exacta en unidades menores\", () => {",
+                  "  pm.expect(BigInt(q.grossSubtotal.amount)-BigInt(q.discountTotal.amount)).to.eql(BigInt(q.taxableBase.amount));",
+                  "  pm.expect(BigInt(q.taxableBase.amount)+BigInt(q.taxTotal.amount)).to.eql(BigInt(q.total.amount));",
+                  "});",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GT - Volumen y obsequios",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Tenant-ID",
+                "value": "{{tenantId}}"
+              },
+              {
+                "key": "X-Country",
+                "value": "GT"
+              },
+              {
+                "key": "X-Customer-ID",
+                "value": "{{customerId}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/quotes",
+            "description": "GT - Volumen y obsequios",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenantId\": \"{{tenantId}}\",\n  \"country\": \"GT\",\n  \"customerId\": \"{{customerId}}\",\n  \"paymentMethod\": \"CASH\",\n  \"items\": [\n    {\n      \"sku\": \"SKU-001\",\n      \"quantity\": 12\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "",
+                  "const q = pm.response.json();",
+                  "const expected = {PE:[\"PEN\",2,\"1363\"],CL:[\"CLP\",0,\"13745\"],CO:[\"COP\",2,\"1155\"],EC:[\"USD\",2,\"1155\"],GT:[\"GTQ\",2,\"1155\"],AR:[\"ARS\",2,\"1155\"]}[q.country];",
+                  "pm.test(\"Moneda, escala y total del seed\", () => {",
+                  "  pm.expect(expected, \"País soportado\").to.be.an(\"array\");",
+                  "  pm.expect(q.total).to.eql({currency:expected[0],scale:expected[1],amount:expected[2]});",
+                  "});",
+                  "pm.test(\"Desglose y origen de beneficios\", () => {",
+                  "  pm.expect(q.lines).to.have.lengthOf(1);",
+                  "  pm.expect(q.lines[0].quantity).to.eql(12);",
+                  "  pm.expect(q.adjustments).to.have.lengthOf(2);",
+                  "  q.adjustments.forEach(a => { pm.expect(a.promotionType).to.eql(\"SCALE\"); pm.expect(a.promotionId).to.eql(\"SCALE-001\"); });",
+                  "  pm.expect(q.gifts[0].quantity).to.eql(2);",
+                  "  pm.expect(q.gifts[0].promotionId).to.eql(\"GIFT-001\");",
+                  "});",
+                  "pm.test(\"Aritmética exacta en unidades menores\", () => {",
+                  "  pm.expect(BigInt(q.grossSubtotal.amount)-BigInt(q.discountTotal.amount)).to.eql(BigInt(q.taxableBase.amount));",
+                  "  pm.expect(BigInt(q.taxableBase.amount)+BigInt(q.taxTotal.amount)).to.eql(BigInt(q.total.amount));",
+                  "});",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "AR - Volumen y obsequios",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Tenant-ID",
+                "value": "{{tenantId}}"
+              },
+              {
+                "key": "X-Country",
+                "value": "AR"
+              },
+              {
+                "key": "X-Customer-ID",
+                "value": "{{customerId}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/quotes",
+            "description": "AR - Volumen y obsequios",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenantId\": \"{{tenantId}}\",\n  \"country\": \"AR\",\n  \"customerId\": \"{{customerId}}\",\n  \"paymentMethod\": \"CASH\",\n  \"items\": [\n    {\n      \"sku\": \"SKU-001\",\n      \"quantity\": 12\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "",
+                  "const q = pm.response.json();",
+                  "const expected = {PE:[\"PEN\",2,\"1363\"],CL:[\"CLP\",0,\"13745\"],CO:[\"COP\",2,\"1155\"],EC:[\"USD\",2,\"1155\"],GT:[\"GTQ\",2,\"1155\"],AR:[\"ARS\",2,\"1155\"]}[q.country];",
+                  "pm.test(\"Moneda, escala y total del seed\", () => {",
+                  "  pm.expect(expected, \"País soportado\").to.be.an(\"array\");",
+                  "  pm.expect(q.total).to.eql({currency:expected[0],scale:expected[1],amount:expected[2]});",
+                  "});",
+                  "pm.test(\"Desglose y origen de beneficios\", () => {",
+                  "  pm.expect(q.lines).to.have.lengthOf(1);",
+                  "  pm.expect(q.lines[0].quantity).to.eql(12);",
+                  "  pm.expect(q.adjustments).to.have.lengthOf(2);",
+                  "  q.adjustments.forEach(a => { pm.expect(a.promotionType).to.eql(\"SCALE\"); pm.expect(a.promotionId).to.eql(\"SCALE-001\"); });",
+                  "  pm.expect(q.gifts[0].quantity).to.eql(2);",
+                  "  pm.expect(q.gifts[0].promotionId).to.eql(\"GIFT-001\");",
+                  "});",
+                  "pm.test(\"Aritmética exacta en unidades menores\", () => {",
+                  "  pm.expect(BigInt(q.grossSubtotal.amount)-BigInt(q.discountTotal.amount)).to.eql(BigInt(q.taxableBase.amount));",
+                  "  pm.expect(BigInt(q.taxableBase.amount)+BigInt(q.taxTotal.amount)).to.eql(BigInt(q.total.amount));",
+                  "});",
+                  ""
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "04 - Crédito insuficiente (ejecutar en orden)",
+      "item": [
+        {
+          "name": "01 - Cotizar crédito insuficiente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Tenant-ID",
+                "value": "{{tenantId}}"
+              },
+              {
+                "key": "X-Country",
+                "value": "PE"
+              },
+              {
+                "key": "X-Customer-ID",
+                "value": "{{customerId}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/quotes",
+            "description": "01 - Cotizar crédito insuficiente",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenantId\": \"{{tenantId}}\",\n  \"country\": \"PE\",\n  \"customerId\": \"{{customerId}}\",\n  \"paymentMethod\": \"CREDIT\",\n  \"items\": [\n    {\n      \"sku\": \"SKU-001\",\n      \"quantity\": 1000000\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "",
+                  "const q = pm.response.json();",
+                  "pm.test(\"Crédito insuficiente visible sin rechazar cotización\", () => pm.expect(q.creditEvaluation.eligible).to.eql(false));",
+                  "pm.collectionVariables.set(\"creditQuoteId\",q.quoteId);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "02 - Rechazar confirmación sin saldo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Tenant-ID",
+                "value": "{{tenantId}}"
+              },
+              {
+                "key": "X-Country",
+                "value": "PE"
+              },
+              {
+                "key": "X-Customer-ID",
+                "value": "{{customerId}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Idempotency-Key",
+                "value": "{{$guid}}"
+              }
+            ],
+            "url": "{{baseUrl}}/orders",
+            "description": "02 - Rechazar confirmación sin saldo",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quoteId\": \"{{creditQuoteId}}\",\n  \"customerId\": \"{{customerId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 409\", () => pm.response.to.have.status(409));",
+                  "pm.test(\"CREDIT_INSUFFICIENT y trazabilidad\", () => { const e = pm.response.json(); pm.expect(e.code).to.eql(\"CREDIT_INSUFFICIENT\"); pm.expect(e.message).to.be.a(\"string\").and.not.empty; pm.expect(e.traceId).to.eql(pm.response.headers.get(\"X-Trace-ID\")); pm.expect(e.traceId).to.be.a(\"string\").and.not.empty; });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "05 - Validaciones y aislamiento (después de compra)",
+      "item": [
+        {
+          "name": "Headers de contexto ausentes",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/quotes",
+            "description": "Headers de contexto ausentes",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenantId\": \"{{tenantId}}\",\n  \"country\": \"{{country}}\",\n  \"customerId\": \"{{customerId}}\",\n  \"paymentMethod\": \"CASH\",\n  \"items\": [\n    {\n      \"sku\": \"SKU-001\",\n      \"quantity\": 12\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"INVALID_REQUEST y trazabilidad\", () => { const e = pm.response.json(); pm.expect(e.code).to.eql(\"INVALID_REQUEST\"); pm.expect(e.message).to.be.a(\"string\").and.not.empty; pm.expect(e.traceId).to.eql(pm.response.headers.get(\"X-Trace-ID\")); pm.expect(e.traceId).to.be.a(\"string\").and.not.empty; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Scope del cuerpo distinto",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Tenant-ID",
+                "value": "{{tenantId}}"
+              },
+              {
+                "key": "X-Country",
+                "value": "{{country}}"
+              },
+              {
+                "key": "X-Customer-ID",
+                "value": "{{customerId}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/quotes",
+            "description": "Scope del cuerpo distinto",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenantId\": \"other-tenant\",\n  \"country\": \"{{country}}\",\n  \"customerId\": \"{{customerId}}\",\n  \"paymentMethod\": \"CASH\",\n  \"items\": [\n    {\n      \"sku\": \"SKU-001\",\n      \"quantity\": 12\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"INVALID_REQUEST y trazabilidad\", () => { const e = pm.response.json(); pm.expect(e.code).to.eql(\"INVALID_REQUEST\"); pm.expect(e.message).to.be.a(\"string\").and.not.empty; pm.expect(e.traceId).to.eql(pm.response.headers.get(\"X-Trace-ID\")); pm.expect(e.traceId).to.be.a(\"string\").and.not.empty; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cantidad cero",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Tenant-ID",
+                "value": "{{tenantId}}"
+              },
+              {
+                "key": "X-Country",
+                "value": "{{country}}"
+              },
+              {
+                "key": "X-Customer-ID",
+                "value": "{{customerId}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/quotes",
+            "description": "Cantidad cero",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenantId\": \"{{tenantId}}\",\n  \"country\": \"{{country}}\",\n  \"customerId\": \"{{customerId}}\",\n  \"paymentMethod\": \"CASH\",\n  \"items\": [\n    {\n      \"sku\": \"SKU-001\",\n      \"quantity\": 0\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"INVALID_REQUEST y trazabilidad\", () => { const e = pm.response.json(); pm.expect(e.code).to.eql(\"INVALID_REQUEST\"); pm.expect(e.message).to.be.a(\"string\").and.not.empty; pm.expect(e.traceId).to.eql(pm.response.headers.get(\"X-Trace-ID\")); pm.expect(e.traceId).to.be.a(\"string\").and.not.empty; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "SKU duplicado",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Tenant-ID",
+                "value": "{{tenantId}}"
+              },
+              {
+                "key": "X-Country",
+                "value": "{{country}}"
+              },
+              {
+                "key": "X-Customer-ID",
+                "value": "{{customerId}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/quotes",
+            "description": "SKU duplicado",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenantId\": \"{{tenantId}}\",\n  \"country\": \"{{country}}\",\n  \"customerId\": \"{{customerId}}\",\n  \"paymentMethod\": \"CASH\",\n  \"items\": [\n    {\n      \"sku\": \"SKU-001\",\n      \"quantity\": 1\n    },\n    {\n      \"sku\": \"SKU-001\",\n      \"quantity\": 2\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"INVALID_REQUEST y trazabilidad\", () => { const e = pm.response.json(); pm.expect(e.code).to.eql(\"INVALID_REQUEST\"); pm.expect(e.message).to.be.a(\"string\").and.not.empty; pm.expect(e.traceId).to.eql(pm.response.headers.get(\"X-Trace-ID\")); pm.expect(e.traceId).to.be.a(\"string\").and.not.empty; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Campo desconocido",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Tenant-ID",
+                "value": "{{tenantId}}"
+              },
+              {
+                "key": "X-Country",
+                "value": "{{country}}"
+              },
+              {
+                "key": "X-Customer-ID",
+                "value": "{{customerId}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/quotes",
+            "description": "Campo desconocido",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenantId\": \"{{tenantId}}\",\n  \"country\": \"{{country}}\",\n  \"customerId\": \"{{customerId}}\",\n  \"paymentMethod\": \"CASH\",\n  \"items\": [\n    {\n      \"sku\": \"SKU-001\",\n      \"quantity\": 12\n    }\n  ],\n  \"unexpected\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"INVALID_REQUEST y trazabilidad\", () => { const e = pm.response.json(); pm.expect(e.code).to.eql(\"INVALID_REQUEST\"); pm.expect(e.message).to.be.a(\"string\").and.not.empty; pm.expect(e.traceId).to.eql(pm.response.headers.get(\"X-Trace-ID\")); pm.expect(e.traceId).to.be.a(\"string\").and.not.empty; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Producto inexistente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Tenant-ID",
+                "value": "{{tenantId}}"
+              },
+              {
+                "key": "X-Country",
+                "value": "{{country}}"
+              },
+              {
+                "key": "X-Customer-ID",
+                "value": "{{customerId}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/quotes",
+            "description": "Producto inexistente",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenantId\": \"{{tenantId}}\",\n  \"country\": \"{{country}}\",\n  \"customerId\": \"{{customerId}}\",\n  \"paymentMethod\": \"CASH\",\n  \"items\": [\n    {\n      \"sku\": \"NONEXISTENT\",\n      \"quantity\": 1\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 404\", () => pm.response.to.have.status(404));",
+                  "pm.test(\"PRODUCT_NOT_FOUND y trazabilidad\", () => { const e = pm.response.json(); pm.expect(e.code).to.eql(\"PRODUCT_NOT_FOUND\"); pm.expect(e.message).to.be.a(\"string\").and.not.empty; pm.expect(e.traceId).to.eql(pm.response.headers.get(\"X-Trace-ID\")); pm.expect(e.traceId).to.be.a(\"string\").and.not.empty; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Confirmación sin clave",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Tenant-ID",
+                "value": "{{tenantId}}"
+              },
+              {
+                "key": "X-Country",
+                "value": "{{country}}"
+              },
+              {
+                "key": "X-Customer-ID",
+                "value": "{{customerId}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/orders",
+            "description": "Confirmación sin clave",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quoteId\": \"{{quoteId}}\",\n  \"customerId\": \"{{customerId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"INVALID_REQUEST y trazabilidad\", () => { const e = pm.response.json(); pm.expect(e.code).to.eql(\"INVALID_REQUEST\"); pm.expect(e.message).to.be.a(\"string\").and.not.empty; pm.expect(e.traceId).to.eql(pm.response.headers.get(\"X-Trace-ID\")); pm.expect(e.traceId).to.be.a(\"string\").and.not.empty; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Pedido inexistente",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Tenant-ID",
+                "value": "{{tenantId}}"
+              },
+              {
+                "key": "X-Country",
+                "value": "{{country}}"
+              },
+              {
+                "key": "X-Customer-ID",
+                "value": "{{customerId}}"
+              }
+            ],
+            "url": "{{baseUrl}}/orders/00000000-0000-4000-8000-000000000000",
+            "description": "Pedido inexistente"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 404\", () => pm.response.to.have.status(404));",
+                  "pm.test(\"ORDER_NOT_FOUND y trazabilidad\", () => { const e = pm.response.json(); pm.expect(e.code).to.eql(\"ORDER_NOT_FOUND\"); pm.expect(e.message).to.be.a(\"string\").and.not.empty; pm.expect(e.traceId).to.eql(pm.response.headers.get(\"X-Trace-ID\")); pm.expect(e.traceId).to.be.a(\"string\").and.not.empty; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Pedido de otro tenant",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Tenant-ID",
+                "value": "other-tenant"
+              },
+              {
+                "key": "X-Country",
+                "value": "{{country}}"
+              },
+              {
+                "key": "X-Customer-ID",
+                "value": "{{customerId}}"
+              }
+            ],
+            "url": "{{baseUrl}}/orders/{{orderId}}",
+            "description": "Pedido de otro tenant"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 404\", () => pm.response.to.have.status(404));",
+                  "pm.test(\"ORDER_NOT_FOUND y trazabilidad\", () => { const e = pm.response.json(); pm.expect(e.code).to.eql(\"ORDER_NOT_FOUND\"); pm.expect(e.message).to.be.a(\"string\").and.not.empty; pm.expect(e.traceId).to.eql(pm.response.headers.get(\"X-Trace-ID\")); pm.expect(e.traceId).to.be.a(\"string\").and.not.empty; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Pedido de otro cliente",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Tenant-ID",
+                "value": "{{tenantId}}"
+              },
+              {
+                "key": "X-Country",
+                "value": "{{country}}"
+              },
+              {
+                "key": "X-Customer-ID",
+                "value": "OTHER-CUSTOMER"
+              }
+            ],
+            "url": "{{baseUrl}}/orders/{{orderId}}",
+            "description": "Pedido de otro cliente"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 404\", () => pm.response.to.have.status(404));",
+                  "pm.test(\"ORDER_NOT_FOUND y trazabilidad\", () => { const e = pm.response.json(); pm.expect(e.code).to.eql(\"ORDER_NOT_FOUND\"); pm.expect(e.message).to.be.a(\"string\").and.not.empty; pm.expect(e.traceId).to.eql(pm.response.headers.get(\"X-Trace-ID\")); pm.expect(e.traceId).to.be.a(\"string\").and.not.empty; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cotización de otro país",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Tenant-ID",
+                "value": "{{tenantId}}"
+              },
+              {
+                "key": "X-Country",
+                "value": "ZZ"
+              },
+              {
+                "key": "X-Customer-ID",
+                "value": "{{customerId}}"
+              }
+            ],
+            "url": "{{baseUrl}}/quotes/{{quoteId}}",
+            "description": "Cotización de otro país"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 404\", () => pm.response.to.have.status(404));",
+                  "pm.test(\"QUOTE_NOT_FOUND y trazabilidad\", () => { const e = pm.response.json(); pm.expect(e.code).to.eql(\"QUOTE_NOT_FOUND\"); pm.expect(e.message).to.be.a(\"string\").and.not.empty; pm.expect(e.traceId).to.eql(pm.response.headers.get(\"X-Trace-ID\")); pm.expect(e.traceId).to.be.a(\"string\").and.not.empty; });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

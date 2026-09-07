@@ -64,6 +64,8 @@ Los valores por defecto funcionan contra los puertos locales. El URI del host in
 
 ## API Contracts v1
 
+Colección ejecutable de [Postman y entorno Docker local](contracts/postman/README.md): cotizaciones, compra, idempotencia, seis países, crédito insuficiente y validaciones del contrato, con variables y aserciones automáticas.
+
 OpenAPI 3.1 en `contracts/openapi.json`; ejemplos versionados en `contracts/http/`; evento y JSON Schema en `contracts/events/`. Los UUID y fechas de ejemplo son ilustrativos: usar el `quoteId` devuelto por la API. Un test compara el ejemplo de quote contra el motor y el seed.
 
 Todas las rutas de negocio requieren:

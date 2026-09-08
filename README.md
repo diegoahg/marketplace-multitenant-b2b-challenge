@@ -33,3 +33,5 @@ Detalles de ejecución, arquitectura, pruebas y límites: [frontend](frontend/RE
 [Colección de Postman y entorno](backend/contracts/postman/README.md) · [Worker, reintentos y DLQ](backend/worker/README.md).
 
 Integración continua: [workflow de pruebas, sintaxis, complejidad y seguridad](.github/workflows/ci.yml). Consulta los controles y la evidencia local e histórica en [ci/README.md](ci/README.md). El estado de una ejecución anterior no acredita los cambios todavía sin publicar.
+
+Para repetir o retomar esta app con IA, usa el skill [MariposaMarket](.agents/skills/mariposa-marketplace/SKILL.md): `Usa $mariposa-marketplace para preparar la app y ejecutar su validación completa`. Sustituye el antiguo archivo `backend/instruccion.txt` y se versiona con el proyecto.

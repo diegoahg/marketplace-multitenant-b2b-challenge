@@ -1,0 +1,4 @@
+interface:
+  display_name: "MariposaMarket"
+  short_description: "Prepara y valida la demo del marketplace B2B"
+  default_prompt: "Usa $mariposa-marketplace para preparar nuevamente la app y validar su funcionamiento completo."

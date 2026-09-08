@@ -8,7 +8,7 @@ El workflow [ci.yml](../.github/workflows/ci.yml) corre en cada push, pull reque
 | Flutter syntax and golden tests | Formato Dart, `flutter analyze` y `flutter test` en Flutter 3.44.0/Linux. Compara los ocho golden; nunca los regenera. |
 | Go and Dart complexity | Gocyclo 0.6.0 y Dart Code Linter 4.3.0. Complejidad ciclomática máxima 20; Go excluye archivos de pruebas y Dart analiza `lib`. Cualquier exceso hace fallar el job. |
 | Security and workflow validation | Actionlint 1.7.7 para YAML y expresiones de Actions; Gosec 2.29.0 para código Go con severidad y confianza al menos medias; Trivy 0.74.0 para secretos y vulnerabilidades HIGH/CRITICAL en dependencias Go, Dart y npm, incluidas dependencias de desarrollo. |
-| Chrome end-to-end in Docker | Compila la aplicación, espera `/api/ready`, verifica sintaxis JS y ejecuta ocho recorridos Playwright con Chrome y API real, incluidos CO/COP, EC/USD, GT/GTQ y AR/ARS. |
+| Chrome end-to-end in Docker | Compila la aplicación, espera `/api/ready`, verifica sintaxis JS y ejecuta nueve recorridos Playwright con Chrome y API real, incluidos CO/COP, EC/USD, GT/GTQ y AR/ARS. |
 | CI required | Falla si cualquier job anterior falla, se cancela o se omite. |
 
 El workflow usa `contents: read`, acciones fijadas por SHA, Trivy fijado por digest y no persiste credenciales del checkout. No necesita credenciales cloud, claves de scanners ni servicios de pago. Los jobs de integración y navegador tienen entornos independientes y eliminan sus contenedores y volúmenes al terminar. Los informes de complejidad/seguridad y las evidencias de pruebas fallidas se conservan como artefactos durante siete días. Bash utiliza `pipefail`, por lo que `tee` no oculta fallos de los scanners.
@@ -17,9 +17,9 @@ Para impedir merges con controles fallidos, seleccionar **CI required** como com
 
 ## Validación inicial del 6 de septiembre de 2026
 
-**Estado posterior:** el commit `9205099` pasó CI y Pages. El workspace incorpora después aplicaciones API/worker, dos suscripciones, DLQ y correo; el job de navegador incluye ahora `worker-smoke.mjs` y `dlq-smoke.mjs`. Esos cambios tienen evidencia local y requieren una nueva ejecución remota al publicarse. La revisión contra el PDF está en [revision-final.md](../Documentation/revision-final.md). Los resultados iniciales siguientes son históricos.
+**Estado posterior (7 de septiembre):** el commit `41d130c` ya está publicado. Go, Flutter, complejidad y seguridad aprobaron; el job de navegador falló durante la descarga de módulos Go por un timeout TLS. La corrección añade tres intentos como máximo, conserva el fallo si persiste y separa compilación de arranque con log de build como artefacto. Su validación remota está pendiente. La revisión contra el PDF está en [revision-final.md](../Documentation/revision-final.md). Los resultados iniciales siguientes son históricos.
 
-Los comandos se ejecutaron en Docker sobre el workspace; el workflow todavía no se ha ejecutado en GitHub Actions.
+En esa validación inicial, los comandos se ejecutaron en Docker sobre el workspace y el workflow aún no se había ejecutado en GitHub Actions.
 
 - Actionlint: sin errores de sintaxis/expresiones en los workflows.
 - Go: pruebas unitarias, golden e integración con detector de carreras aprobadas; `go vet` aprobado. Se normalizó con `gofmt` el formato de tres archivos de pruebas que no cumplían el nuevo control.
@@ -42,7 +42,19 @@ Trivy detectó 13 vulnerabilidades HIGH/CRITICAL en `backend/go.mod`: 12 altas y
 
 La revisión posterior dividió el motor en etapas y separó validación de eventos y parsing/redondeo de dinero. Gocyclo ya no encuentra funciones por encima de 20. Se actualizaron `x/crypto` a 0.55.0, `x/text` a 0.41.0 y `x/sync` a 0.22.0; Trivy volvió a escanear los tres lockfiles y no encontró vulnerabilidades HIGH/CRITICAL. No se aumentaron umbrales ni se añadieron excepciones. Los resultados originales anteriores se conservan como evidencia del problema corregido.
 
-Las pruebas Go con `-race -tags=integration` incluyen ahora escala por familia, orden del carrito, combo e incompatibilidades, además de pérdida de recursos del broker y reconciliación de destinos incompletos. Flutter tiene 43 pruebas y ocho golden; Chrome agrega cuatro compras en monedas nuevas. El ADR de una página se publica con la documentación.
+Las pruebas Go con `-race -tags=integration` incluyen ahora escala por familia, orden del carrito, combo e incompatibilidades, además de pérdida de recursos del broker y reconciliación de destinos incompletos. Flutter tiene 45 pruebas y ocho golden; Chrome tiene nueve recorridos, incluidas cuatro compras en monedas nuevas y el detalle de pedido. El ADR de una página se publica con la documentación.
+
+## Suite de pruebas con un comando
+
+Desde la raíz, en Bash o PowerShell:
+
+```sh
+node scripts/test.mjs
+```
+
+Requiere Node.js 20+ (22 en CI), Docker Compose con contenedores Linux e Internet. Instala npm y Chrome; en Linux, Playwright puede solicitar privilegios para sus dependencias de sistema. Construye las imágenes, levanta Mongo/PubSub, ejecuta formato/vet, la regresión de reintentos de descarga, Go con `-race -tags=integration`, formato/análisis Flutter y sus tests, nueve E2E Chrome y ambos smoke de worker/DLQ. No modifica los golden.
+
+Cada ejecución asigna un proyecto, red, volúmenes y puertos locales propios. Los smoke reciben `COMPOSE_FILE`, `COMPOSE_PROJECT_NAME` y `API_URL` de ese entorno; el smoke de correo consulta el puerto de Mailpit después de reiniciarlo. Los datos de la demo no se usan. Ante éxito o fallo se recogen logs y se eliminan únicamente los recursos de esa ejecución. Informes: `reports/marketplace-test-*/tests.log`; si falla, el comando retorna un código distinto de cero. Seguridad y complejidad siguen como controles adicionales del workflow y se reproducen con los comandos siguientes.
 
 ## Reproducir los controles
 

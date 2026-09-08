@@ -13,10 +13,13 @@ docker compose up --build -d
 
 Requiere Docker con contenedores Linux. El seed se carga automáticamente. Se conserva el volumen Mongo del proyecto `backend`.
 
+La suite completa se ejecuta desde la raíz con **un solo comando** (Node.js 20 o superior; CI usa 22, Docker Compose y acceso a Internet):
+
 ```sh
-docker compose --profile frontend-test run --build --no-deps --rm frontend-tests
-docker compose --profile test run --build --no-deps --rm tests
+node scripts/test.mjs
 ```
+
+Construye las imágenes y verifica formato/análisis Go y Dart, pruebas Go con integración y detector de carreras, Flutter y ocho golden, nueve recorridos Chrome, recuperación de outbox y DLQ/correo. Instala las dependencias npm y Chrome; en Linux, la instalación de dependencias del navegador puede requerir privilegios de administrador. Usa un proyecto Compose nuevo, volúmenes propios y puertos libres; elimina sus contenedores y volúmenes al terminar, incluso si una prueba falla. La demo existente conserva sus datos. Los resultados y logs quedan en `reports/marketplace-test-*/tests.log`, con evidencias de navegador/Flutter si fallan. Seguridad y complejidad se ejecutan por separado en CI; comandos en [ci/README.md](ci/README.md).
 
 Roadmap
 ![Roadmap](Documentation/images/roadmap.png)

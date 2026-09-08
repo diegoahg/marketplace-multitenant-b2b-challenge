@@ -2,7 +2,7 @@
 
 Fecha: 7 de septiembre de 2026. Fuente: `Prueba_Tecnica_Tech_Lead_1.pdf`, tres páginas. Se contrastaron sus requisitos con el código y las pruebas del workspace. El documento se usó como criterio de evaluación; los cambios posteriores del usuario definen las extensiones de worker, DLQ, correo y diseño.
 
-**Conclusión:** los requisitos técnicos A1, A2 y A3 y el frontend opcional tienen implementación y evidencia local. Postman sigue siendo compatible. La entrega remota no se considera cerrada mientras los últimos cambios no estén publicados y verificados por GitHub Actions. No se asigna un porcentaje oficial: el PDF no proporciona pesos de evaluación.
+**Conclusión:** los requisitos técnicos A1, A2 y A3 y el frontend opcional tienen implementación y evidencia local. Postman sigue siendo compatible. La entrega remota no se considera cerrada hasta que GitHub Actions verifique la corrección del fallo de descarga detectado en el commit `41d130c`. No se asigna un porcentaje oficial: el PDF no proporciona pesos de evaluación.
 
 ## Trazabilidad del PDF
 
@@ -18,18 +18,27 @@ Fecha: 7 de septiembre de 2026. Fuente: `Prueba_Tecnica_Tech_Lead_1.pdf`, tres p
 | A2: 201 implica orden persistida y consultable | Commit antes de responder; `GET /orders/{id}` y Postman | Cumple |
 | A2: efectos recuperables y consistencia documentada | Outbox, dos suscripciones, deduplicación por destino, reintentos, DLQ durable y alertas; efectos dummy | Cumple con contrato idempotente exigido a receptores reales |
 | A3: ADR máximo una página | `adr.html` y `ADR.pdf`: decisiones, alternativas, exclusiones, code review, riesgo y mitigación | Cumple; una página A4 verificada |
-| Front opcional: desglose y tres defectos de UX | Flutter; textos largos a ancho mediano, insets/teclado, imágenes 4:3 contain; 43 tests y ocho golden visuales | Cumple en Flutter Web y simulación de insets |
-| Entrega: ejecución, README y Git | Compose y comandos documentados; código local comprobado | Publicación de últimos cambios y CI remoto pendientes |
+| Front opcional: desglose y tres defectos de UX | Flutter; textos largos a ancho mediano, insets/teclado, imágenes 4:3 contain; 45 tests y ocho golden visuales | Cumple en Flutter Web y simulación de insets |
+| Entrega: ejecución, README y Git | `node scripts/test.mjs` ejecuta la suite en un entorno aislado; README y ADR documentados | Validación remota de la corrección del CI pendiente |
 
 ## Comprobaciones y alcance
 
 - Postman/Newman: **28 requests y 71 aserciones aprobadas**. Cotiza los seis países, confirma, consulta, verifica replay, crédito insuficiente y errores de scope/contrato.
-- Flutter: **43 tests aprobados**, ocho PNG comparados y analizador sin incidencias.
+- Flutter: **45 tests aprobados**, ocho PNG comparados y analizador sin incidencias.
+- Chrome: **nueve recorridos aprobados** contra la API real, incluyendo el detalle de pedido y estados ERP/PUSH.
 - Go: pruebas unitarias, seis golden de negocio e integración con `-race -tags=integration -count=1`. Las pruebas de Mongo ejercen atomicidad, concurrencia y recuperación.
 - Worker: `worker-smoke.mjs` verifica API disponible sin broker/worker y recuperación del outbox. `dlq-smoke.mjs` verifica los dos destinos, recuperación transitoria, seis fallos, DLQ y correo después de una interrupción SMTP. Evidencia detallada en `backend/VALIDATION.md`.
 - Postman no sustituye las pruebas de concurrencia ni inspecciona DLQ/ERP/PUSH mediante una API inexistente. El correo de prueba se consulta en Mailpit, `http://localhost:8025`.
 
 En esta revisión se corrigió un aislamiento adicional: un payload inválido que copiaba el ID de un evento válido ya no puede consumir su presupuesto de retries ni contaminar su estado DLQ. Se añadió una prueba de regresión.
+
+## Estado del CI y comando único
+
+El commit `41d130c` fue publicado. Su [ejecución de CI](https://github.com/diegoahg/marketplace-multitenant-b2b-challenge/actions/runs/34170586219) aprobó Go, Flutter, complejidad y seguridad; el navegador falló antes de ejecutar pruebas porque `go mod download` recibió un `TLS handshake timeout` al descargar `github.com/klauspost/compress@v1.16.7`. El log autenticado confirma esta causa.
+
+La corrección limita la descarga a tres intentos, con esperas de dos y cuatro segundos, sin desactivar TLS ni checksums. Un fallo persistente sigue bloqueando el build. CI separa compilación y arranque y conserva el log de compilación. `node scripts/test.mjs` reúne las pruebas funcionales y de integración en un proyecto Compose aislado y retorna un código distinto de cero si una etapa falla. La publicación y validación remota de esta corrección siguen pendientes; una ejecución local no acredita un CI remoto verde.
+
+La ejecución local del comando único terminó con salida **0**: Go con integración/race, regresión de descarga, 45 pruebas Flutter y ocho golden, nueve E2E Chrome, recuperación de outbox y DLQ/correo aprobados. Actionlint y sintaxis JavaScript también aprobaron. Los contenedores y volúmenes del proyecto de pruebas se eliminaron al finalizar.
 
 ## Límites explícitos
 

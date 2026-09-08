@@ -35,6 +35,7 @@ jobs:
             files=$(gofmt -l .)
             if [ -n "$files" ]; then printf "%s\n" "$files"; exit 1; fi
             go vet -tags=integration ./...
+            sh scripts/test-download-go-modules.sh
           '
       - name: Start integration dependencies
         run: docker compose up -d --wait --wait-timeout 180 mongo pubsub-emulator
@@ -155,19 +156,26 @@ jobs:
           node-version: '22'
           cache: npm
           cache-dependency-path: frontend/package-lock.json
+      - name: Build application
+        run: |
+          mkdir -p reports
+          docker compose --progress plain build 2>&1 | tee reports/browser-build.log
       - name: Start application
         run: |
-          docker compose up --build -d
+          docker compose up --no-build -d
           for attempt in {1..90}; do
-            if curl --fail --silent http://localhost:3000/api/ready; then exit 0; fi
+            if curl --fail --silent --connect-timeout 2 --max-time 5 http://localhost:3000/api/ready; then exit 0; fi
             sleep 2
           done
+          docker compose ps --all
+          echo "Application readiness timed out" >&2
           exit 1
       - name: Install browser test dependencies
         # The smoke test below uses Node and the real independent Compose services.
         working-directory: frontend
         run: |
           npm ci
+          node --check ../scripts/test.mjs
           node --check playwright.config.js
           node --check e2e/shop.spec.js
           npx playwright install --with-deps chrome

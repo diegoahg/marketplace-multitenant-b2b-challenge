@@ -8,7 +8,7 @@ const compose = (...args) => execFileSync('docker', ['compose', ...args], { enco
 const mongo = code => JSON.parse(compose('exec', '-T', 'mongo', 'mongosh', '--quiet', 'marketplace', '--eval', `JSON.stringify(${code})`).trim());
 const headers = { 'Content-Type': 'application/json', 'X-Tenant-ID': 'tenant-demo', 'X-Country': 'PE', 'X-Customer-ID': 'CUSTOMER-001' };
 async function request(path, status, body, extra = {}) {
-  const res = await fetch('http://localhost:8080' + path, {
+  const res = await fetch((process.env.API_URL || 'http://localhost:8080') + path, {
     method: body ? 'POST' : 'GET', headers: { ...headers, ...extra },
     ...(body ? { body: JSON.stringify(body) } : {}), signal: AbortSignal.timeout(15000),
   });

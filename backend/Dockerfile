@@ -1,7 +1,8 @@
 FROM golang:1.25-bookworm AS build
 WORKDIR /src
 COPY go.mod go.sum ./
-RUN go mod download
+COPY scripts/download-go-modules.sh /usr/local/bin/download-go-modules.sh
+RUN sh /usr/local/bin/download-go-modules.sh
 COPY . .
 RUN CGO_ENABLED=0 go build -trimpath -o /out/api ./api && CGO_ENABLED=0 go build -trimpath -o /out/worker ./worker && CGO_ENABLED=0 go build -trimpath -o /out/seed ./cmd/seed
 

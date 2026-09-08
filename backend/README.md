@@ -241,16 +241,16 @@ Si Windows bloquea el script de smoke por su política de ejecución, ejecutarlo
 
 ## Trade-offs y límites
 
-- Monolito y worker en el mismo proceso simplifican operación; publisher y worker tienen `context.Context` y cierre controlado. Primero se drena HTTP, luego se cancelan workers y se cierra Mongo.
+- API y worker son procesos y contenedores independientes. La API confirma la transacción sin depender del broker; el worker publica el outbox y procesa los destinos con `context.Context` y cierre controlado.
 - Un Mongo replica set de un nodo permite transacciones locales, pero no alta disponibilidad.
 - Catálogo se carga por tenant/país para mantener el adaptador simple; para catálogos grandes conviene consultar únicamente SKU relevantes y campañas aplicables.
 - El motor cubre palancas descritas, no una DSL genérica de campañas. La política de acumulación sobre unidades de combo es deliberadamente excluyente.
-- Un consumidor secuencial y reintentos fijos son adecuados para el demo. Faltan DLQ y cuarentena de mensajes inválidos: actualmente se reintentan y se registran en logs.
+- ERP y PUSH tienen suscripciones independientes, reintentos limitados y deduplicación por destino. Al agotar seis fallos se conserva una DLQ durable en Mongo y se reintenta la alerta por correo. Los mensajes inválidos se aíslan sin consumir el presupuesto de un evento válido. La revisión y el redrive de casos terminales son manuales.
 - No se implementan autenticación real, stock, pagos, devolución de crédito, administración de reglas, auditoría fiscal ni retención automática de outbox/idempotencia.
 - No se implementaron Kubernetes, Kafka, Redis, service mesh, microservicios, despliegue cloud productivo ni exactly-once distribuido.
 
 ## Mejoras para producción
 
-Identidad verificada y autorización; límites por tenant; observabilidad con métricas y trazas; replica set de varios nodos; límites y backoff con jitter/DLQ; retención y archivo; validación administrativa de promociones; catálogo por SKU; contrato de idempotencia comprobado con ERP/Push; migraciones de esquemas; políticas fiscales validadas; TLS y secretos gestionados. El cliente de mensajería actual está acotado al emulador y requiere un adaptador autenticado para cloud.
+Identidad verificada y autorización; límites por tenant; observabilidad con métricas y trazas; replica set de varios nodos; ajuste operativo de límites, backoff y redrive de DLQ; retención y archivo; validación administrativa de promociones; catálogo por SKU; contrato de idempotencia comprobado con ERP/Push; migraciones de esquemas; políticas fiscales validadas; TLS y secretos gestionados. El cliente de mensajería actual está acotado al emulador y requiere un adaptador autenticado para cloud.
 
 Referencias de implementación: [transacciones del driver MongoDB](https://www.mongodb.com/docs/drivers/go/current/crud/transactions/), [Pub/Sub Emulator](https://cloud.google.com/pubsub/docs/emulator).

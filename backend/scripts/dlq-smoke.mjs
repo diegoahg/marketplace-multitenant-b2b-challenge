@@ -7,7 +7,7 @@ const compose=(...args)=>execFileSync('docker',['compose',...args],{encoding:'ut
 const mongo=code=>JSON.parse(compose('exec','-T','mongo','mongosh','--quiet','marketplace','--eval',`JSON.stringify(${code})`).trim());
 const headers={'Content-Type':'application/json','X-Tenant-ID':'tenant-demo','X-Country':'PE','X-Customer-ID':'CUSTOMER-001'};
 async function request(path,body,extra={}) {
-  const r=await fetch('http://localhost:8080'+path,{method:'POST',headers:{...headers,...extra},body:JSON.stringify(body),signal:AbortSignal.timeout(15000)});
+  const r=await fetch((process.env.API_URL || 'http://localhost:8080')+path,{method:'POST',headers:{...headers,...extra},body:JSON.stringify(body),signal:AbortSignal.timeout(15000)});
   const data=await r.json();assert.equal(r.status,201,JSON.stringify(data));return data;
 }
 async function create(kind,failures) {
@@ -43,8 +43,10 @@ try {
   await until(()=>mongo(`db.dead_letters.countDocuments({_id:{$in:${JSON.stringify(deadIds)}},mailError:{$exists:true,$ne:''}})`)>0,'SMTP failure retained');
   compose('start','mailpit');
   await until(()=>mongo(`db.dead_letters.countDocuments({_id:{$in:${JSON.stringify(deadIds)}},emailedAt:{$exists:true}})`)===2,'mail retry');
-  const list=await(await fetch('http://localhost:8025/api/v1/messages?limit=100')).json();
-  const mails=await Promise.all(list.messages.map(async m=>(await(await fetch('http://localhost:8025/api/v1/message/'+m.ID)).json()).Text));
+  // Discover the current port after restart: Docker may reassign an ephemeral port.
+  const mailpitURL='http://'+compose('port','mailpit','8025').trim();
+  const list=await(await fetch(mailpitURL+'/api/v1/messages?limit=100')).json();
+  const mails=await Promise.all(list.messages.map(async m=>(await(await fetch(mailpitURL+'/api/v1/message/'+m.ID)).json()).Text));
   for(const id of deadIds)assert.ok(mails.some(text=>text.includes(id)),'missing email for '+id);
-  console.log('PASS: independent ERP/PUSH subscriptions, transient recovery, six failures -> durable DLQ, SMTP outage -> email retry; inbox http://localhost:8025');
+  console.log('PASS: independent ERP/PUSH subscriptions, transient recovery, six failures -> durable DLQ, SMTP outage -> email retry');
 } finally {compose('start','mailpit','worker');}
